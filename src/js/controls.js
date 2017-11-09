@@ -150,8 +150,10 @@ module.exports = (function() {
   }
 
   Controls.prototype.export = function() {
-    var stlBinary = this.voxelGrid.export().toStlBinary();
-    FileSaver.saveAs(stlBinary, 'export.stl');
+    //var stlBinary = this.voxelGrid.export().toStlBinary();
+    //FileSaver.saveAs(stlBinary, 'export.stl');
+    this.voxelGrid.exportTexture();
+
   }
 
   Controls.prototype.onKeyDown = function(evt) {

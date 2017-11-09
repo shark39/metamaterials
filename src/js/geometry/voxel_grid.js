@@ -5,9 +5,11 @@ const StlReader      = require('stl-reader');
 const THREE          = require('three');
 const voxelize       = require('voxelize');
 const CSG            = require('openjscad-csg').CSG;
+const saveAs         = require('file-saver').saveAs;
 
 const GeometryBuffer = require('./geometry_buffer');
 const Voxel          = require('./voxel');
+const STLExporter    = require('../misc/STLExporter');
 
 module.exports = (function() {
 
@@ -96,6 +98,19 @@ module.exports = (function() {
 
     const exportScene = CSG.fromPolygons(polygons);
     return exportScene;
+  };
+
+  VoxelGrid.prototype.exportTexture = function() {
+    debugger;
+    var name = "export_texture";
+    var exporter = new THREE.STLExporter();
+    var stlString = exporter.parse( this.scene );
+
+    var blob = new Blob([stlString], {type: 'text/plain'});
+
+    saveAs(blob, name + '.stl');
+
+
   };
 
   VoxelGrid.prototype.update = function() {
