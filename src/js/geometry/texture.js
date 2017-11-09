@@ -30,79 +30,29 @@ module.exports = (function() {
 
   PrismGeometry.prototype = Object.create(THREE.ExtrudeGeometry.prototype);
 
-  function Texture() {
-    bind(this);
-    //VoxelElement.call(this, vertices, buffer);
-  }
 
-  Texture.prototype.getGeometry = function() {
-    var length = 1;
-    var height = 1;
-    var boxWidth = 0.2;
-    var wallWidth = 0.2;
-    var middleWidth = 0.1;
-    var boxHeight = 1;
-    var totalWidth = 2;
-    var topHeight = 0.05;
-    var gap = 0.01; //hinge
-    var memberHeight = 0.3;
-
-
-    var textureGeometry = new THREE.Geometry();
-
-    var middleConnector = new THREE.BoxGeometry(middleWidth / 2, boxHeight, length, 4, 4, 4);
-    middleConnector.translate(0, -boxHeight / 2, 0);
-    THREE.GeometryUtils.merge(textureGeometry, middleConnector);
-
-    var topPlane = new THREE.BoxGeometry(totalWidth / 2, topHeight, length, 4, 4, 4);
-    topPlane.translate(-totalWidth / 4, -topHeight / 2, 0);
-    THREE.GeometryUtils.merge(textureGeometry, topPlane);
-
-    var wall = new THREE.BoxGeometry(boxWidth, boxHeight, length, 4, 4, 4);
-    wall.translate(-totalWidth / 2, -boxHeight / 2, 0);
-    THREE.GeometryUtils.merge(textureGeometry, wall);
-
-    //member
-    var A = new THREE.Vector2(0, 0);
-    var B = new THREE.Vector2(totalWidth / 2 - 2 * gap - 2 * boxWidth, memberHeight);
-    var C = new THREE.Vector2(0, memberHeight);
-
-    var height = length;
-    var member = new PrismGeometry([A, B, C], height);
-    member.translate(-totalWidth / 2 + wallWidth + gap, -memberHeight - topHeight, -length / 2);
-
-    THREE.GeometryUtils.merge(textureGeometry, member);
-
-    var middlePlane = topPlane.clone();
-    middlePlane.translate(0, -height + memberHeight + topHeight / 2, 0);
-    THREE.GeometryUtils.merge(textureGeometry, middlePlane);
-
-    var middleMember = member.clone();
-    middleMember.translate(0, -height + memberHeight + topHeight / 2, 0);
-
-    THREE.GeometryUtils.merge(textureGeometry, middleMember);
-
-
-    var cell2 = textureGeometry.clone();
+  function mirror(geometry) {
+    var mirroredGeometry = geometry.clone();
     var mS = (new THREE.Matrix4()).identity();
     mS.elements[0] = -1;
-    cell2.applyMatrix(mS);
+    mirroredGeometry.applyMatrix(mS);
+    return mirroredGeometry;
+  }
 
+  function flipNormals(geometry) {
+    for (var i = 0; i < geometry.faces.length; i++) {
 
-    //flip normals for the shader
-    for (var i = 0; i < cell2.faces.length; i++) {
-
-      var face = cell2.faces[i];
+      var face = geometry.faces[i];
       var temp = face.a;
       face.a = face.c;
       face.c = temp;
 
     }
 
-    cell2.computeFaceNormals();
-    cell2.computeVertexNormals();
+    geometry.computeFaceNormals();
+    geometry.computeVertexNormals();
 
-    var faceVertexUvs = cell2.faceVertexUvs[0];
+    var faceVertexUvs = geometry.faceVertexUvs[0];
     for (var i = 0; i < faceVertexUvs.length; i++) {
 
       var temp = faceVertexUvs[i][0];
@@ -111,8 +61,72 @@ module.exports = (function() {
 
     }
 
-    THREE.GeometryUtils.merge(textureGeometry, cell2);
+  }
 
+  function Texture(options) {
+    /*options contains parameters like length, hingeThickness ...*/
+    bind(this);
+    var options = options != undefined ? options : {};
+    //VoxelElement.call(this, vertices, buffer);
+    this.length = options.length || 1;
+    this.height = options.height || 1;
+    this.width = options.width || 2;
+    this.wallWidth = options.wallWidth || 0.3;
+    this.middleConnectorWidth = options.middleConnectorWidth || 0.2;
+    this.surfaceHeight = options.surfaceHeight || 0.1;
+    this.hingeWidth = options.hingeWidth || 0.04;
+    this.hingeHeight = options.hingeHeight || 0.1;
+    this.memberHeight = options.memberHeight || 0.2;
+  }
+
+  Texture.prototype.getGeometry = function() {
+    
+
+    var textureGeometry = new THREE.Geometry();
+
+    //generate left half of the texture cell
+    var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth/2, this.height, this.length, 4, 4, 4);
+    middleConnector.translate(-this.middleConnectorWidth/4, -this.height/2, 0);
+    THREE.GeometryUtils.merge(textureGeometry, middleConnector);
+
+    var topPlane = new THREE.BoxGeometry(this.width/2, this.surfaceHeight, this.length, 4, 4, 4);
+    topPlane.translate(-this.width / 4, -this.surfaceHeight / 2, 0);
+    THREE.GeometryUtils.merge(textureGeometry, topPlane);
+
+    var wall = new THREE.BoxGeometry(this.wallWidth, this.height, this.length, 4, 4, 4);
+    wall.translate(-this.width / 2 + this.wallWidth/2, -this.height / 2, 0);
+    THREE.GeometryUtils.merge(textureGeometry, wall);
+
+    //member
+    var A = new THREE.Vector2(0, 0);
+    var B = new THREE.Vector2(this.width / 2 - 2 * this.hingeWidth - this.wallWidth - this.middleConnectorWidth/2, this.memberHeight);
+    var C = new THREE.Vector2(0, this.memberHeight);
+
+    var member = new PrismGeometry([A, B, C], this.length);
+    member.translate(-this.middleConnectorWidth/2-this.hingeWidth-B.x, -this.memberHeight - this.surfaceHeight, -this.length / 2);
+
+    THREE.GeometryUtils.merge(textureGeometry, member);
+
+    //the lower part of the cell
+    var lowerPlane = topPlane.clone();
+    lowerPlane.translate(0, -A.distanceTo(B), 0);
+    THREE.GeometryUtils.merge(textureGeometry, lowerPlane);
+
+    var lowerMember = member.clone();
+    lowerMember.translate(0, -A.distanceTo(B), 0);
+
+    THREE.GeometryUtils.merge(textureGeometry, lowerMember);
+
+
+    var textureRight = mirror(textureGeometry);
+    //flip normals for the shader
+    flipNormals(textureRight);
+
+    THREE.GeometryUtils.merge(textureGeometry, textureRight);
+
+
+    textureGeometry.computeBoundingBox();
+    console.log(textureGeometry.boundingBox);
     return textureGeometry;
   }
 
