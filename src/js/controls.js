@@ -12,6 +12,7 @@ const VoxelEditTool      = require('./tools/voxel_edit_tool');
 const VoxelSmoothingTool = require('./tools/voxel_smoothing_tool');
 const AnchorTool         = require('./tools/anchor_tool');
 const ForceTool          = require('./tools/force_tool');
+const TextureEditor      = require('./tools/texture_editor');
 
 module.exports = (function() {
 
@@ -55,6 +56,13 @@ module.exports = (function() {
     $('#import-thickness').blur(this.parseGridSettings);
 
     this.advancedEditor = new AdvancedEditor([
+      this.tools['add-tool'],
+      this.tools['delete-tool'],
+      this.tools['edit-tool'],
+      this.tools['smoothing-tool']
+    ]);
+
+    this.textureEditor = new TextureEditor([
       this.tools['add-tool'],
       this.tools['delete-tool'],
       this.tools['edit-tool'],

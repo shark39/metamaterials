@@ -1,7 +1,10 @@
 'use strict';
 
-const bind  = require('../misc/bind');
-const Tool  = require('./tool');
+const bind          = require('../misc/bind');
+const cursorConfig  = require('../misc/cursorConfig');
+const Tool          = require('./tool');
+
+const Texture       = require('../geometry/texture');
 // const addBorderingIfNeeded = require('./bordering');
 
 const $     = require('jquery');
@@ -424,23 +427,46 @@ module.exports = (function() {
     if (invalidPosition) {
       return [];
     }
+    if (this.activeBrush.type == "texture") {
+      return this.updateSingleVoxelTexture(position, offset);
+    } else {
+      const cellCoords = [offset.y % this.activeBrush.height, offset.x % this.activeBrush.width];
+      const features = this.activeBrush.cells[cellCoords].mirroredFeatures;
 
-    const cellCoords = [offset.y % this.activeBrush.height, offset.x % this.activeBrush.width];
-    const features = this.activeBrush.cells[cellCoords].mirroredFeatures;
+      return _.flatten(positions.map(function(mirroredPosition) {
+        const mirrorFactor = mirroredPosition.getComponent(this.extrusionComponent) / position.getComponent(this.extrusionComponent);
+        var mirror = this.mirror.slice();
+        if (this.mirror[this.extrusionComponent]) {
+          mirror = [true, true, true];
+          mirror[this.extrusionComponent] = false;
+        }
+        mirror = mirror.map(function(cur, idx) {
+          return cur && mirroredPosition.getComponent(idx) != position.getComponent(idx);
+        });
 
-    return _.flatten(positions.map(function(mirroredPosition) {
-      const mirrorFactor = mirroredPosition.getComponent(this.extrusionComponent) / position.getComponent(this.extrusionComponent);
-      var mirror = this.mirror.slice();
-      if (this.mirror[this.extrusionComponent]) {
-        mirror = [true, true, true];
-        mirror[this.extrusionComponent] = false;
-      }
-      mirror = mirror.map(function(cur, idx) {
-        return cur && mirroredPosition.getComponent(idx) != position.getComponent(idx);
-      });
+        return this.updateVoxel(mirroredPosition, features[mirror], mirrorFactor);
+      }.bind(this)));
+    }
 
-      return this.updateVoxel(mirroredPosition, features[mirror], mirrorFactor);
-    }.bind(this)));
+  }
+
+  VoxelTool.prototype.updateSingleVoxelTexture = function(position, offset) {
+    console.log("[in progress] update with texture");
+    var material = new THREE.MeshPhongMaterial({
+				color: 0xf00000,
+				flatShading: false
+			});
+    var textureGeometry = (new Texture()).getGeometry();
+    //remove voxel
+    this.voxelGrid.removeVoxel(position);
+    //translate to correct position //center of the voxel
+    textureGeometry.translate(position.x, position.y, position.z);
+    // add to scene, better: merge to render geometry
+    var object = new THREE.Mesh(textureGeometry, material);
+    object.name = 'texture';
+		this.scene.add(object);
+    return []; //these are updated voxels haha
+    //
   }
 
   VoxelTool.prototype.__defineGetter__('activeBrush', function() {
