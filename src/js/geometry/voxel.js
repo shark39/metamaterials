@@ -271,6 +271,7 @@ module.exports = (function() {
 
   Voxel.prototype.update = function(features, direction) {
     // const oldVoxel = this;
+    //debugger;
     const oldFeatures = this.features;
     const oldDirections = this.directions;
     var oldDirection;

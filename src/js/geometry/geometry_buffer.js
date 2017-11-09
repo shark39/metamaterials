@@ -282,6 +282,7 @@ module.exports = (function() {
 
   GeometryBuffer.prototype.updateVertices = function(vertices) {
     const texture = this.textures.simulation;
+    //debugger;
     vertices = new Float32Array(vertices);
 
     this.vertexIndices.forEach(function(vertexIndex, index) {
@@ -292,6 +293,7 @@ module.exports = (function() {
   }
 
   GeometryBuffer.prototype.updateRenderGeometry = function(oldGeometry, newGeometry) {
+    //debugger;
     _.forEach(oldGeometry, function(geometry) {
       this.renderGeometries.delete(geometry);
     }.bind(this));

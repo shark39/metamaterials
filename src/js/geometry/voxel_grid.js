@@ -101,7 +101,7 @@ module.exports = (function() {
   };
 
   VoxelGrid.prototype.exportTexture = function() {
-    debugger;
+    //debugger;
     var name = "export_texture";
     var exporter = new THREE.STLExporter();
     var stlString = exporter.parse( this.scene );
