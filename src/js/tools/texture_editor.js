@@ -1,23 +1,28 @@
 'use strict';
 
-const $     = require('jquery');
-const _     = require('lodash');
+const $ = require('jquery');
+const _ = require('lodash');
 const THREE = require('three');
 
-const bind  = require('../misc/bind');
+const bind = require('../misc/bind');
 
 module.exports = (function() {
 
   function TextureEditor(tools) {
     bind(this);
-
     this.tools = tools;
     this.brushes = {};
+    this.rotatation = $('#texture_rotate').checked;
     var self = this;
     ["#hubbles", "#zickzack"].forEach(function(id) {
       $(id).click(function() {
         self.activateBrush(id);
-      })
+      });
+    });
+    $('#texture_rotate').click(function() {
+      debugger;
+      self.rotatation = this.checked;
+      self.activateBrush(); //reactivate brush with new parameter
     });
 
   }
@@ -26,7 +31,11 @@ module.exports = (function() {
     //this.removeUnusedBrush();
 
     //$('.voxel-cells-btn').removeClass('active');
-    var brush = {"type": "texture"};
+    var brush = {
+      "type": "texture",
+      rotated: this.rotatation,
+      name: name || this.activeBrush.name
+    };
     this.activeBrush = brush;
     //brush.domElement.addClass('active');
     this.tools.forEach(function(tool) {

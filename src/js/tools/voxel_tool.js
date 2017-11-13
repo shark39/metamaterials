@@ -330,9 +330,14 @@ module.exports = (function() {
     var textureGeometry = (new Texture()).getGeometry();
     //remove voxel
     this.voxelGrid.removeVoxel(position);
+    textureGeometry.center();
+    if (this.activeBrush.rotated) { //rotation is taken from active brush attribute
+      textureGeometry.rotateY(Math.PI/2);
+    }
     //translate to correct position //center of the voxel
     textureGeometry.translate(position.x, position.y, position.z);
-    // add to scene, better: merge to render geometry
+
+    // add to scene (not so good), better: merge to render geometry
     var object = new THREE.Mesh(textureGeometry, material);
     object.name = 'texture';
 		this.scene.add(object);
