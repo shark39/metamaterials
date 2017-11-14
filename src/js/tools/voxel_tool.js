@@ -214,6 +214,17 @@ module.exports = (function() {
       this.infoBox.html('size ' + this.cursor.scale.toArray().join(' x '));
     }
 
+    if (this.activeBrush && this.activeBrush.type == 'texture') {
+      if (this.activeBrush.rotated) {
+        this.cursor.position.z -= 0.5;
+        this.cursor.scale.z *= 2;
+      } else {
+        this.cursor.position.x -= 0.5;
+        this.cursor.scale.x *= 2;
+      }
+
+    }
+
     this.updateCursor();
   }
 
@@ -324,7 +335,7 @@ module.exports = (function() {
   VoxelTool.prototype.updateSingleVoxelTexture = function(position, offset) {
     console.log("[in progress] update with texture");
     var material = new THREE.MeshPhongMaterial({
-				color: 0xf00000,
+				color: 0x300000,
 				flatShading: false
 			});
     var textureGeometry = (new Texture()).getGeometry();
@@ -333,10 +344,12 @@ module.exports = (function() {
     textureGeometry.center();
     if (this.activeBrush.rotated) { //rotation is taken from active brush attribute
       textureGeometry.rotateY(Math.PI/2);
-    }
+      textureGeometry.translate(position.x, position.y, position.z-0.5);
+    } else {
     //translate to correct position //center of the voxel
-    textureGeometry.translate(position.x, position.y, position.z);
-
+    //-0.5 to align in 2 voxels
+      textureGeometry.translate(position.x-0.5, position.y, position.z);
+    }
     // add to scene (not so good), better: merge to render geometry
     var object = new THREE.Mesh(textureGeometry, material);
     object.name = 'texture';
