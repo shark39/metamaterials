@@ -28,11 +28,24 @@ module.exports = (function() {
     if (simulationData.anchors) {
       this.setAnchorPoints(simulationData.anchors);
     }
+
+    if (simulationData.textureObj) {
+      this.setObj(simulationData.textureObj);
+    }
   }
 
   Simulation.prototype.stop = function() {
     this.running = false;
     this.voxelGrid.stopSimulation();
+  }
+
+  Simulation.prototype.setObj = function(obj) {
+
+    console.log('Sending obj data...');
+    this.sendMessage({
+      method: 'SetObj',
+      parameters: obj
+    });
   }
 
   Simulation.prototype.setMesh = function(mesh) {
@@ -112,8 +125,13 @@ module.exports = (function() {
       return;
     }
 
-    const vertices = JSON.parse(message.data).Parameters.Vertices;
-    this.voxelGrid.updateSimulation(vertices, this.simulatedForce);
+    console.log("update!");
+    var obj = message.data.replace('"', ''); //format sucks
+    this.voxelGrid.updateSimulationFromObj(obj);
+
+
+    //const vertices = JSON.parse(message.data).Parameters.Vertices;
+    //this.voxelGrid.updateSimulation(vertices, this.simulatedForce);
   }
 
   return Simulation;

@@ -335,7 +335,7 @@ module.exports = (function() {
   VoxelTool.prototype.updateSingleVoxelTexture = function(position, offset) {
     console.log("[in progress] update with texture");
     var material = new THREE.MeshPhongMaterial({
-				color: 0x300000,
+				color: 0xa00000,
 				flatShading: false
 			});
     var textureGeometry = (new Texture()).getGeometry();
@@ -351,9 +351,10 @@ module.exports = (function() {
       textureGeometry.translate(position.x-0.5, position.y, position.z);
     }
     // add to scene (not so good), better: merge to render geometry
+    this.voxelGrid.addTexture(textureGeometry); //save it to a BufferGeometry
     var object = new THREE.Mesh(textureGeometry, material);
     object.name = 'texture';
-		this.scene.add(object);
+		this.renderer.scene.add(object);
     return []; //these are updated voxels haha
     //
   }

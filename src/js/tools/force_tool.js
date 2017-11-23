@@ -5,6 +5,7 @@ const Tool  = require('./tool');
 
 const _     = require('lodash');
 const THREE = require('three');
+const OBJLoader    = require('../misc/OBJLoader');
 
 module.exports = (function() {
 
@@ -165,7 +166,8 @@ module.exports = (function() {
   ForceTool.prototype.simulate = function() {
     this.force = this.forceVectorLength() - this.forceOffset;
     this.deformCursor();
-    this.simulation.simulate(this.forceVector.clone().multiplyScalar(this.force), this.loadVertex);
+    //SIMULATION START WITH VERTICES
+    //this.simulation.simulate(this.forceVector.clone().multiplyScalar(this.force), this.loadVertex);
   }
 
   return ForceTool;

@@ -119,14 +119,16 @@ module.exports = (function() {
 
 
     var textureRight = mirror(textureGeometry);
+    textureRight.computeFaceNormals();
+    textureRight.computeVertexNormals();
     //flip normals for the shader
-    flipNormals(textureRight);
+    //flipNormals(textureRight);
 
     THREE.GeometryUtils.merge(textureGeometry, textureRight);
 
 
-    textureGeometry.computeBoundingBox();
-    console.log(textureGeometry.boundingBox);
+    //textureGeometry.computeBoundingBox();
+    //console.log(textureGeometry.boundingBox);
     return textureGeometry;
   }
 

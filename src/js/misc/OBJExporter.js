@@ -1,6 +1,9 @@
 /**
  * @author mrdoob / http://mrdoob.com/
+ * modified to work with geometry
  */
+
+ var THREE          = require('three');
 
 THREE.OBJExporter = function () {};
 
@@ -22,19 +25,17 @@ THREE.OBJExporter.prototype = {
 
 		var i, j, l, m, face = [];
 
-		var parseMesh = function ( mesh ) {
+		var parseGemometry = function ( geometry ) {
 
 			var nbVertex = 0;
 			var nbNormals = 0;
 			var nbVertexUvs = 0;
 
-			var geometry = mesh.geometry;
-
 			var normalMatrixWorld = new THREE.Matrix3();
 
 			if ( geometry instanceof THREE.Geometry ) {
 
-				geometry = new THREE.BufferGeometry().setFromObject( mesh );
+				geometry = new THREE.BufferGeometry().fromGeometry( geometry );
 
 			}
 
@@ -46,8 +47,8 @@ THREE.OBJExporter.prototype = {
 				var uvs = geometry.getAttribute( 'uv' );
 				var indices = geometry.getIndex();
 
-				// name of the mesh object
-				output += 'o ' + mesh.name + '\n';
+				// name of the geometry object
+				output += 'o ' + geometry.name + '\n';
 
 				// vertices
 
@@ -60,7 +61,7 @@ THREE.OBJExporter.prototype = {
 						vertex.z = vertices.getZ( i );
 
 						// transfrom the vertex to world space
-						vertex.applyMatrix4( mesh.matrixWorld );
+						//vertex.applyMatrix4( geometry.matrixWorld );
 
 						// transform the vertex to export format
 						output += 'v ' + vertex.x + ' ' + vertex.y + ' ' + vertex.z + '\n';
@@ -89,7 +90,7 @@ THREE.OBJExporter.prototype = {
 
 				if( normals !== undefined ) {
 
-					normalMatrixWorld.getNormalMatrix( mesh.matrixWorld );
+					//normalMatrixWorld.getNormalMatrix( mesh.matrixWorld );
 
 					for ( i = 0, l = normals.count; i < l; i ++, nbNormals++ ) {
 
@@ -98,7 +99,7 @@ THREE.OBJExporter.prototype = {
 						normal.z = normals.getZ( i );
 
 						// transfrom the normal to world space
-						normal.applyMatrix3( normalMatrixWorld );
+						//normal.applyMatrix3( normalMatrixWorld );
 
 						// transform the normal to export format
 						output += 'vn ' + normal.x + ' ' + normal.y + ' ' + normal.z + '\n';
@@ -147,7 +148,7 @@ THREE.OBJExporter.prototype = {
 
 			} else {
 
-				console.warn( 'THREE.OBJExporter.parseMesh(): geometry type unsupported', geometry );
+				console.warn( 'THREE.OBJExporter.parseGeometry(): geometry type unsupported', geometry );
 
 			}
 
@@ -233,11 +234,14 @@ THREE.OBJExporter.prototype = {
 
 		};
 
-		object.traverse( function ( child ) {
 
-			if ( child instanceof THREE.Mesh ) {
+    parseGemometry( object );
+    /*
+    object.traverse( function ( child ) {
 
-				parseMesh( child );
+			if ( child instanceof THREE.Geometry ) {
+
+				parseGemometry( child );
 
 			}
 
@@ -247,7 +251,7 @@ THREE.OBJExporter.prototype = {
 
 			}
 
-		} );
+		} );*/
 
 		return output;
 

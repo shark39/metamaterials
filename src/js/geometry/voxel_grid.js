@@ -10,6 +10,8 @@ const saveAs         = require('file-saver').saveAs;
 const GeometryBuffer = require('./geometry_buffer');
 const Voxel          = require('./voxel');
 const STLExporter    = require('../misc/STLExporter');
+const OBJExporter    = require('../misc/OBJExporter');
+const OBJLoader2      = require('../misc/OBJLoader');
 
 module.exports = (function() {
 
@@ -19,6 +21,8 @@ module.exports = (function() {
     this.settings = settings;
 
     this.buffer = new GeometryBuffer(scene, this.size, 100000);
+
+    this.textureGeometry = new THREE.Geometry();
 
     this.intersectionVoxelGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0);
     this.anchorGeometry = new THREE.SphereGeometry(0.35, 0.35, 0.35);
@@ -100,6 +104,11 @@ module.exports = (function() {
     return exportScene;
   };
 
+  VoxelGrid.prototype.addTexture = function(geometry) {
+    THREE.GeometryUtils.merge(this.textureGeometry, geometry);
+    //mark voxel in voxelgrid as full
+  }
+
   VoxelGrid.prototype.exportTexture = function() {
     //debugger;
     var name = "export_texture";
@@ -110,8 +119,40 @@ module.exports = (function() {
 
     saveAs(blob, name + '.stl');
 
-
   };
+
+  VoxelGrid.prototype.getTextureAsObj = function() {
+    var exporter = new THREE.OBJExporter();
+    //convert geometry to mesh
+    //var material = new THREE.MeshPhongMaterial({color: 0xFF0000});
+    //var mesh = new THREE.Mesh(this.textureGeometry, material);
+    var objString = exporter.parse(this.textureGeometry);
+    return objString;
+  }
+
+  VoxelGrid.prototype.setTextureFromObj = function(obj) {
+
+    var loader = new THREE.OBJLoader2();
+    var group = loader.parse(obj);
+    var geo = group.children[0].geometry;
+    this.textureGeometry = geo;
+    var self = this;
+    this.scene.traverse(function(object) {
+      if (object.name == "texture") {
+        self.scene.remove(object);
+      }
+    });
+    var material = new THREE.MeshPhongMaterial({
+				color: 0xa00000,
+				flatShading: false
+			});
+
+    var mesh = new THREE.Mesh(geo, material);
+    mesh.name = "texture";
+    this.scene.add(mesh);
+
+  }
+
 
   VoxelGrid.prototype.update = function() {
     this.buffer.update();
@@ -228,10 +269,11 @@ module.exports = (function() {
   VoxelGrid.prototype.simulationData = function() {
     const mesh = this.voxelsHaveChanged ? this.meshForSimulation() : null;
     const anchors = this.anchorsHaveChanged ? this.anchorsForSimulation() : null;
+    const textureObj = this.getTextureAsObj();
 
     this.voxelsHaveChanged = this.anchorsHaveChanged = false;
 
-    return { mesh: mesh, anchors: anchors };
+    return { mesh: mesh, anchors: anchors, textureObj: textureObj };
   };
 
   VoxelGrid.prototype.meshForSimulation = function() {
@@ -285,6 +327,11 @@ module.exports = (function() {
     this.buffer.startSimulation();
     this.buffer.simulatedForce = simulatedForce;
   };
+
+  VoxelGrid.prototype.updateSimulationFromObj = function(obj) {
+    this.setTextureFromObj(obj);
+
+  }
 
   VoxelGrid.prototype.interpolateSimulation = function(force) {
     this.buffer.userForce = force;
