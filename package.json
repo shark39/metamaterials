@@ -14,7 +14,8 @@
   "bugs": "https://github.com/jfrohnhofen/metamaterial-mechanisms/issues",
   "contributors": [
     "Johannes Frohnhofen <johannes@frohnhofen.com> (http://johannesfrohnhofen.com)",
-    "Alexandra Ion <me@alexandraion.com> (http://alexandraion.com)"
+    "Alexandra Ion <me@alexandraion.com> (http://alexandraion.com)",
+    "Pascal Crenzin <pascalcrenzin@gmail.com>"
   ],
   "license": "MIT",
   "devDependencies": {
@@ -39,7 +40,7 @@
     "lodash": "^4.6.1",
     "openjscad-csg": "^1.0.3",
     "stl-reader": "^3.0.1",
-    "three": "^0.82.1",
+    "three": "^0.88.0",
     "three-orbit-controls": "^82.1.0",
     "voxelize": "^1.0.0",
     "websocket": "^1.0.23"
