@@ -3,6 +3,8 @@
 const $                  = require('jquery');
 const FileSaver          = require('file-saver');
 
+const THREE              = require('three');
+
 const bind               = require('./misc/bind');
 
 const AdvancedEditor     = require('./tools/advanced_editor');
@@ -30,6 +32,7 @@ module.exports = (function() {
 
     $('#voxel-import-btn').click(this.import);
     $('#voxel-export-btn').click(this.export);
+    $('#voxel-export-obj-btn').click(this.exportObj);
 
     this.tools = {
       'add-tool': new VoxelAddTool(this.renderer, this.voxelGrid),
@@ -70,6 +73,9 @@ module.exports = (function() {
     ]);
 
     this.parseGridSettings();
+
+    this.tools['add-tool'].activeBrush = {'rotated': false};
+    this.tools['add-tool'].updateSingleVoxelTexture(new THREE.Vector3(0.5, 0.5, 0.5), new THREE.Vector2(0,0));
   }
 
   Controls.prototype.selectTool = function(evt) {
@@ -153,6 +159,13 @@ module.exports = (function() {
     //var stlBinary = this.voxelGrid.export().toStlBinary();
     //FileSaver.saveAs(stlBinary, 'export.stl');
     this.voxelGrid.exportTexture();
+
+  }
+
+  Controls.prototype.exportObj = function() {
+    var name = "export";
+    var blob = this.voxelGrid.exportObj();
+    FileSaver.saveAs(blob, name + '.obj');
 
   }
 

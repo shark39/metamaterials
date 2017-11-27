@@ -1,14 +1,14 @@
 'use strict';
 
-const bind          = require('../misc/bind');
-const cursorConfig  = require('../misc/cursorConfig');
-const Tool          = require('./tool');
+const bind = require('../misc/bind');
+const cursorConfig = require('../misc/cursorConfig');
+const Tool = require('./tool');
 
-const Texture       = require('../geometry/texture');
+const Texture = require('../geometry/texture');
 // const addBorderingIfNeeded = require('./bordering');
 
-const $     = require('jquery');
-const _     = require('lodash');
+const $ = require('jquery');
+const _ = require('lodash');
 const THREE = require('three');
 
 module.exports = (function() {
@@ -27,10 +27,8 @@ module.exports = (function() {
     this.cursorBorder = 0.0;
     this.stiffness = 0.01;
 
-    this.minPosition = new THREE.Vector3(
-      -(this.voxelGrid.size.x / 2 - 0.5),
-      0.5,
-      -(this.voxelGrid.size.z / 2 - 0.5)
+    this.minPosition = new THREE.Vector3(-(this.voxelGrid.size.x / 2 - 0.5),
+      0.5, -(this.voxelGrid.size.z / 2 - 0.5)
     );
     this.maxPosition = new THREE.Vector3(
       this.voxelGrid.size.x / 2 - 0.5,

@@ -121,6 +121,17 @@ module.exports = (function() {
 
   };
 
+  VoxelGrid.prototype.exportObj = function() {
+    //debugger;
+    var name = "export";
+
+    var objString = this.getTextureAsObj();
+    var blob = new Blob([objString], {type: 'text/plain'});
+    return blob
+    
+
+  };
+
   VoxelGrid.prototype.getTextureAsObj = function() {
     var exporter = new THREE.OBJExporter();
     //convert geometry to mesh
