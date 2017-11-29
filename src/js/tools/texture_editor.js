@@ -6,7 +6,7 @@ const THREE = require('three');
 
 const bind = require('../misc/bind');
 
-const patterns = ['regular', 'box', 'zigzag', 'diamond','spiky'];
+const patterns = ['regular', 'box', 'round', 'zigzag', 'diamond','spiky'];
 
 module.exports = (function() {
 

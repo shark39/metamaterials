@@ -108,14 +108,17 @@ module.exports = (function() {
     return topPlane;
   }
 
-  Texture.prototype._getMemberGeometry = function(orientation) {
+  Texture.prototype._getMemberGeometry = function(orientation, doTranslate) {
     orientation = orientation / Math.abs(orientation) || 1;
+    doTranslate = doTranslate || true;
     var A = new THREE.Vector2(0, 0);
     var B = new THREE.Vector2(orientation * (this.width / 2 - 2 * this.hingeWidth - this.wallWidth - this.middleConnectorWidth / 2), this.memberHeight);
     var C = new THREE.Vector2(0, this.memberHeight);
 
     var member = new PrismGeometry([A, B, C], this.length);
-    member.translate(-this.middleConnectorWidth / 2 - this.hingeWidth - B.x, -this.memberHeight - this.surfaceHeight, -this.length / 2);
+    if (doTranslate) {
+      member.translate(-this.middleConnectorWidth / 2 - this.hingeWidth - B.x, -this.memberHeight - this.surfaceHeight, -this.length / 2);
+    }
     return member;
 
   }
@@ -169,7 +172,8 @@ module.exports = (function() {
     const mapping = {
       'regular': this.getRegularGeometry,
       'zigzag': this.getZigZagGeometry,
-      'box': this.getBoxGeometry
+      'box': this.getBoxGeometry,
+      'round': this.getRoundGeometry
     };
     var geo = mapping[pattern]();
     var fill = this.getFillGeometry();
@@ -248,11 +252,19 @@ module.exports = (function() {
   Texture.prototype.getRegularGeometry = function() {
     var textureGeometry = new THREE.Geometry();
 
-    //generate left half of the texture cell
+
     console.log(this._getDistanceBetweenMembers());
     var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, this._getDistanceBetweenMembers(), this.length, 4, 4, 4);
     middleConnector.translate(-this.middleConnectorWidth / 2 - 1, -this._getDistanceBetweenMembers() / 2, 0);
     THREE.GeometryUtils.merge(textureGeometry, middleConnector);
+
+    var member1 = this._getMemberGeometry();
+    member1.translate(-this.middleConnectorWidth / 2 - this.hingeWidth - this.width/2, 0, 0);
+    THREE.GeometryUtils.merge(textureGeometry, member1);
+
+    var member2 = this._getMemberGeometry(-1);
+    member2.translate(this.middleConnectorWidth / 2 + this.hingeWidth - this.width/2, 0, 0);
+    THREE.GeometryUtils.merge(textureGeometry, member2);
 
     THREE.GeometryUtils.merge(textureGeometry, this._getSurfaceGeometry());
     THREE.GeometryUtils.merge(textureGeometry, this._getWallGeometry('left'));
@@ -307,6 +319,14 @@ module.exports = (function() {
 
     THREE.GeometryUtils.merge(textureGeometry, middleConnector);
 
+    var member1 = this._getMemberGeometry();
+    member1.translate(-this.middleConnectorWidth / 2 - this.hingeWidth - this.width/2, 0, 0);
+    THREE.GeometryUtils.merge(textureGeometry, member1);
+
+    var member2 = this._getMemberGeometry(-1);
+    member2.translate(this.middleConnectorWidth / 2 + this.hingeWidth - this.width/2, 0, 0);
+    THREE.GeometryUtils.merge(textureGeometry, member2);
+
     THREE.GeometryUtils.merge(textureGeometry, this._getSurfaceGeometry());
     THREE.GeometryUtils.merge(textureGeometry, this._getWallGeometry('left'));
     THREE.GeometryUtils.merge(textureGeometry, this._getWallGeometry('right'));
@@ -315,18 +335,35 @@ module.exports = (function() {
 
   }
 
+  Texture.prototype.getRoundGeometry = function() {
+    //other members
 
-  /*const box = new THREE.Mesh(this.getGeometry());
-    const box2 = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    const box2Mesh = new THREE.Mesh(box2);
+    var textureGeometry = new THREE.Geometry();
 
-    const sBSP = new ThreeBSP(box2Mesh);
-    const bBSP = new ThreeBSP(box);
+    console.log(this._getDistanceBetweenMembers());
+    var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, this._getDistanceBetweenMembers(), this.length, 4, 4, 4);
+    middleConnector.translate(-this.middleConnectorWidth / 2 - 1, -this._getDistanceBetweenMembers() / 2, 0);
+    THREE.GeometryUtils.merge(textureGeometry, middleConnector);
 
-    const sub = bBSP.subtract(sBSP);
-    const newMesh = sub.toMesh();
-    return newMesh.geometry;
-*/
+    var outerHingeWidth = this.hingeWidth;
+    this.hingeWidth = this.hingeWidth * 4;
+    var member2 = this._getMemberGeometry(-1, false);
+    var member1 = this._getMemberGeometry(1, false);
+    this.hingeWidth = outerHingeWidth;
+    member1.translate(-this.middleConnectorWidth / 2 - this.hingeWidth*4 - this.width/2, 0, 0);
+    THREE.GeometryUtils.merge(textureGeometry, member1);
+
+    member2.translate(- this.hingeWidth - this.wallWidth -0.2, 0, 0);
+    THREE.GeometryUtils.merge(textureGeometry, member2);
+
+    THREE.GeometryUtils.merge(textureGeometry, this._getSurfaceGeometry());
+    THREE.GeometryUtils.merge(textureGeometry, this._getWallGeometry('left'));
+    THREE.GeometryUtils.merge(textureGeometry, this._getWallGeometry('right'));
+
+    return textureGeometry;
+  }
+
+
 
 
   /////////////////////////
