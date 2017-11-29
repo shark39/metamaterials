@@ -1,5 +1,21 @@
 'use strict';
 
+/*
+This file contains the geometry construction for the texture voxels
+
+Usage:
+
+var texture = new Texture(options);
+texture.getGeometry(type);
+
+supported types:
+- regular
+- zigzag
+- box
+- ...
+
+*/
+
 const THREE = require('three');
 const ThreeBSP = require('three-js-csg')(THREE);
 
@@ -8,6 +24,8 @@ const VoxelElement = require('./voxel_element');
 
 module.exports = (function() {
 
+
+  //Helpers (should be moved to an external file)
   var PrismGeometry = function(vertices, height) {
 
     var Shape = new THREE.Shape();
@@ -63,6 +81,7 @@ module.exports = (function() {
     }
 
   }
+  //end helpers
 
   function Texture(options) {
     /*options contains parameters like length, hingeThickness ...*/
@@ -109,10 +128,19 @@ module.exports = (function() {
     var D = new THREE.Vector2(0.5, 0);
 
 
-    var member = new PrismGeometry([A, B, C, D], 0.2);
-    member.rotateY(Math.PI / 2);
+    var m = new PrismGeometry([A, B, C, D], 0.2);
+    m.rotateY(Math.PI / 2);
     //member.translate(-this.middleConnectorWidth / 2 - this.hingeWidth - B.x, -this.memberHeight - this.surfaceHeight, -this.length / 2);
+    return m;
+  }
 
+  Texture.prototype._getMiddleBoxGeometry = function() {
+    var A = new THREE.Vector2(-0.5, 0);
+    var B = new THREE.Vector2(-0.15, this._getDistanceBetweenMembers());
+    var C = new THREE.Vector2(0.15, this._getDistanceBetweenMembers());
+    var D = new THREE.Vector2(0.5, 0);
+    var m = new PrismGeometry([A, B, C, D], this.length);
+    return m;
   }
 
   Texture.prototype._getMiddleConnector = function() {
@@ -121,16 +149,27 @@ module.exports = (function() {
     return middleConnector;
   }
 
+  Texture.prototype._getWallGeometry = function(side) {
+    var wall = new THREE.BoxGeometry(this.wallWidth, this.height, this.length, 4, 4, 4);
+    wall.translate(-this.wallWidth / 2, -this.height / 2, 0);
+    if (side == "left") {
+      wall.translate(-this.width, 0, 0);
+    }
+    return wall;
+  }
+
   Texture.prototype._getDistanceBetweenMembers = function() {
     var A = new THREE.Vector2(0, 0);
     var B = new THREE.Vector2(this.width / 2 - 2 * this.hingeWidth - this.wallWidth - this.middleConnectorWidth / 2, this.memberHeight);
     return A.distanceTo(B);
   }
 
+  //different geometry types:
   Texture.prototype.getGeometry = function(pattern) {
     const mapping = {
       'regular': this.getRegularGeometry,
-      'zigzag': this.getZigZagGeometry
+      'zigzag': this.getZigZagGeometry,
+      'box': this.getBoxGeometry
     };
     var geo = mapping[pattern]();
     var fill = this.getFillGeometry();
@@ -206,15 +245,6 @@ module.exports = (function() {
     return tempGeo;
   }
 
-  Texture.prototype._getWallGeometry = function(side) {
-    var wall = new THREE.BoxGeometry(this.wallWidth, this.height, this.length, 4, 4, 4);
-    wall.translate(-this.wallWidth / 2, -this.height / 2, 0);
-    if (side == "left") {
-      wall.translate(-this.width, 0, 0);
-    }
-    return wall;
-  }
-
   Texture.prototype.getRegularGeometry = function() {
     var textureGeometry = new THREE.Geometry();
 
@@ -266,6 +296,23 @@ module.exports = (function() {
     THREE.GeometryUtils.merge(textureGeometry, fill);
 
     return textureGeometry;
+  }
+
+  Texture.prototype.getBoxGeometry = function() {
+
+    var textureGeometry = new THREE.Geometry();
+
+    var middleConnector = this._getMiddleBoxGeometry();
+    middleConnector.translate(-1 - 0.15 - 0.15 / 2, -this._getDistanceBetweenMembers(), -this.length/2);
+
+    THREE.GeometryUtils.merge(textureGeometry, middleConnector);
+
+    THREE.GeometryUtils.merge(textureGeometry, this._getSurfaceGeometry());
+    THREE.GeometryUtils.merge(textureGeometry, this._getWallGeometry('left'));
+    THREE.GeometryUtils.merge(textureGeometry, this._getWallGeometry('right'));
+
+    return textureGeometry;
+
   }
 
 
