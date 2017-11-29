@@ -57,16 +57,46 @@ module.exports = (function() {
     const material = new THREE.RawShaderMaterial({
       transparent: true,
       uniforms: {
-        'scale': { type: 'v3', value: new THREE.Vector3(1.0, 1.0, 1.0) },
-        'color': { type: 'c', value: new THREE.Color(0x444444) },
-        'borderColor': { type: 'c', value: new THREE.Color(0x666666) },
-        'borderSize': { type: 'f', value: 0.0 },
-        'rotatedMode': { type: 'i', value: 0 },
-        'rotatedScale': { type: 'f', value: 0.0 },
-        'rotatedHeight': { type: 'f', value: 0.0 },
-        'rotatedDirection': { type: 'i', value: 0 },
-        'image': { type: 't', value: new THREE.Texture() },
-        'tool': { type: 'i', value: 0 }
+        'scale': {
+          type: 'v3',
+          value: new THREE.Vector3(1.0, 1.0, 1.0)
+        },
+        'color': {
+          type: 'c',
+          value: new THREE.Color(0x444444)
+        },
+        'borderColor': {
+          type: 'c',
+          value: new THREE.Color(0x666666)
+        },
+        'borderSize': {
+          type: 'f',
+          value: 0.0
+        },
+        'rotatedMode': {
+          type: 'i',
+          value: 0
+        },
+        'rotatedScale': {
+          type: 'f',
+          value: 0.0
+        },
+        'rotatedHeight': {
+          type: 'f',
+          value: 0.0
+        },
+        'rotatedDirection': {
+          type: 'i',
+          value: 0
+        },
+        'image': {
+          type: 't',
+          value: new THREE.Texture()
+        },
+        'tool': {
+          type: 'i',
+          value: 0
+        }
       },
       vertexShader: cursorConfig.vertexShader,
       fragmentShader: cursorConfig.fragmentShader
@@ -262,7 +292,7 @@ module.exports = (function() {
             updatedVoxels = updatedVoxels.concat(
               this.updateSingleVoxel(new THREE.Vector3().fromArray(position), new THREE.Vector2(du + (radius + 1) % 2, dv))
             );
-      }
+          }
     } else {
       for (var x = start.x; x <= end.x; x++)
         for (var y = start.y; y <= end.y; y++)
@@ -270,7 +300,7 @@ module.exports = (function() {
             updatedVoxels = updatedVoxels.concat(
               this.updateSingleVoxel(new THREE.Vector3(x, y, z), new THREE.Vector2(x - start.x, z - start.z))
             );
-      }
+          }
     }
 
     updatedVoxels.forEach(function(voxel) {
@@ -288,7 +318,7 @@ module.exports = (function() {
   }
 
   VoxelTool.prototype.updateSingleVoxel = function(position, offset) {
-    var positions = [ position.clone() ];
+    var positions = [position.clone()];
     var invalidPosition = false;
 
     this.mirror.forEach(function(mirror, axis) {
@@ -333,26 +363,32 @@ module.exports = (function() {
   VoxelTool.prototype.updateSingleVoxelTexture = function(position, offset) {
     console.log("[in progress] update with texture");
     var material = new THREE.MeshPhongMaterial({
-				color: 0xa00000,
-				flatShading: false
-			});
-    var textureGeometry = (new Texture()).getGeometry();
+      color: 0xa00000,
+      flatShading: false
+    });
+    var pattern = this.activeBrush.name;
+    var texture = new Texture();
+    var textureGeometry = texture.getGeometry(pattern);
+
+    //var textureGeometry = texture.getZigZagGeometry();
     //remove voxel
-    this.voxelGrid.removeVoxel(position);
+    try {
+      this.voxelGrid.removeVoxel(position);
+    } catch (err) {}
     textureGeometry.center();
     if (this.activeBrush.rotated) { //rotation is taken from active brush attribute
-      textureGeometry.rotateY(Math.PI/2);
-      textureGeometry.translate(position.x, position.y, position.z-0.5);
+      textureGeometry.rotateY(Math.PI / 2);
+      textureGeometry.translate(position.x, position.y, position.z - 0.5);
     } else {
-    //translate to correct position //center of the voxel
-    //-0.5 to align in 2 voxels
-      textureGeometry.translate(position.x-0.5, position.y, position.z);
+      //translate to correct position //center of the voxel
+      //-0.5 to align in 2 voxels
+      textureGeometry.translate(position.x - 0.5, position.y, position.z);
     }
     // add to scene (not so good), better: merge to render geometry
     this.voxelGrid.addTexture(textureGeometry); //save it to a BufferGeometry
     var object = new THREE.Mesh(textureGeometry, material);
     object.name = 'texture';
-		this.renderer.scene.add(object);
+    this.renderer.scene.add(object);
     return []; //these are updated voxels haha
     //
   }
@@ -367,7 +403,7 @@ module.exports = (function() {
     this.cursor.material.uniforms.image.value.needsUpdate = true;
   });
 
-  VoxelTool.prototype.alterMouseEvents = function(){
+  VoxelTool.prototype.alterMouseEvents = function() {
     const oldouseMoveDown = this.mouseMoveDown;
     const oldouseDown = this.mouseDown;
     const oldouseUp = this.mouseUp;

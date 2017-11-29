@@ -74,7 +74,7 @@ module.exports = (function() {
 
     this.parseGridSettings();
 
-    this.tools['add-tool'].activeBrush = {'rotated': false};
+    this.tools['add-tool'].activeBrush = {'rotated': false, 'name': 'regular'};
     this.tools['add-tool'].updateSingleVoxelTexture(new THREE.Vector3(0.5, 0.5, 0.5), new THREE.Vector2(0,0));
   }
 

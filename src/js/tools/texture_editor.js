@@ -6,6 +6,8 @@ const THREE = require('three');
 
 const bind = require('../misc/bind');
 
+const patterns = ['regular', 'box', 'zigzag', 'diamond','spiky'];
+
 module.exports = (function() {
 
   function TextureEditor(tools) {
@@ -14,13 +16,12 @@ module.exports = (function() {
     this.brushes = {};
     this.rotatation = $('#texture_rotate').checked;
     var self = this;
-    ["#hubbles", "#zickzack"].forEach(function(id) {
-      $(id).click(function() {
-        self.activateBrush(id);
+    patterns.forEach(function(pattern) {
+      $('#'+pattern).click(function() {
+        self.activateBrush(pattern);
       });
     });
     $('#texture_rotate').click(function() {
-      debugger;
       self.rotatation = this.checked;
       self.activateBrush(); //reactivate brush with new parameter
     });
