@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "bootstrap": "^3.3.7",
+    "createjs-browserify": "^1.0.5",
     "file-saver": "^1.3.3",
     "jquery": "^3.1.1",
     "lodash": "^4.6.1",
@@ -43,6 +44,7 @@
     "three": "^0.88.0",
     "three-js-csg": "^72.0.0",
     "three-orbit-controls": "^82.1.0",
+    "three-subdivision-modifier": "^1.0.5",
     "voxelize": "^1.0.0",
     "websocket": "^1.0.23"
   }

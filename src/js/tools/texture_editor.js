@@ -3,10 +3,12 @@
 const $ = require('jquery');
 const _ = require('lodash');
 const THREE = require('three');
-
+const createjs = require('createjs-browserify');
 const bind = require('../misc/bind');
 
-const patterns = ['regular', 'box', 'round', 'zigzag', 'diamond','spiky'];
+const TextureCanvasDrawer = require('./texture_canvasdrawer');
+
+const patterns = ['regular', 'box', 'round', 'zigzag', 'diamond','spiky', 'custom', 'debug'];
 
 module.exports = (function() {
 
@@ -26,7 +28,10 @@ module.exports = (function() {
       self.activateBrush(); //reactivate brush with new parameter
     });
 
+    this.canvasdrawer = new TextureCanvasDrawer('texture_canvas');
+
   }
+
 
   TextureEditor.prototype.activateBrush = function(name) {
     //this.removeUnusedBrush();
@@ -35,7 +40,8 @@ module.exports = (function() {
     var brush = {
       "type": "texture",
       rotated: this.rotatation,
-      name: name || this.activeBrush.name
+      name: name || this.activeBrush.name,
+      canvasdrawer: this.canvasdrawer
     };
     this.activeBrush = brush;
     //brush.domElement.addClass('active');

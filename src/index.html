@@ -16,7 +16,7 @@
 			<div class="panel-heading">
 				<h4 class="panel-title"><a data-target="#voxel-mode-collapse" data-toggle="collapse" href="#voxel-mode-collapse">modes</a></h4>
 			</div>
-			<div class="panel-collapse collapse in" id="voxel-mode-collapse">
+			<div class="panel-collapse collapse" id="voxel-mode-collapse">
 				<div class="panel-body">
 					<div class="voxel-btn voxel-mode-btn voxel-tool-btn active" id="voxel-add-tool-btn">
 						<div class="voxel-btn-img">
@@ -48,7 +48,7 @@
 			<div class="panel-heading">
 				<h4 class="panel-title"><a data-target="#voxel-cells-collapse" data-toggle="collapse" href="#voxel-cells-collapse">cells</a></h4>
 			</div>
-			<div class="panel-collapse collapse in" id="voxel-cells-collapse">
+			<div class="panel-collapse collapse" id="voxel-cells-collapse">
 				<div class="panel-body">
 					<div class="voxel-cells-container" id="voxel-cells-container-1"></div>
 					<div class="voxel-cells-container" id="voxel-cells-container-2"></div>
@@ -79,7 +79,12 @@
 			</div>
 			<div class="panel-collapse collapse in" id="voxel-textures-collapse">
 				<div class="panel-body">
+					<canvas height=100 width=200 id="texture_canvas"></canvas>
 					<fieldset>
+						<input type="radio" id="custom" name="texture" value="custom">
+						<label for="custom">custom</label>
+						<input type="radio" id="debug" name="texture" value="debug">
+						<label for="debug">for demo</label>
 						<input type="radio" id="regular" name="texture" value="regular">
 						<label for="regular">regular</label>
 						<input type="radio" id="box" name="texture" value="box">

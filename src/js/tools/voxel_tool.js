@@ -368,9 +368,14 @@ module.exports = (function() {
     });
     var pattern = this.activeBrush.name;
     var texture = new Texture();
-    var textureGeometry = texture.getGeometry(pattern);
+    if (pattern == "custom") {
+      var textureGeometry = texture.getCustomGeometry(this.activeBrush.canvasdrawer);
+    } else if (pattern == "debug") {
+        var textureGeometry = texture.getCustomGeometry(this.activeBrush.canvasdrawer, true);
+    } else {
+      var textureGeometry = texture.getGeometry(pattern);
+    }
 
-    //var textureGeometry = texture.getZigZagGeometry();
     //remove voxel
     try {
       this.voxelGrid.removeVoxel(position);
@@ -382,7 +387,11 @@ module.exports = (function() {
     } else {
       //translate to correct position //center of the voxel
       //-0.5 to align in 2 voxels
+      textureGeometry.computeBoundingBox();
+      console.log("Bounding Box", textureGeometry.boundingBox);
       textureGeometry.translate(position.x - 0.5, position.y, position.z);
+      textureGeometry.computeBoundingBox();
+      console.log("Bounding Box (fit in grid)", textureGeometry.boundingBox);
     }
     // add to scene (not so good), better: merge to render geometry
     this.voxelGrid.addTexture(textureGeometry); //save it to a BufferGeometry
