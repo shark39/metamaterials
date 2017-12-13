@@ -40,10 +40,16 @@ module.exports = (function() {
     this.surfaceHeight = options.surfaceHeight || 0.1;
     this.hingeWidth = options.hingeWidth || 0.08;
     this.hingeHeight = options.hingeHeight || 0.1;
-    this.memberHeight = options.memberHeight || 0.2;
+    this.memberHeight = options.memberHeight || 0.15;
 
-    //calculate width of member (wallWidth/2 because half of wall is outside of the voxel)
-    this.memberWidth = this.width/2 - this.wallWidth/2 - this.hingeWidth*2 - this.middleConnectorWidth/2;
+    //calculate width of member
+    this.memberWidth = this.width/2 - this.wallWidth - this.hingeWidth*2 - this.middleConnectorWidth/2;
+
+    this.amplitude = Math.sqrt((this.width/2-this.wallWidth-this.middleConnectorWidth)**2 - this.memberWidth**2);
+    console.log("amplitude is ", this.amplitude);
+    /*Note for construction
+    left wall starts at x=0, right wall ends at x=this.width=2
+    */
   }
 
   //different geometry types:
@@ -68,8 +74,8 @@ module.exports = (function() {
   //HELPER FUNCTIONS TO CONSTRUCT THE TEXTURECELL //
   /////////////////////////////////////////////////
   Texture.prototype._getSurfaceGeometry = function() {
-    var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length, 4, 4, 4);
-    topPlane.translate(-this.width / 2, -this.surfaceHeight / 2, 0);
+    var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length);
+    topPlane.translate(this.width / 2, -this.surfaceHeight / 2 + this.height, 0);
     return topPlane;
   }
 
@@ -119,14 +125,15 @@ module.exports = (function() {
 
   Texture.prototype._getWallGeometry = function(side) {
     var wall = new THREE.BoxGeometry(this.wallWidth, this.height, this.length);
-    wall.translate(-this.wallWidth/2, -this.height / 2, 0);
-    if (side == "left") {
-      wall.translate(-this.width+this.wallWidth/2, 0, 0);
+    wall.translate(this.wallWidth/2, -this.height / 2, 0);
+    if (side == "right") {
+      wall.translate(this.width-this.wallWidth, 0, 0);
     }
     return wall;
   }
 
   Texture.prototype._getDistanceBetweenMembers = function() {
+    console.warn("DEPRECATED");
     var A = new THREE.Vector2(0, 0);
     var B = new THREE.Vector2(this.width / 2 - 2 * this.hingeWidth - this.wallWidth - this.middleConnectorWidth / 2, this.memberHeight);
     return A.distanceTo(B);
@@ -143,16 +150,15 @@ module.exports = (function() {
     // x#           #x
     var tempGeo = new THREE.Geometry();
     var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length);
-    topPlane.translate(-this.width/2, this.memberHeight+this.surfaceHeight/2, this.length/2);
+    topPlane.translate(this.width/2, this.memberHeight+this.surfaceHeight/2, this.length/2);
     THREE.GeometryUtils.merge(tempGeo, topPlane);
 
     var lowerMember1 = this._getMemberGeometry(1, false);
-    //lowerMember1.translate(-this.middleConnectorWidth / 2 - this.hingeWidth, -this._getDistanceBetweenMembers() + 0.1, 0);
-    lowerMember1.translate(-this.width + this.hingeWidth, 0, 0);
+    lowerMember1.translate(this.wallWidth + this.hingeWidth, 0, 0);
     THREE.GeometryUtils.merge(tempGeo, lowerMember1);
 
     var lowerMember2 = this._getMemberGeometry(-1, false);
-    lowerMember2.translate(-this.wallWidth-this.hingeWidth, 0, 0);
+    lowerMember2.translate(this.width/2 + this.middleConnectorWidth/2 + this.hingeWidth + this.memberWidth, 0, 0);
     THREE.GeometryUtils.merge(tempGeo, lowerMember2);
     tempGeo.translate(0,  -this.height, -this.length/2);
 
@@ -166,18 +172,20 @@ module.exports = (function() {
     var textureGeometry = new THREE.Geometry();
 
     var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, this.height-this.memberHeight, this.length);
-    middleConnector.translate(-this.width/2-0.1, -(this.height-this.memberHeight)/2, 0);
+    middleConnector.translate(this.width/2, -(this.height-this.memberHeight)/2, 0);
     THREE.GeometryUtils.merge(textureGeometry, middleConnector);
 
     var member1 = this._getMemberGeometry(1, false);
-    member1.translate(-this.width + this.hingeWidth+this.wallWidth/2, -this.memberHeight-this.surfaceHeight, -this.length/2);
+    member1.translate(this.wallWidth + this.hingeWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
     THREE.GeometryUtils.merge(textureGeometry, member1);
 
     var member2 = this._getMemberGeometry(-1, false);
-    member2.translate(-this.wallWidth-this.hingeWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
+    member2.translate(this.width/2 + this.middleConnectorWidth/2 + this.hingeWidth + this.memberWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
     THREE.GeometryUtils.merge(textureGeometry, member2);
 
-    THREE.GeometryUtils.merge(textureGeometry, this._getSurfaceGeometry());
+    var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length);
+    topPlane.translate(this.width / 2, -this.surfaceHeight / 2, 0);
+    THREE.GeometryUtils.merge(textureGeometry, topPlane);
 
     return textureGeometry;
   }
