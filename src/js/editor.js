@@ -49,6 +49,8 @@ module.exports = (function() {
       }
     }
     window.addEventListener("mousemove", requestRender, true);
+    window.addEventListener("mouseup", requestRender, true);
+    window.addEventListener("mousedown", requestRender, true);
     window.addEventListener("keydown", requestRender, false);
     requestRender();
   }
