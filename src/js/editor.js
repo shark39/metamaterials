@@ -28,8 +28,29 @@ module.exports = (function() {
   }
 
   Editor.prototype.run = function() {
-    this.renderer.update();
-    requestAnimationFrame(this.run);
+    var renderer = this.renderer;
+    function render(time) {
+      renderer.update();
+
+      if (gLastMove + kStandbyAfter < Date.now()) {
+        gRunning = false;
+      } else {
+        gRunning = true;
+        requestAnimationFrame(render);
+      }
+    }
+    var gLastMove = Date.now();
+    var gRunning = false;
+    var kStandbyAfter = 100; // ms
+    function requestRender() {
+      gLastMove = Date.now();
+      if (!gRunning) {
+        requestAnimationFrame(render);
+      }
+    }
+    window.addEventListener("mousemove", requestRender, false);
+    window.addEventListener("keydown", requestRender, false);
+    requestRender();
   }
 
   return Editor;
