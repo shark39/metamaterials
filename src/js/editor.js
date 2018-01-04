@@ -48,7 +48,7 @@ module.exports = (function() {
         requestAnimationFrame(render);
       }
     }
-    window.addEventListener("mousemove", requestRender, false);
+    window.addEventListener("mousemove", requestRender, true);
     window.addEventListener("keydown", requestRender, false);
     requestRender();
   }
