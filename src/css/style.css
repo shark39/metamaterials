@@ -14,10 +14,13 @@ body {
 }
 
 #controls {
-  position: absolute;
+  position: fixed;
   right: 0;
   width: 350px;
-  margin: 10px;
+  padding: 10px;
+  height: 100%;
+  overflow-y: scroll;
+  background: rgba(0,0,0,0.4);
 }
 
 
@@ -198,7 +201,6 @@ body {
 #voxel-advanced-editor {
   position: relative;
   margin: auto;
-  width: 320px;
   height: 150px;
   overflow: hidden;
 }
@@ -233,8 +235,7 @@ body {
   bottom: 30px;
   right: 30px;
   font-size: 20pt;
-  padding: 20px;
-  background-color: rgba(1.0, 1.0, 1.0, 0.7);
+  pointer-events: none;
 }
 
 
