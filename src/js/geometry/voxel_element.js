@@ -56,7 +56,7 @@ module.exports = (function() {
   }
 
   VoxelElement.prototype.buildSimulationGeometry = function() {
-    const position = this.positionMatrix().applyToVector3Array([
+    const position = this.positionMatrix().applyToBufferAttribute([
       -0.5, -0.5, -0.5,
        0.5, -0.5, -0.5,
       -0.5,  0.5, -0.5,
@@ -67,7 +67,7 @@ module.exports = (function() {
        0.5,  0.5,  0.5
     ]);
 
-    const offset = this.offsetMatrix().applyToVector3Array([
+    const offset = this.offsetMatrix().applyToBufferAttribute([
       -1.0, -1.0, -1.0,
        1.0, -1.0, -1.0,
       -1.0,  1.0, -1.0,
