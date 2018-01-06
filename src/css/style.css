@@ -262,3 +262,13 @@ body {
 			border-color: black;
 			border-width: 2px;
 		}
+
+.canvas-pattern {
+  padding: 3px;
+}
+
+.texture-presets {
+    display: block;
+    clear: both;
+    margin-left: 15px;
+  }

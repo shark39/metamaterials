@@ -48,11 +48,16 @@
 			<div class="panel-heading">
 				<h4 class="panel-title"><a data-target="#voxel-cells-collapse" data-toggle="collapse" href="#voxel-cells-collapse">cells</a></h4>
 			</div>
-			<div class="panel-collapse collapse" id="voxel-cells-collapse">
+			<div class="panel-collapse" id="voxel-cells-collapse">
 				<div class="panel-body">
+					<span>Structures</span>
 					<div class="voxel-cells-container" id="voxel-cells-container-1"></div>
 					<div class="voxel-cells-container" id="voxel-cells-container-2"></div>
 					<div class="voxel-cells-container" id="voxel-cells-container-3"></div>
+					<span>Textures</span>
+					<div id="texture-presets">
+
+					</div>
 				</div>
 			</div>
 		</div>
@@ -79,25 +84,9 @@
 			</div>
 			<div class="panel-collapse collapse in" id="voxel-textures-collapse">
 				<div class="panel-body">
+
 					<canvas height=100 width=200 id="texture_canvas"></canvas>
-					<fieldset>
-						<input type="radio" id="custom" name="texture" value="custom">
-						<label for="custom">custom</label>
-						<input type="radio" id="debug" name="texture" value="debug">
-						<label for="debug">for demo</label>
-						<input type="radio" id="regular" name="texture" value="regular">
-						<label for="regular">regular</label>
-						<input type="radio" id="box" name="texture" value="box">
-						<label for="box">box</label>
-						<input type="radio" id="round" name="texture" value="round">
-						<label for="round">round</label>
-						<input type="radio" id="zigzag" name="texture" value="zigzag">
-						<label for="zigzag">zigzag</label>
-						<input type="radio" id="diamond" name="texture" value="diamond">
-						<label for="diamond">diamond</label>
-						<input type="radio" id="spiky" name="texture" value="spiky">
-						<label for="spiky">spiky</label>
-					</fieldset>
+					<div>amplitude <input id="texture-amplitude" size=3 value="20">%</div>
 					<label>
           <input type="checkbox" id="texture_rotate" name="rotate" value="rotate">
           rotate
