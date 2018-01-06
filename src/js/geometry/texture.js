@@ -123,8 +123,8 @@ module.exports = (function() {
 
   Texture.prototype._getMiddleBoxGeometry = function(widthTop, widthBottom) {
     var A = new THREE.Vector2(-widthBottom/2, 0);
-    var B = new THREE.Vector2(-widthTop/2, this._getDistanceBetweenMembers());
-    var C = new THREE.Vector2(widthTop/2, this._getDistanceBetweenMembers());
+    var B = new THREE.Vector2(-widthTop/2, -(this.height)/2);
+    var C = new THREE.Vector2(widthTop/2, -(this.height)/2);
     var D = new THREE.Vector2(widthBottom/2, 0);
     var m = new PrismGeometry([A, B, C, D], this.length);
     return m;
@@ -174,6 +174,42 @@ module.exports = (function() {
     return tempGeo;
   }
 
+  Texture.prototype.getHingesGeometry = function() {
+
+    var textureGeometry = new THREE.Geometry();
+    var hingeOffsets = [this.wallWidth,
+                        this.memberWidth,
+                        this.middleConnectorWidth,
+                        this.memberWidth
+                     ]
+    var offset = 0;
+    for (var i = 0; i < hingeOffsets.length; i++) {
+      offset += hingeOffsets[i];
+      var box = new THREE.BoxGeometry(this.hingeWidth, this.hingeHeight, this.length);
+      box.translate(this.hingeWidth/2+i*this.hingeWidth + offset, -this.hingeHeight/2, 0);
+      THREE.GeometryUtils.merge(textureGeometry, box);
+
+    }
+
+    return textureGeometry;
+
+  }
+
+  Texture.prototype.getMembersGeometry = function() {
+
+    var textureGeometry = new THREE.Geometry();
+
+    var member1 = this._getMemberGeometry(1, false);
+    member1.translate(this.wallWidth + this.hingeWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
+    THREE.GeometryUtils.merge(textureGeometry, member1);
+
+    var member2 = this._getMemberGeometry(-1, false);
+    member2.translate(this.width/2 + this.middleConnectorWidth/2 + this.hingeWidth + this.memberWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
+    THREE.GeometryUtils.merge(textureGeometry, member2);
+
+    return textureGeometry;
+  }
+
   Texture.prototype.getRegularGeometry = function() {
     //regular texture pattern
     //surface + middleConnector + members
@@ -217,19 +253,10 @@ module.exports = (function() {
     var textureGeometry = new THREE.Geometry();
 
     var middleConnector = this._getMiddleBoxGeometry(0.3, 0.5);
-    //middleConnector.translate(-1 - 0.15 - 0.15 / 2, -this._getDistanceBetweenMembers(), -this.length/2);
-    middleConnector.translate(-this.width/2-0.3/2, -this._getDistanceBetweenMembers(), -this.length/2);
+    middleConnector.translate(this.width/2, 0, -this.length/2);
     THREE.GeometryUtils.merge(textureGeometry, middleConnector);
 
-    this.memberWidth = this.memberWidth - 0.3/2;
-    var member1 = this._getMemberGeometry(1, false);
-    member1.translate(-this.width + this.hingeWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
-    THREE.GeometryUtils.merge(textureGeometry, member1);
-
-    var member2 = this._getMemberGeometry(-1, false);
-    member2.translate(-this.wallWidth-this.hingeWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
-    THREE.GeometryUtils.merge(textureGeometry, member2);
-
+    THREE.GeometryUtils.merge(textureGeometry, this.getMembersGeometry());
     THREE.GeometryUtils.merge(textureGeometry, this._getSurfaceGeometry());
 
     return textureGeometry;
