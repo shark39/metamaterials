@@ -8,11 +8,25 @@ const createjs = require('createjs-browserify');
 
 module.exports = (function() {
 
+  var width = 80;
+  var height = 40;
+
+  function drawRegular() {
+    var line = new createjs.Shape();
+    line.graphics.setStrokeStyle(2).beginStroke("rgba(0,0,0,0.5)");
+    line.graphics.moveTo(width/2, 0);
+    line.graphics.lineTo(width/2, height);
+    return line;
+
+
+  }
+
   function Texture2d() {}
 
   Texture2d.getImage = function(pattern) {
-    var width = 80;
-    var height = 40;
+
+    const mapping = {"regular" : drawRegular};
+
     var canvas = document.createElement("canvas");
     canvas.setAttribute('width', width);
     canvas.setAttribute('height', height);
@@ -21,13 +35,20 @@ module.exports = (function() {
     var stage = new createjs.Stage(canvas);
     var bg = new createjs.Shape();
     bg.graphics.beginFill("white").drawRect(0, 0, width, height);
-    var line = new createjs.Shape();
-    line.graphics.setStrokeStyle(2).beginStroke("rgba(0,0,0,0.5)");
-    line.graphics.moveTo(0, 0);
-    line.graphics.lineTo(width, height);
     stage.addChild(bg);
-    stage.addChild(line);
-    var text = new createjs.Text(pattern, "16px Arial", "#0077ff");
+
+    if (mapping.hasOwnProperty(pattern)) {
+      stage.addChild(drawRegular());
+    } else {
+      var line = new createjs.Shape();
+      line.graphics.setStrokeStyle(2).beginStroke("rgba(0,0,0,0.5)");
+      line.graphics.moveTo(0, 0);
+      line.graphics.lineTo(width, height);
+      stage.addChild(line);
+
+    }
+
+    var text = new createjs.Text(pattern, "18px Arial", "#0077ff");
     text.x = 5;
     text.y = height/2;
     text.textBaseline = "alphabetic";
