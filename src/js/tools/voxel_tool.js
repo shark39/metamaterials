@@ -362,18 +362,19 @@ module.exports = (function() {
 
   VoxelTool.prototype.updateSingleVoxelTexture = function(position, offset) {
     console.log("[in progress] update with texture");
+
     var material = new THREE.MeshPhongMaterial({
       color: 0xa00000,
       flatShading: false
     });
     var pattern = this.activeBrush.name;
-    var texture = new Texture();
+    var texture = new Texture(pattern, this.stiffness);
     if (pattern == "custom") {
       var textureGeometry = texture.getCustomGeometry(this.activeBrush.canvasdrawer);
     } else if (pattern == "debug") {
         var textureGeometry = texture.getCustomGeometry(this.activeBrush.canvasdrawer, true);
     } else {
-      var textureGeometry = texture.getGeometry(pattern);
+      var textureGeometry = texture.getGeometry();
     }
 
     //remove voxel
