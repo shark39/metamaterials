@@ -310,11 +310,6 @@ module.exports = (function() {
     this.voxelGrid.update();
     this.setCuboidMode(this.cuboidMode, this.rotatedMode);
     this.processSingle();
-    // this.voxelGrid.highlightHinges();
-
-    // this.voxelGrid.detectBadVoxels();
-    // this.voxelGrid.highlightBadVoxels();
-    // addBorderingIfNeeded( this );
   }
 
   VoxelTool.prototype.updateSingleVoxel = function(position, offset) {
