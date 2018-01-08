@@ -8,7 +8,7 @@ const CSG            = require('openjscad-csg').CSG;
 const saveAs         = require('file-saver').saveAs;
 
 const GeometryBuffer = require('./geometry_buffer');
-const Voxel          = require('./voxel');
+const Voxel          = require('./mechanicalCell/voxel');
 const STLExporter    = require('../misc/STLExporter');
 const OBJExporter    = require('../misc/OBJExporter');
 const OBJLoader2      = require('../misc/OBJLoader');

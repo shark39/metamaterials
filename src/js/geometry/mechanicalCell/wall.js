@@ -2,8 +2,8 @@
 
 const THREE        = require('three');
 
-const bind         = require('../misc/bind');
-const VoxelElement = require('./voxel_element');
+const bind         = require('../../misc/bind');
+const VoxelElement = require('../voxel_element');
 
 module.exports = (function() {
 

@@ -3,7 +3,7 @@
 const _        = require('lodash');
 const THREE    = require('three');
 
-const bind     = require('../misc/bind');
+const bind     = require('../../misc/bind');
 const Beam     = require('./beam');
 const Triangle = require('./triangle');
 const Solid    = require('./solid');

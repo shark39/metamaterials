@@ -19,8 +19,8 @@ supported types:
 const THREE = require('three');
 const ThreeBSP = require('three-js-csg')(THREE);
 
-const bind = require('../misc/bind');
-const VoxelElement = require('./voxel_element');
+const bind = require('../../misc/bind');
+const VoxelElement = require('../voxel_element');
 const PrismGeometry = require('./prism.js');
 
 

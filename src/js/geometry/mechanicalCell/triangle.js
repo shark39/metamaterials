@@ -3,8 +3,8 @@
 const THREE        = require('three');
 const _            = require('lodash');
 
-const bind         = require('../misc/bind');
-const VoxelElement = require('./voxel_element');
+const bind         = require('../../misc/bind');
+const VoxelElement = require('../voxel_element');
 
 module.exports = (function() {
 

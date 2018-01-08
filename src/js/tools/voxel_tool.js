@@ -4,7 +4,7 @@ const bind = require('../misc/bind');
 const cursorConfig = require('../misc/cursorConfig');
 const Tool = require('./tool');
 
-const Texture = require('../geometry/texture');
+const Texture = require('../geometry/textureCell/texture');
 // const addBorderingIfNeeded = require('./bordering');
 
 const $ = require('jquery');
