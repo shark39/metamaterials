@@ -1,10 +1,9 @@
 var browserify = require('browserify');
 var gulp = require('gulp');
 var eslint = require('gulp-eslint');
-var livereload = require('gulp-livereload');
 var merge = require('merge-stream');
 var source = require('vinyl-source-stream');
-var webserver = require('gulp-webserver');
+var browserSync = require('browser-sync').create();
 
 var files = {
   static: [
@@ -34,15 +33,14 @@ gulp.task('build:static', function() {
     return gulp
       .src(entry.src)
       .pipe(gulp.dest(entry.dest));
-  })).pipe(livereload());
+  }));
 });
 
 gulp.task('build:js', function() {
   return browserify(files.js.entry, { debug: true, detectGlobals: false })
     .bundle()
     .pipe(source(files.js.bundle))
-    .pipe(gulp.dest(files.js.dest))
-    .pipe(livereload());
+    .pipe(gulp.dest(files.js.dest));
 });
 
 gulp.task('lint', function() {
@@ -60,16 +58,24 @@ gulp.task('fix', function() {
     .pipe(gulp.dest(files.js.fix));
 });
 
-gulp.task('server', function() {
-  livereload.listen();
-
-  gulp.watch(files.static.map(function(entry) { return entry.src; }), gulp.series('build:static'));
-  gulp.watch(files.js.src, gulp.series('build:js'));
-
-  return gulp
-    .src(files.server)
-    .pipe(webserver({ open: true }));
+gulp.task('browser-sync', function() {
+    browserSync.init({
+        server: {
+            baseDir: "./public/"
+        }
+    });
+    gulp.watch(files.static.map(function(entry) { return entry.src; }), gulp.series('build:static', 'browser-reload'));
+    gulp.watch(files.js.src, gulp.series('build:js', 'browser-reload'));
 });
 
+gulp.task('browser-reload', function(done) {
+  browserSync.reload();
+  done();
+})
+
 gulp.task('build', gulp.parallel('build:static', 'build:js'));
-gulp.task('default', gulp.series('build', 'server'));
+gulp.task('default', gulp.series('build', 'browser-sync'));
+
+
+
+
