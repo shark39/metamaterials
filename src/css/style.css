@@ -19,7 +19,7 @@ body {
   width: 350px;
   padding: 10px;
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto; /*scroll if needed */
   background: rgba(0,0,0,0.4);
 }
 
