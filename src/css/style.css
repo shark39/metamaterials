@@ -273,3 +273,19 @@ body {
     clear: both;
     margin-left: 15px;
   }
+
+#canvas-container {
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+  background-color: aqua;
+  z-index: 0;
+}
+
+.texture-canvas {
+  width: auto;
+  height: auto;
+  padding: 0.5em;
+  background-color: darkslateblue;
+  z-index: 1;
+}

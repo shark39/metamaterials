@@ -1,6 +1,7 @@
 'use strict';
 
 const $ = require('jquery');
+require('jquery-ui-browserify');
 const _ = require('lodash');
 const THREE = require('three');
 const createjs = require('createjs-browserify');
@@ -9,7 +10,7 @@ const bind = require('../misc/bind');
 const TextureCanvasDrawer = require('./texture_canvasdrawer');
 const Texture2d = require('../geometry/texture2d');
 
-var patterns = ['regular', 'box', 'round', 'zigzag', 'diamond','spiky', 'custom', 'debug'];
+const patterns = ['regular', 'box', 'round', 'zigzag', 'diamond', 'spiky', 'custom', 'debug'];
 
 module.exports = (function() {
 
@@ -28,22 +29,27 @@ module.exports = (function() {
         .addClass('voxel-btn voxel-cells-btn')
         .append($('<div></div>')
           .addClass('voxel-btn-img')
-          .css({ width: 60 })
+          .css({
+            width: 60
+          })
           .append($('<div></div>')
             .addClass('voxel-btn-selection')
           )
           .append(image)
         );
-        domElement.click(function() {
-          console.log("activated");
-          self.activateBrush(pattern);
-        });
+      domElement.click(function() {
+        self.activateBrush(pattern);
+      });
       //var div = document.createElement('div');
       //div.className = "voxel-cells-btn voxel-btn-img";
       //div.style.width = "50px";
       //div.append(image);
       container.append(domElement);
-      self.brushes[pattern] = {name: pattern, domElement: domElement, type: "texture"};
+      self.brushes[pattern] = {
+        name: pattern,
+        domElement: domElement,
+        type: "texture"
+      };
 
       //var label = document.createElement('div');
       //label.text = pattern;
@@ -56,7 +62,21 @@ module.exports = (function() {
       self.activateBrush(); //reactivate brush with new parameter
     });
 
-    this.canvasdrawer = new TextureCanvasDrawer('texture_canvas');
+    //
+    let canvas = $('<canvas height=100 width=200 class="texture-canvas"></canvas>');
+    canvas.draggable({
+      disabled: false,
+      //prevent dragging when clicked on line or dot
+      drag: function(event, ui) {
+        return !self.canvasdrawer.movingDot;
+      }
+    });
+    $('#canvas-container').append(canvas);
+    this.canvasdrawer = new TextureCanvasDrawer(canvas);
+
+    //this.canvasdrawer = new TextureCanvasDrawer($('#canvas-container'));
+    // onchange: update --> generate image, name, add to brushes and activateBrush
+
 
   }
 
@@ -65,8 +85,6 @@ module.exports = (function() {
     //this.removeUnusedBrush();
 
     $('.voxel-cells-btn').removeClass('active');
-
-
 
     var brush = this.brushes[name];
     brush.rotated = this.rotatation;
