@@ -8,7 +8,7 @@ const createjs = require('createjs-browserify');
 const bind = require('../misc/bind');
 
 const TextureCanvasDrawer = require('./texture_canvasdrawer');
-const Texture2d = require('../geometry/texture2d');
+const Texture2d = require('../geometry/textureCell/texture2d');
 
 const patterns = ['regular', 'box', 'round', 'zigzag', 'diamond', 'spiky', 'custom', 'debug'];
 

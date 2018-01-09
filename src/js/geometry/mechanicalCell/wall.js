@@ -2,14 +2,14 @@
 
 const THREE        = require('three');
 
-const bind         = require('../misc/bind');
-const VoxelElement = require('./voxel_element');
+const bind         = require('../../misc/bind');
+const Feature = require('./feature');
 
 module.exports = (function() {
 
-  function Wall(vertices, buffer) {
+  function Wall(voxel, vertices) {
     bind(this);
-    VoxelElement.call(this, vertices, buffer);
+    Feature.call(this, voxel, vertices);
   }
 
   Wall.front  = { element: Wall, vertices: [ 5, 1, 7, 3 ], id: 'wf' };
@@ -26,7 +26,7 @@ module.exports = (function() {
   Wall.posDiagonalZ = { element: Wall, vertices: [ 6, 2, 5, 1 ], id: 'dz+' };
   Wall.negDiagonalZ = { element: Wall, vertices: [ 4, 0, 7, 3 ], id: 'dz-' };
 
-  Wall.prototype = Object.create(VoxelElement.prototype);
+  Wall.prototype = Object.create(Feature.prototype);
 
   Wall.prototype.positionMatrix = function(thickness) {
     this.thickness = thickness || 0;
@@ -53,8 +53,8 @@ module.exports = (function() {
   Wall.prototype.buildRenderGeometry = function() {
     this.thickness = this.thickness/this.stiffnessFactor; //set to half so scaling of length works out nicely
 
-    var beam = new THREE.BoxBufferGeometry(1.0, 1.0, 1.0);
-    var member = new THREE.BoxBufferGeometry(2.0, 1.0, 0.35);
+    var beam = new THREE.BoxGeometry(1.0, 1.0, 1.0);
+    var member = new THREE.BoxGeometry(2.0, 1.0, 0.35);
 
     return [beam, member];
   }

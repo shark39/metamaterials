@@ -3,14 +3,14 @@
 const THREE        = require('three');
 const _            = require('lodash');
 
-const bind         = require('../misc/bind');
-const VoxelElement = require('./voxel_element');
+const bind         = require('../../misc/bind');
+const Feature      = require('./feature');
 
 module.exports = (function() {
 
-  function Triangle(vertices, buffer) {
+  function Triangle(voxel, vertices) {
     bind(this);
-    VoxelElement.call(this, vertices, buffer);
+    Feature.call(this, voxel, vertices);
   }
 
   // almost working.
@@ -43,7 +43,7 @@ module.exports = (function() {
                           [ 4, 6, 5, 0, 2, 1 ],
                           [ 5, 4, 7, 1, 0, 3 ]];
 
-  Triangle.prototype = Object.create(VoxelElement.prototype);
+  Triangle.prototype = Object.create(Feature.prototype);
 
   Triangle.prototype.buildSimulationGeometry = function() {
     const position = this.positionMatrix().applyToVector3Array([

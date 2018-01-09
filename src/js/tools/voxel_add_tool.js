@@ -37,9 +37,7 @@ module.exports = (function() {
 
   VoxelAddTool.prototype.updateVoxel = function(position, features) {
     const voxel = this.voxelGrid.addVoxel(position, features, this.extrusionNormal.largestComponent(), this.stiffness);
-
     this.activeBrush.used = true;
-
     return [ voxel ];
   }
 

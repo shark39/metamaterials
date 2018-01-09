@@ -46,7 +46,7 @@ module.exports = (function() {
 
   ForceTool.prototype.buildArrow = function(color, axis) {
     const arrow = new THREE.Object3D();
-    const material = new THREE.MeshPhongMaterial({ color: color, shading: THREE.SmoothShading });
+    const material = new THREE.MeshPhongMaterial({ color: color, flatShading: THREE.SmoothShading });
 
     arrow.front = new THREE.Mesh(new THREE.CylinderGeometry(0.0, 0.2, 0.4, 32, 1, false), material);
     arrow.back = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.0, 0.4, 32, 1, false), material);

@@ -2,7 +2,7 @@
 
 const $ = require('jquery');
 const _ = require('lodash');
-const bind = require('../misc/bind');
+const bind = require('../../misc/bind');
 
 const createjs = require('createjs-browserify');
 
