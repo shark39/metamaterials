@@ -364,7 +364,7 @@ module.exports = (function() {
     console.log("[in progress] update with texture");
 
     var color = new THREE.Color(0, 0, 0 );
-    var l = 1 - 0.8*this.stiffness+0.1; // from 0.1 to 0.9
+    var l = 1 - 0.8 * this.stiffness + 0.1; // from 0.1 to 0.9
     color.setHSL(0, 1, l);
     var material = new THREE.MeshPhongMaterial({
       color: color,
