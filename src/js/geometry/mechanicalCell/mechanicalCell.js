@@ -11,7 +11,7 @@ const Wall     = require('./wall');
 
 module.exports = (function() {
 
-  function Voxel(position, features, direction, stiffness = 0.01, onUpdate = function () {}) {
+  function MechanicalCell(position, features, direction, stiffness = 0.01, onUpdate = function () {}) {
     bind(this);
 
     this.position = position;
@@ -43,7 +43,7 @@ module.exports = (function() {
     this.buildGeometry();
     this.renderMesh();
   }
-  Voxel.featureVertices = {
+  MechanicalCell.featureVertices = {
     'box': {
       vertices: [0,1,2,3,4,5,6,7],
       elementClass: Solid
@@ -90,9 +90,9 @@ module.exports = (function() {
     }
   };
 
-  Voxel.prototype.buildGeometry = function() {
+  MechanicalCell.prototype.buildGeometry = function() {
     var elements = [];
-    this.featureVertices = this.features.map((feature) => Voxel.featureVertices[feature]);
+    this.featureVertices = this.features.map((feature) => MechanicalCell.featureVertices[feature]);
     this.featureVertices.forEach((feature) => {
         const vertices = feature.vertices.map((index) => this.vertices[index]);    
         elements.push(new feature.elementClass(this, vertices));
@@ -110,7 +110,7 @@ module.exports = (function() {
     }, new THREE.Geometry());
   };
 
-  Voxel.prototype.renderMesh = function() {
+  MechanicalCell.prototype.renderMesh = function() {
     switch(this.direction) {
       case 0: break;
       case 1: this.renderGeometry.rotateZ(Math.PI/2); break;
@@ -126,17 +126,17 @@ module.exports = (function() {
     this.mesh = new THREE.Mesh(this.renderGeometry, material);
   }
 
-  Voxel.prototype.setStiffness = function(stiffness) {
+  MechanicalCell.prototype.setStiffness = function(stiffness) {
     this.stiffness = stiffness;
     this.onUpdate();
   };
 
-  Voxel.prototype.setColor = function(color) {
+  MechanicalCell.prototype.setColor = function(color) {
     this.color = color;
     this.onUpdate();
   };
 
-  Voxel.featureStore = {
+  MechanicalCell.featureStore = {
     '0:left-edge': Wall.left,
     '0:top-edge': Wall.top,
     '0:right-edge': Wall.right,
@@ -171,95 +171,21 @@ module.exports = (function() {
     '2:bottom-right-triangle': Triangle.bottomRightZ
   };
 
-  Voxel.prototype.usedVertices = function() {
+  MechanicalCell.prototype.usedVertices = function() {
     return _.values(this.elements).map(function(element) {
       return element.vertices;
     });
   };
 
-  Voxel.prototype.edges = function() {
+  MechanicalCell.prototype.edges = function() {
     return this.elements.map(function(element) {
       return element.edges();
     });
   };
 
   const cubeCornerBeams = [[6,1],[7,0],[4,3],[5,2]]; // beams that creat diagnal accross the cube
-  Voxel.prototype.isSolid = function() {
-    if(this.featureDirection == -1){
-      return true;
-    } else{
-      var wallCount = 0;
-      var isTriangle = false;
-      var tooManyWalls = false;
 
-      var cornerBeams = [];
-      var walls = [];
-
-      this.featureVertices.map(function(verticesList){
-        if (verticesList.length == 6){
-          isTriangle = true;
-        } else if(verticesList.length == 4){
-          wallCount+=1;
-          walls.concat(verticesList);
-          if (wallCount > 4){
-            tooManyWalls = true;
-          }
-        } else if(verticesList.length == 2){
-          cubeCornerBeams.map(function(beam){
-            if(_.union(beam,verticesList).length == 2){
-              cornerBeams.push(verticesList);
-            }
-          });
-        }
-      });
-      if (isTriangle || tooManyWalls){
-        return true;
-      } else{
-        // if no trianlges:
-
-        if (cornerBeams.length > 0){
-          // look for opposite sides with 8+ vertice connections
-          if (wallCount > 2){
-            return true;
-          } if (wallCount == 2){
-            if (_.union(walls[0],walls[1]) == 0){ // walls are on opposite sides
-              return true;
-            }
-          } if (wallCount == 1){
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  };
-
-  Voxel.prototype.enhanceEdges = function() {
-    if (this.features.length == 1 && this.featureDirection == 1) {
-      const left = this.voxelGrid.voxelAtPosition(this.position.clone().add(new THREE.Vector3(-1.0, 0.0, 0.0)));
-      const top = this.voxelGrid.voxelAtPosition(this.position.clone().add(new THREE.Vector3(0.0, 0.0, -1.0)));
-      const right = this.voxelGrid.voxelAtPosition(this.position.clone().add(new THREE.Vector3(1.0, 0.0, 0.0)));
-      const bottom = this.voxelGrid.voxelAtPosition(this.position.clone().add(new THREE.Vector3(0.0, 0.0, 1.0)));
-
-      if (this.features[0] == 'neg-diagonal') {
-        if (left && left.isSolid() || top && top.isSolid()) {
-          this.addElement(Triangle.topLeftY);
-        }
-        if (right && right.isSolid() || bottom && bottom.isSolid()) {
-          this.addElement(Triangle.bottomRightY);
-        }
-      } else if (this.features[0] == 'pos-diagonal') {
-        if (right && right.isSolid() || top && top.isSolid()) {
-          this.addElement(Triangle.topRightY);
-        }
-        if (left && left.isSolid() || bottom && bottom.isSolid()) {
-          this.addElement(Triangle.bottomLeftY);
-        }
-      }
-    }
-  };
-
-  Voxel.prototype.positionAsString = function(color) {
+  MechanicalCell.prototype.positionAsString = function(color) {
     return this.position.x+","+this.position.y+","+this.position.z
   };
 
@@ -267,7 +193,7 @@ module.exports = (function() {
                                 [[2,3,6,7],[0,1,4,5]],
                                 [[0,1,2,3],[4,5,6,7]]];
 
-  Voxel.prototype.get2dFeaturesInDirection = function (direction, normalized) {
+  MechanicalCell.prototype.get2dFeaturesInDirection = function (direction, normalized) {
     var twoDFeatures = [];
     const _this = this;
 
@@ -314,11 +240,11 @@ module.exports = (function() {
     1:[0,1,0,1,3,2,3,2],
     2:[3,2,0,1,3,2,0,1]
   }
-  Voxel.prototype.normalize2dFeatureInDirection = function (direction, twoDFeature) {
+  MechanicalCell.prototype.normalize2dFeatureInDirection = function (direction, twoDFeature) {
     return twoDFeature.map((value) => normalize2dFeatureInDirectionMap[direction][value]);
   };
 
-  Voxel.prototype.getNormalizedPairs = function (normalizedFeatureArray) {
+  MechanicalCell.prototype.getNormalizedPairs = function (normalizedFeatureArray) {
     var returnArray = [];
     for (var i = 0; i < normalizedFeatureArray.length; i++){
       for (var j = 0; j < normalizedFeatureArray.length; j++){
@@ -343,11 +269,11 @@ module.exports = (function() {
     [0,2]
   ];
 
-  Voxel.prototype.getFeatureWallAsPair = function (wallValue) {
+  MechanicalCell.prototype.getFeatureWallAsPair = function (wallValue) {
     return featuresAsLines[wallValue];
   };
 
-  Voxel.prototype.getLineValue = function (normalizedFeature) {
+  MechanicalCell.prototype.getLineValue = function (normalizedFeature) {
     if (normalizedFeature.length == 2){
       for (var i = 1; i <= 6; i++){
         if (_.union(featuresAsLines[i],normalizedFeature).length == 2){
@@ -361,7 +287,7 @@ module.exports = (function() {
     }
   };
 
-  Voxel.prototype.getFeaturePairsAsLines = function (featurePairs) {
+  MechanicalCell.prototype.getFeaturePairsAsLines = function (featurePairs) {
     var featurePairsAsLines = {'right':[],"accute":[]};
     const _this = this
     featurePairs.map(function(featuresArray){
@@ -379,7 +305,7 @@ module.exports = (function() {
     return featurePairsAsLines;
   };
 
-  Voxel.prototype.getNeighborPositionOnAxisInDirection = function (axis, wallDirection) {
+  MechanicalCell.prototype.getNeighborPositionOnAxisInDirection = function (axis, wallDirection) {
     if (axis == 0){
       switch (wallDirection){
         case 1:
@@ -416,7 +342,7 @@ module.exports = (function() {
     }
   };
 
-  Voxel.prototype.getNeighborPositionOnAxisFromCorner = function (axis, corner) {
+  MechanicalCell.prototype.getNeighborPositionOnAxisFromCorner = function (axis, corner) {
     if (axis == 0){
       switch (corner){
         case 0:
@@ -453,27 +379,27 @@ module.exports = (function() {
     }
   };
 
-  Voxel.prototype.lineAsFeature = function (featureLine) {
+  MechanicalCell.prototype.lineAsFeature = function (featureLine) {
     return featuresAsLines[featureLine];
   };
 
-  Voxel.prototype.coordinatesToString = function (position) {
+  MechanicalCell.prototype.coordinatesToString = function (position) {
     return position.x+","+position.y+","+position.z;
   };
 
-  Voxel.prototype.markBad = function () {
+  MechanicalCell.prototype.markBad = function () {
     this.setColor(new THREE.Color(1, 0.75, 0.55));
-    // this.buffer.setVoxelColor(this.position, this.color);
+    // this.buffer.setMechanicalCellColor(this.position, this.color);
   };
 
-  Voxel.prototype.wallDirectionToValue = 
-  Voxel.prototype.getWallValue = function (wallDirection) {
+  MechanicalCell.prototype.wallDirectionToValue = 
+  MechanicalCell.prototype.getWallValue = function (wallDirection) {
     return [undefined, 1, 1, -1, -1, -1, 1][wallDirection];
   };
 
-  Voxel.prototype.getOppositeWall = function (wall) {
+  MechanicalCell.prototype.getOppositeWall = function (wall) {
     return [-2,3,4,1][wall];
   };
-  return Voxel;
+  return MechanicalCell;
 
 })();

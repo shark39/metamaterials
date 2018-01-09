@@ -3,13 +3,13 @@
 const THREE        = require('three');
 
 const bind         = require('../../misc/bind');
-const VoxelElement = require('./voxel_element');
+const Feature = require('./feature');
 
 module.exports = (function() {
 
   function Wall(voxel, vertices) {
     bind(this);
-    VoxelElement.call(this, voxel, vertices);
+    Feature.call(this, voxel, vertices);
   }
 
   Wall.front  = { element: Wall, vertices: [ 5, 1, 7, 3 ], id: 'wf' };
@@ -26,7 +26,7 @@ module.exports = (function() {
   Wall.posDiagonalZ = { element: Wall, vertices: [ 6, 2, 5, 1 ], id: 'dz+' };
   Wall.negDiagonalZ = { element: Wall, vertices: [ 4, 0, 7, 3 ], id: 'dz-' };
 
-  Wall.prototype = Object.create(VoxelElement.prototype);
+  Wall.prototype = Object.create(Feature.prototype);
 
   Wall.prototype.positionMatrix = function(thickness) {
     this.thickness = thickness || 0;

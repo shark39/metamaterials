@@ -9,8 +9,8 @@ const THREE = require('three');
 
 module.exports = (function() {
 
-  function VoxelElement(voxel, vertices) {
-    this.voxel = voxel;
+  function Feature(mechanicalCell, vertices) {
+    this.mechanicalCell = mechanicalCell;
     this.vertices = vertices;
     this.stiffnessFactor = 2; // stiffness ratio between members (thick part of beam) and hinges (thin part)
 
@@ -23,12 +23,12 @@ module.exports = (function() {
     this.updateThickness();
   }
 
-  VoxelElement.prototype.updateRenderGeometry = function() {
+  Feature.prototype.updateRenderGeometry = function() {
     this.renderGeometry = this.transformRenderGeometry(this.buildRenderGeometry());
   }
 
-  VoxelElement.prototype.updateThickness = function() {
-    const color = this.voxel.color.clone().addScalar(this.voxel.position.y / 20.0);
+  Feature.prototype.updateThickness = function() {
+    const color = this.mechanicalCell.color.clone().addScalar(this.mechanicalCell.position.y / 20.0);
     const zFightingOffset = color.r * 0.00001 + color.g * 0.00002 + color.b * 0.00003;
 
     const cellSize = Globals.cellSize.getValue();
@@ -37,17 +37,17 @@ module.exports = (function() {
     const minThickness = Globals.minThickness.getValue() / cellSize * this.stiffnessFactor;
 
     //FIXME doesn't represent stiffness, because stiffness increases to the power of 4 with thickness
-    this.thickness = (maxThickness-minThickness) * this.voxel.stiffness + minThickness + zFightingOffset;
+    this.thickness = (maxThickness-minThickness) * this.mechanicalCell.stiffness + minThickness + zFightingOffset;
 
     this.updateRenderGeometry();
   }
 
-  VoxelElement.prototype.buildRenderGeometry = function() {
+  Feature.prototype.buildRenderGeometry = function() {
     return [new THREE.BoxGeometry(1.0, 1.0, 1.0)];
   }
 
-  VoxelElement.prototype.transformRenderGeometry = function(renderGeometry) {
-    const color = this.voxel.color.clone().addScalar(this.voxel.position.y / 20.0);
+  Feature.prototype.transformRenderGeometry = function(renderGeometry) {
+    const color = this.mechanicalCell.color.clone().addScalar(this.mechanicalCell.position.y / 20.0);
 
     _.forEach(renderGeometry, function(geometry) {
       geometry.applyMatrix(this.positionMatrix(this.thickness));
@@ -56,7 +56,7 @@ module.exports = (function() {
     return renderGeometry;
   }
 
-  VoxelElement.prototype.buildSimulationGeometry = function() {
+  Feature.prototype.buildSimulationGeometry = function() {
     const position = this.positionMatrix().applyToBufferAttribute([
       -0.5, -0.5, -0.5,
        0.5, -0.5, -0.5,
@@ -85,18 +85,18 @@ module.exports = (function() {
     };
   }
 
-  VoxelElement.prototype.edges = function() {
+  Feature.prototype.edges = function() {
     return this.localEdges().map(function(edge) {
       return {
         vertices: [
           this.vertices[edge[0]],
           this.vertices[edge[1]]
         ],
-        stiffness: this.voxel.stiffness
+        stiffness: this.mechanicalCell.stiffness
       };
     }.bind(this));
   }
 
-  return VoxelElement;
+  return Feature;
 
 })();

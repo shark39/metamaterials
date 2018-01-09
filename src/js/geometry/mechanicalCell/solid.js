@@ -1,19 +1,17 @@
 'use strict';
 
-const THREE        = require('three');
-
-const bind         = require('../../misc/bind');
-const VoxelElement = require('./voxel_element');
+const THREE     = require('three');
+const bind      = require('../../misc/bind');
+const Feature   = require('./feature');
 
 module.exports = (function() {
 
   function Solid(voxel, vertices) {
     bind(this);
-    VoxelElement.call(this, voxel, vertices);
+    Feature.call(this, voxel, vertices);
   }
 
-
-  Solid.prototype = Object.create(VoxelElement.prototype);
+  Solid.prototype = Object.create(Feature.prototype);
 
   Solid.prototype.positionMatrix = function(thickness) {
     thickness = thickness || 0;

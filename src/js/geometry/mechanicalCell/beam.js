@@ -3,13 +3,13 @@
 const THREE        = require('three');
 
 const bind         = require('../../misc/bind');
-const VoxelElement = require('./voxel_element');
+const Feature = require('./feature');
 
 module.exports = (function() {
 
   function Beam(voxel, vertices) {
     bind(this);
-    VoxelElement.call(this, voxel, vertices);
+    Feature.call(this, voxel, vertices);
   }
 
   Beam.frontTop    = { element: Beam, vertices: [ 7, 3 ], id: 'bft' };
@@ -27,7 +27,7 @@ module.exports = (function() {
   Beam.bottomLeft  = { element: Beam, vertices: [ 4, 5 ], id: 'bbl' };
   Beam.bottomRight = { element: Beam, vertices: [ 0, 1 ], id: 'bbr' };
 
-  Beam.prototype = Object.create(VoxelElement.prototype);
+  Beam.prototype = Object.create(Feature.prototype);
 
   Beam.prototype.positionMatrix = function(thickness) {
     thickness = thickness || 0;

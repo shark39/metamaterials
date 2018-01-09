@@ -303,10 +303,6 @@ module.exports = (function() {
           }
     }
 
-    updatedVoxels.forEach(function(voxel) {
-      voxel.enhanceEdges();
-    });
-
     this.voxelGrid.update();
     this.setCuboidMode(this.cuboidMode, this.rotatedMode);
     this.processSingle();
