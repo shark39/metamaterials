@@ -64,11 +64,11 @@ module.exports = (function() {
       vertices: [1,3,0,2],
       elementClass: Wall
       },
-    'pos-diagonal': {
+    'neg-diagonal': {
       vertices: [1,7,0,6],
       elementClass: Wall
       },
-    'neg-diagonal': {
+    'pos-diagonal': {
       vertices: [5,3,4,2],
       elementClass: Wall
       },
