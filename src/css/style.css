@@ -275,7 +275,7 @@ body {
   }
 
 #canvas-container {
-  width: 200px;
+  width: 280px;
   height: 200px;
   overflow: hidden;
   background-color: aqua;
@@ -286,6 +286,6 @@ body {
   width: auto;
   height: auto;
   padding: 0.5em;
-  background-color: darkslateblue;
+  background-color: white;
   z-index: 1;
 }
