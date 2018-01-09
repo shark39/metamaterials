@@ -15,6 +15,7 @@ const VoxelSmoothingTool = require('./tools/voxel_smoothing_tool');
 const AnchorTool         = require('./tools/anchor_tool');
 const ForceTool          = require('./tools/force_tool');
 const TextureEditor      = require('./tools/texture_editor');
+const Globals            = require('./global');
 
 module.exports = (function() {
 
@@ -25,10 +26,10 @@ module.exports = (function() {
     this.voxelGrid = voxelGrid;
     this.simulation = simulation;
 
-    this.cellSize = 5.0;
-    this.minThickness = 0.4;
-
     this.pressedKeys = {};
+
+    $('#import-cellsize').val(Globals.cellSize.getValue());
+    $('#import-thickness').val(Globals.minThickness.getValue());
 
     $('#voxel-import-btn').click(this.import);
     $('#voxel-export-btn').click(this.export);
@@ -149,7 +150,7 @@ module.exports = (function() {
       if (file) {
         var reader = new FileReader();
         reader.onload = function() {
-          this.voxelGrid.import(reader.result, this.cellSize);
+          this.voxelGrid.import(reader.result);
         }.bind(this);
         reader.readAsArrayBuffer(file);
       }
@@ -206,8 +207,8 @@ module.exports = (function() {
   }
 
   Controls.prototype.parseGridSettings = function() {
-    this.voxelGrid.cellSize = this.cellSize = parseFloat($('#import-cellsize').val());
-    this.voxelGrid.minThickness = this.minThickness = parseFloat($('#import-thickness').val());
+    Globals.cellSize.setValue(parseFloat($('#import-cellsize').val()));
+    Globals.minThickness.setValue(parseFloat($('#import-thickness').val()));
   };
 
   return Controls;

@@ -3,13 +3,13 @@
 const THREE        = require('three');
 
 const bind         = require('../../misc/bind');
-const VoxelElement = require('../voxel_element');
+const VoxelElement = require('./voxel_element');
 
 module.exports = (function() {
 
-  function Beam(vertices, buffer) {
+  function Beam(voxel, vertices) {
     bind(this);
-    VoxelElement.call(this, vertices, buffer);
+    VoxelElement.call(this, voxel, vertices);
   }
 
   Beam.frontTop    = { element: Beam, vertices: [ 7, 3 ], id: 'bft' };
@@ -53,8 +53,8 @@ module.exports = (function() {
   Beam.prototype.buildRenderGeometry = function() {
     this.thickness = this.thickness/this.stiffnessFactor; //set to half so scaling of length works out nicely
 
-    var beam = new THREE.BoxBufferGeometry(1.0, 1.0, 1.0); 
-    var member = new THREE.BoxBufferGeometry(2.0, 2.0, 0.35);
+    var beam = new THREE.BoxGeometry(1.0, 1.0, 1.0); 
+    var member = new THREE.BoxGeometry(2.0, 2.0, 0.35);
 
     return [beam, member];
 }

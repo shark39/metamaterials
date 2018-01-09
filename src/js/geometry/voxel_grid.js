@@ -30,6 +30,7 @@ module.exports = (function() {
 
     this.anchorParent = new THREE.Object3D();
     this.anchorParent.visible = false;
+
     this.scene.add(this.anchorParent);
 
     this.reset();
@@ -105,7 +106,7 @@ module.exports = (function() {
   };
 
   VoxelGrid.prototype.addTexture = function(geometry) {
-    THREE.GeometryUtils.merge(this.textureGeometry, geometry);
+    this.textureGeometry.merge(geometry);
     //mark voxel in voxelgrid as full
   }
 
@@ -164,7 +165,6 @@ module.exports = (function() {
 
   }
 
-
   VoxelGrid.prototype.update = function() {
     this.buffer.update();
   };
@@ -203,14 +203,16 @@ module.exports = (function() {
     this.voxelsHaveChanged = true;
     this.addIntersectionVoxel(position);
 
-    return this.voxels[position.toArray()] = new Voxel(position, this, this.buffer, features, direction, stiffness);
+    const voxel = new Voxel(position, features, direction, stiffness);
+    this.scene.add(voxel.mesh);
+    return this.voxels[position.toArray()] = voxel;
   };
 
   VoxelGrid.prototype.removeVoxel = function(position) {
     if (this.voxels[position.toArray()]) {
       this.voxelsHaveChanged = true;
       this.removeIntersectionVoxel(position);
-      this.voxels[position.toArray()].remove();
+      this.scene.remove(this.voxels[position.toArray()].mesh);
       delete this.voxels[position.toArray()];
     }
   };

@@ -3,16 +3,15 @@
 const THREE        = require('three');
 
 const bind         = require('../../misc/bind');
-const VoxelElement = require('../voxel_element');
+const VoxelElement = require('./voxel_element');
 
 module.exports = (function() {
 
-  function Solid(vertices, buffer) {
+  function Solid(voxel, vertices) {
     bind(this);
-    VoxelElement.call(this, vertices, buffer);
+    VoxelElement.call(this, voxel, vertices);
   }
 
-  Solid.solid = { element: Solid, vertices: [ 0, 1, 2, 3, 4, 5, 6, 7 ], id: 's' };
 
   Solid.prototype = Object.create(VoxelElement.prototype);
 

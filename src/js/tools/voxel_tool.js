@@ -356,8 +356,6 @@ module.exports = (function() {
   }
 
   VoxelTool.prototype.updateSingleVoxelTexture = function(position, offset) {
-    console.log("[in progress] update with texture");
-
     var color = new THREE.Color(0, 0, 0 );
     var l = 1 - 0.8*this.stiffness+0.1; // from 0.1 to 0.9
     color.setHSL(0, 1, l);
@@ -387,10 +385,8 @@ module.exports = (function() {
       //translate to correct position //center of the voxel
       //-0.5 to align in 2 voxels
       textureGeometry.computeBoundingBox();
-      console.log("Bounding Box", textureGeometry.boundingBox);
       textureGeometry.translate(position.x - 0.5, position.y, position.z);
       textureGeometry.computeBoundingBox();
-      console.log("Bounding Box (fit in grid)", textureGeometry.boundingBox);
     }
     // add to scene (not so good), better: merge to render geometry
     this.voxelGrid.addTexture(textureGeometry); //save it to a BufferGeometry

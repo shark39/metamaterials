@@ -55,9 +55,9 @@ module.exports = (function() {
       indexCount += geometry.index.count;
     });
 
-    renderGeometry.setIndex(new THREE.Uint32Attribute(new Uint32Array(indexCount), 1));
-    renderGeometry.addAttribute('position', new THREE.Float32Attribute(new Float32Array(vertexCount * 3), 3));
-    renderGeometry.addAttribute('voxel', new THREE.Float32Attribute(new Float32Array(vertexCount * 3), 3));
+    renderGeometry.setIndex(new THREE.Uint32BufferAttribute(new Uint32Array(indexCount), 1));
+    renderGeometry.addAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(vertexCount * 3), 3));
+    renderGeometry.addAttribute('voxel', new THREE.Float32BufferAttribute(new Float32Array(vertexCount * 3), 3));
 
     vertexCount = 0;
     indexCount = 0;
@@ -123,10 +123,10 @@ module.exports = (function() {
     const indexBufferSize = this.elementCapacity * 36;
 
     const geometry = new THREE.BufferGeometry();
-    geometry.setIndex(new THREE.Uint32Attribute(new Uint32Array(indexBufferSize), 1));
-    geometry.addAttribute('position', new THREE.Float32Attribute(new Float32Array(attributeBufferSize * 3), 3));
-    geometry.addAttribute('offset', new THREE.Float32Attribute(new Float32Array(attributeBufferSize * 3), 3));
-    geometry.addAttribute('voxel', new THREE.Float32Attribute(new Float32Array(attributeBufferSize * 3), 3));
+    geometry.setIndex(new THREE.Uint32BufferAttribute(new Uint32Array(indexBufferSize), 1));
+    geometry.addAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(attributeBufferSize * 3), 3));
+    geometry.addAttribute('offset', new THREE.Float32BufferAttribute(new Float32Array(attributeBufferSize * 3), 3));
+    geometry.addAttribute('voxel', new THREE.Float32BufferAttribute(new Float32Array(attributeBufferSize * 3), 3));
 
     const elementIndex = [
       4, 7, 6,  7, 4, 5, // front

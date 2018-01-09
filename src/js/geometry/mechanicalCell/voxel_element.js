@@ -2,6 +2,7 @@
 
 const _     = require('lodash');
 const $     = require('jquery');
+const Globals = require('../../global');
 
 const THREE = require('three');
 //const jscad = require('jscad');
@@ -17,31 +18,32 @@ module.exports = (function() {
       return sum.add(vertex);
     }, new THREE.Vector3()).divideScalar(this.vertices.length);
 
+    Globals.cellSize.registerListener(this.updateThickness);
+    Globals.minThickness.registerListener(this.updateThickness);
     this.updateThickness();
+  }
 
-    this.renderGeometry = this.buildRenderGeometry();
-    this.transformRenderGeometry(this.renderGeometry);
+  VoxelElement.prototype.updateRenderGeometry = function() {
+    this.renderGeometry = this.transformRenderGeometry(this.buildRenderGeometry());
   }
 
   VoxelElement.prototype.updateThickness = function() {
     const color = this.voxel.color.clone().addScalar(this.voxel.position.y / 20.0);
     const zFightingOffset = color.r * 0.00001 + color.g * 0.00002 + color.b * 0.00003;
 
-    const cellSize = this.voxel.voxelGrid.cellSize;
+    const cellSize = Globals.cellSize.getValue();
 
     const maxThickness = 1/2;
-    const minThickness = this.voxel.voxelGrid.minThickness / cellSize * this.stiffnessFactor;
+    const minThickness = Globals.minThickness.getValue() / cellSize * this.stiffnessFactor;
 
     //FIXME doesn't represent stiffness, because stiffness increases to the power of 4 with thickness
     this.thickness = (maxThickness-minThickness) * this.voxel.stiffness + minThickness + zFightingOffset;
-  }
 
-  VoxelElement.prototype.remove = function() {
-    this.voxel.buffer.removeElement(this.bufferIndex, this.renderGeometry);
+    this.updateRenderGeometry();
   }
 
   VoxelElement.prototype.buildRenderGeometry = function() {
-    return [new THREE.BoxBufferGeometry(1.0, 1.0, 1.0)];
+    return [new THREE.BoxGeometry(1.0, 1.0, 1.0)];
   }
 
   VoxelElement.prototype.transformRenderGeometry = function(renderGeometry) {
@@ -51,8 +53,7 @@ module.exports = (function() {
       geometry.applyMatrix(this.positionMatrix(this.thickness));
       geometry.color = color;
     }.bind(this));
-
-    this.bufferIndex = this.buildSimulationGeometry();
+    return renderGeometry;
   }
 
   VoxelElement.prototype.buildSimulationGeometry = function() {
@@ -78,21 +79,10 @@ module.exports = (function() {
        1.0,  1.0,  1.0
     ]);
 
-    const voxel = [
-
-    ]
-
-    return this.voxel.buffer.addElement(this.voxel.color, {
-      position: position,
-      offset: offset
-    }, this.renderGeometry);
-  }
-
-VoxelElement.prototype.updateRenderGeometry = function() {
-    const newRenderGeometry = this.buildRenderGeometry();
-    this.transformRenderGeometry(newRenderGeometry);
-    this.voxel.buffer.updateRenderGeometry(this.renderGeometry, newRenderGeometry);
-    this.renderGeometry = newRenderGeometry;
+    return {
+      position: [],
+      offset: []
+    };
   }
 
   VoxelElement.prototype.edges = function() {

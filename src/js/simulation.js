@@ -113,7 +113,7 @@ module.exports = (function() {
 
   Simulation.prototype.onConnectFailed = function(error) {
     console.warn('Connecting websocket to simulation failed. Retrying...' + error);
-    setTimeout(this.connect, 5000);
+    //setTimeout(this.connect, 5000);
   }
 
   Simulation.prototype.onReceivedMessage = function(message) {

@@ -44,8 +44,8 @@ module.exports = (function() {
     const voxels = [];
 
     while ((voxel = this.voxelGrid.voxelAtPosition(position)) && (!this.mirror[direction] ||  mirrorFactor * position.getComponent(direction) > 0)) {
-      voxel.update(features, direction);
-      voxel.setStiffness(this.stiffness);
+      this.voxelGrid.removeVoxel(position);
+      const voxel = this.voxelGrid.addVoxel(position, features, this.extrusionNormal.largestComponent(), this.stiffness);
       voxels.push(voxel);
       position.sub(extrusionNormal);
     }

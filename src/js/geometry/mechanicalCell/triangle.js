@@ -4,13 +4,13 @@ const THREE        = require('three');
 const _            = require('lodash');
 
 const bind         = require('../../misc/bind');
-const VoxelElement = require('../voxel_element');
+const VoxelElement = require('./voxel_element');
 
 module.exports = (function() {
 
-  function Triangle(vertices, buffer) {
+  function Triangle(voxel, vertices) {
     bind(this);
-    VoxelElement.call(this, vertices, buffer);
+    VoxelElement.call(this, voxel, vertices);
   }
 
   // almost working.
