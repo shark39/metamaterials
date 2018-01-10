@@ -71,6 +71,7 @@ module.exports = (function() {
 
   TextureCanvasDrawer.prototype.addCell = function() {
 			this.dimensions.y += this.cellHeight;
+      this.cellCount++;
 
 			this.canvas.attr({height:this.dimensions.y});
 			this.middleLine.scaleY = this.dimensions.y/this.cellHeight;
@@ -182,6 +183,12 @@ module.exports = (function() {
       }
     }
 
+  }
+
+  TextureCanvasDrawer.prototype.getImage = function() {
+    var image = new Image();
+    image.src = this.canvas[0].toDataURL("image/png");
+    return image;
   }
 
   return TextureCanvasDrawer;

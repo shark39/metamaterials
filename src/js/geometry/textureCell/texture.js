@@ -375,7 +375,7 @@ module.exports = (function() {
       var negativBSP = new ThreeBSP(pathGeometry);
       var result = topPlaneBSP.subtract(negativBSP);
       topPlane = result.toMesh().geometry;
-      topPlane.translate(-this.width / 2, -this.surfaceHeight / 2, 0);
+      topPlane.translate(this.width / 2, -this.surfaceHeight / 2, 0);
       textureGeometry.merge(topPlane);
 
       //like for every cell:
@@ -383,6 +383,8 @@ module.exports = (function() {
       //textureGeometry.merge(fill);
       textureGeometry.merge(this._getWallGeometry('left'));
       textureGeometry.merge(this._getWallGeometry('right'));
+
+      textureGeometry.scale(1,1,canvasdrawer.cellCount);
 
       return textureGeometry;
     }

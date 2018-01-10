@@ -14,6 +14,21 @@ const patterns = ['regular', 'box', 'round', 'zigzag', 'diamond', 'spiky', 'cust
 
 module.exports = (function() {
 
+  function getButtonDom(image) {
+    return $('<div></div>')
+      //.attr({ id: brush.hash })
+      .addClass('voxel-btn voxel-cells-btn')
+      .append($('<div></div>')
+        .addClass('voxel-btn-img')
+        .css({
+          width: 60
+        })
+        .append($('<div></div>')
+          .addClass('voxel-btn-selection')
+        )
+        .append(image));
+  }
+
   function TextureEditor(tools) {
     bind(this);
     this.tools = tools;
@@ -24,38 +39,18 @@ module.exports = (function() {
     patterns.forEach(function(pattern) {
       //generate UI element
       var image = Texture2d.getImage(pattern);
-      var domElement = $('<div></div>')
-        //.attr({ id: brush.hash })
-        .addClass('voxel-btn voxel-cells-btn')
-        .append($('<div></div>')
-          .addClass('voxel-btn-img')
-          .css({
-            width: 60
-          })
-          .append($('<div></div>')
-            .addClass('voxel-btn-selection')
-          )
-          .append(image)
-        );
+      var domElement = getButtonDom(image);
+
       domElement.click(function() {
         self.activateBrush(pattern);
       });
-      //var div = document.createElement('div');
-      //div.className = "voxel-cells-btn voxel-btn-img";
-      //div.style.width = "50px";
-      //div.append(image);
+
       container.append(domElement);
       self.brushes[pattern] = {
         name: pattern,
         domElement: domElement,
         type: "texture"
       };
-
-      //var label = document.createElement('div');
-      //label.text = pattern;
-      //container.append(label);
-
-
     });
     $('#texture_rotate').click(function() {
       self.rotatation = this.checked;
@@ -81,8 +76,28 @@ module.exports = (function() {
     div.append(addcellDom);
     this.canvasdrawer = new TextureCanvasDrawer(canvas);
 
+    div.click(function(event) {
+      let image = self.canvasdrawer.getImage();
+      let cc = _.size(self.brushes) - patterns.length + 1;
+      let pattern = "custom" + cc;
+      var domElement = getButtonDom(image);
+
+      domElement.click(function() {
+        self.activateBrush(pattern);
+      });
+
+      container.append(domElement);
+      self.brushes[pattern] = {
+        name: pattern,
+        domElement: domElement,
+        type: "texture"
+      };
+
+      self.activateBrush(pattern);
+    });
+
     //this.canvasdrawer = new TextureCanvasDrawer($('#canvas-container'));
-    // onchange: update --> generate image, name, add to brushes and activateBrush
+    // onchange: update --> generate image, name, add to brushes, generate dom element and activateBrush
 
 
   }

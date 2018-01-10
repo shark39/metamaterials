@@ -246,9 +246,15 @@ module.exports = (function() {
       if (this.activeBrush.rotated) {
         this.cursor.position.z -= 0.5;
         this.cursor.scale.z *= 2;
+        if (this.activeBrush.name.startsWith("custom")) {
+          this.cursor.scale.x *= this.activeBrush.canvasdrawer.cellCount;
+        }
       } else {
         this.cursor.position.x -= 0.5;
         this.cursor.scale.x *= 2;
+        if (this.activeBrush.name.startsWith("custom")) {
+          this.cursor.scale.z *= this.activeBrush.canvasdrawer.cellCount;
+        }
       }
 
     }
@@ -328,7 +334,7 @@ module.exports = (function() {
     if (invalidPosition) {
       return [];
     }
-    
+
     if (this.activeBrush.type == "texture") {
       return this.updateSingleVoxelTexture(position, offset);
     }
@@ -349,7 +355,7 @@ module.exports = (function() {
 
       return this.updateVoxel(mirroredPosition, features[mirror], mirrorFactor);
     }.bind(this)));
-  
+
 
   }
 
@@ -363,7 +369,7 @@ module.exports = (function() {
     });
     var pattern = this.activeBrush.name;
     var texture = new Texture(pattern, this.stiffness);
-    if (pattern == "custom") {
+    if (pattern.startsWith("custom")) {
       var textureGeometry = texture.getCustomGeometry(this.activeBrush.canvasdrawer);
     } else if (pattern == "debug") {
         var textureGeometry = texture.getCustomGeometry(this.activeBrush.canvasdrawer, true);
