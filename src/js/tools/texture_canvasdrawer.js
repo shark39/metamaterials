@@ -12,14 +12,11 @@ const patterns = ['regular', 'box', 'round', 'zigzag', 'diamond', 'spiky'];
 
 module.exports = (function() {
 
-  function TextureCanvasDrawer(canvas, onChange) {
-
-    this.onChange = onChange;
+  function TextureCanvasDrawer(canvas) {
 
     this.canvas = canvas;
+    this.cellCount = 0;
 
-    var width = 400;
-    var height = 200;
     var line;
 
     this.stage = new createjs.Stage(this.canvas[0]);
@@ -32,6 +29,8 @@ module.exports = (function() {
       x: this.canvas.width(), //200
       y: this.canvas.height() //100
     };
+    this.cellHeight = this.dimensions.y;
+    this.cellWidth = this.dimensions.x;
 
     this.initCanvas();
 
@@ -42,6 +41,8 @@ module.exports = (function() {
 
     var width = this.dimensions.x;
     var height = this.dimensions.y;
+    this.cellCount++;
+
     //middle
     var middleLine = new createjs.Shape();
     this.stage.addChild(middleLine);
@@ -50,6 +51,7 @@ module.exports = (function() {
     middleLine.graphics.moveTo(width / 2, 0);
     middleLine.graphics.lineTo(width / 2, height);
     middleLine.graphics.endStroke();
+    this.middleLine = middleLine; //needed for addCell
 
     var line = new createjs.Shape();
     this.pathCommands.push(line.graphics.moveTo(width / 3, 0).command);
@@ -66,6 +68,24 @@ module.exports = (function() {
     this.stage.update();
 
   }
+
+  TextureCanvasDrawer.prototype.addCell = function() {
+			this.dimensions.y += this.cellHeight;
+
+			this.canvas.attr({height:this.dimensions.y});
+			this.middleLine.scaleY = this.dimensions.y/this.cellHeight;
+
+			//add a vertical line
+			var verticalLine = new createjs.Shape();
+			this.stage.addChild(verticalLine);
+			//middleLine.graphics.setStrokeDash([2,2]);
+			verticalLine.graphics.setStrokeStyle([2, 2]).beginStroke("rgba(0.5,0.5,0.5,0.1)");
+			verticalLine.graphics.moveTo(0, this.dimensions.y-this.cellHeight);
+			verticalLine.graphics.lineTo(this.dimensions.x, this.dimensions.y-this.cellHeight);
+			verticalLine.graphics.endStroke();
+
+			this.stage.update();
+		}
 
   TextureCanvasDrawer.prototype.drawPath = function() {
     var self = this;

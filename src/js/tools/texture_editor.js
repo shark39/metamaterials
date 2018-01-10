@@ -63,15 +63,22 @@ module.exports = (function() {
     });
 
     //
+    let div = $('<div></div>');
+    $('#canvas-container').append(div);
     let canvas = $('<canvas height=100 width=200 class="texture-canvas"></canvas>');
-    canvas.draggable({
+    div.draggable({
       disabled: false,
       //prevent dragging when clicked on line or dot
       drag: function(event, ui) {
         return !self.canvasdrawer.movingDot;
       }
     });
-    $('#canvas-container').append(canvas);
+    div.append(canvas);
+    let addcellDom = $('<div>+</div>');
+    addcellDom.click(function(event) {
+      self.canvasdrawer.addCell();
+    });
+    div.append(addcellDom);
     this.canvasdrawer = new TextureCanvasDrawer(canvas);
 
     //this.canvasdrawer = new TextureCanvasDrawer($('#canvas-container'));
