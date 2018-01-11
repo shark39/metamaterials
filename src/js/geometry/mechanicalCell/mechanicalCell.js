@@ -14,7 +14,7 @@ module.exports = (function() {
   function MechanicalCell(position, features, direction, stiffness = 0.01, onUpdate = function () {}) {
     bind(this);
 
-    this.position = position;
+    this.position = (new THREE.Vector3()).copy(position);
     this.onUpdate = onUpdate;
     this.stiffness = stiffness;
 
@@ -43,6 +43,11 @@ module.exports = (function() {
     this.buildGeometry();
     this.renderMesh();
   }
+
+  MechanicalCell.prototype.size = function () {
+    return [1,1,1]
+  }
+
   MechanicalCell.featureVertices = {
     'box': {
       vertices: [0,1,2,3,4,5,6,7],
@@ -117,7 +122,7 @@ module.exports = (function() {
       case 2: this.renderGeometry.rotateY(Math.PI/2); break;
     }
 
-    this.renderGeometry.translate(this.position.x, this.position.y, this.position.z);
+    //this.renderGeometry.translate(this.position.x, this.position.y, this.position.z);
 
     let material = new THREE.MeshPhongMaterial({
       color: this.color,

@@ -244,13 +244,13 @@ module.exports = (function() {
 
     if (this.activeBrush && this.activeBrush.type == 'texture') {
       if (this.activeBrush.rotated) {
-        this.cursor.position.z -= 0.5;
+        this.cursor.position.z += 0.5;
         this.cursor.scale.z *= 2;
         if (this.activeBrush.name.startsWith("custom")) {
           this.cursor.scale.x *= this.activeBrush.canvasdrawer.cellCount;
         }
       } else {
-        this.cursor.position.x -= 0.5;
+        this.cursor.position.x += 0.5;
         this.cursor.scale.x *= 2;
         if (this.activeBrush.name.startsWith("custom")) {
           this.cursor.scale.z *= this.activeBrush.canvasdrawer.cellCount;
@@ -315,90 +315,13 @@ module.exports = (function() {
   }
 
   VoxelTool.prototype.updateSingleVoxel = function(position, offset) {
-    var positions = [position.clone()];
-    var invalidPosition = false;
 
-    this.mirror.forEach(function(mirror, axis) {
-      if (!mirror) {
-        return [];
-      }
-
-      positions = positions.concat(positions.map(function(position) {
-        const mirroredPosition = position.clone();
-        invalidPosition = invalidPosition || mirroredPosition.getComponent(axis) < 0;
-        mirroredPosition.setComponent(axis, -mirroredPosition.getComponent(axis));
-        return mirroredPosition;
-      }));
-    });
-
-    if (invalidPosition) {
-      return [];
+    if(this.activeBrush.type == "texture") {
+      return this.updateVoxel(position);
     }
-
-    if (this.activeBrush.type == "texture") {
-      return this.updateSingleVoxelTexture(position, offset);
-    }
-
     const cellCoords = [offset.y % this.activeBrush.height, offset.x % this.activeBrush.width];
-    const features = this.activeBrush.cells[cellCoords].mirroredFeatures;
-
-    return _.flatten(positions.map(function(mirroredPosition) {
-      const mirrorFactor = mirroredPosition.getComponent(this.extrusionComponent) / position.getComponent(this.extrusionComponent);
-      var mirror = this.mirror.slice();
-      if (this.mirror[this.extrusionComponent]) {
-        mirror = [true, true, true];
-        mirror[this.extrusionComponent] = false;
-      }
-      mirror = mirror.map(function(cur, idx) {
-        return cur && mirroredPosition.getComponent(idx) != position.getComponent(idx);
-      });
-
-      return this.updateVoxel(mirroredPosition, features[mirror], mirrorFactor);
-    }.bind(this)));
-
-
-  }
-
-  VoxelTool.prototype.updateSingleVoxelTexture = function(position, offset) {
-    var color = new THREE.Color(0, 0, 0 );
-    var l = 1 - 0.8 * this.stiffness + 0.1; // from 0.1 to 0.9
-    color.setHSL(0, 1, l);
-    var material = new THREE.MeshPhongMaterial({
-      color: color,
-      flatShading: false
-    });
-    var pattern = this.activeBrush.name;
-    var texture = new Texture(pattern, this.stiffness);
-    if (pattern.startsWith("custom")) {
-      var textureGeometry = texture.getCustomGeometry(this.activeBrush.canvasdrawer);
-    } else if (pattern == "debug") {
-        var textureGeometry = texture.getCustomGeometry(this.activeBrush.canvasdrawer, true);
-    } else {
-      var textureGeometry = texture.getGeometry();
-    }
-
-    //remove voxel
-    try {
-      this.voxelGrid.removeVoxel(position);
-    } catch (err) {}
-    textureGeometry.center();
-    if (this.activeBrush.rotated) { //rotation is taken from active brush attribute
-      textureGeometry.rotateY(Math.PI / 2);
-      textureGeometry.translate(position.x, position.y, position.z - 0.5);
-    } else {
-      //translate to correct position //center of the voxel
-      //-0.5 to align in 2 voxels
-      textureGeometry.computeBoundingBox();
-      textureGeometry.translate(position.x - 0.5, position.y, position.z);
-      textureGeometry.computeBoundingBox();
-    }
-    // add to scene (not so good), better: merge to render geometry
-    this.voxelGrid.addTexture(textureGeometry); //save it to a BufferGeometry
-    var object = new THREE.Mesh(textureGeometry, material);
-    object.name = 'texture';
-    this.renderer.scene.add(object);
-    return []; //these are updated voxels haha
-    //
+    const features = this.activeBrush.cells[cellCoords].features;
+    return this.updateVoxel(position, features);
   }
 
   VoxelTool.prototype.__defineGetter__('activeBrush', function() {

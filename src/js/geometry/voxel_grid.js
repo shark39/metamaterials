@@ -20,7 +20,7 @@ module.exports = (function() {
     this.size = size;
     this.settings = settings;
 
-    this.buffer = new GeometryBuffer(scene, this.size, 100000);
+    //this.buffer = new GeometryBuffer(scene, this.size, 100000);
 
     this.textureGeometry = new THREE.Geometry();
 
@@ -37,7 +37,7 @@ module.exports = (function() {
   }
 
   VoxelGrid.prototype.reset = function() {
-    this.buffer.reset();
+    //this.buffer.reset();
 
     this.voxels = {};
     this.badVoxels = {};
@@ -166,7 +166,7 @@ module.exports = (function() {
   }
 
   VoxelGrid.prototype.update = function() {
-    this.buffer.update();
+    //this.buffer.update();
   };
 
   VoxelGrid.prototype.updateGridSettings = function(newThickness, newCellSize) {
@@ -198,23 +198,49 @@ module.exports = (function() {
     return plane;
   };
 
-  VoxelGrid.prototype.addVoxel = function(position, features, direction, stiffness) {
-    this.removeVoxel(position);
-    this.voxelsHaveChanged = true;
-    this.addIntersectionVoxel(position);
-
-    const voxel = new Voxel(position, features, direction, stiffness);
-    this.scene.add(voxel.mesh);
-    return this.voxels[position.toArray()] = voxel;
+  VoxelGrid.prototype.addVoxel = function(voxel, position) {
+    var size = voxel.size();
+    var origin = voxel.position;
+    for(var x = 0; x < size[0]; x++) 
+      for(var y = 0; y < size[1]; y++)
+        for(var z = 0; z < size[2]; z++){
+          let pos = [origin.x + x, origin.y + y, origin.z + z];
+          this.removeVoxel(pos, voxel);
+    }
+    for(var x = 0; x < size[0]; x++) 
+      for(var y = 0; y < size[1]; y++)
+        for(var z = 0; z < size[2]; z++){
+          let pos = [origin.x + x, origin.y + y, origin.z + z];
+          this.addIntersectionVoxel(pos);
+          this.voxels[pos] = voxel;
+    }         
+    const mesh = voxel.mesh;
+    mesh.position.copy(position);
+    this.scene.add(mesh);
+    return voxel;
   };
 
-  VoxelGrid.prototype.removeVoxel = function(position) {
-    if (this.voxels[position.toArray()]) {
-      this.voxelsHaveChanged = true;
-      this.removeIntersectionVoxel(position);
-      this.scene.remove(this.voxels[position.toArray()].mesh);
-      delete this.voxels[position.toArray()];
-    }
+  VoxelGrid.prototype.removeVoxel = function(position, exclude) {
+    position = position instanceof Array ? position : position.toArray();
+    var voxel = this.voxels[position];
+    if(!voxel || voxel == exclude) return;
+
+    var origin = voxel.position;
+     this.voxelsHaveChanged = true;
+
+    var size = voxel.size();
+    for(var x = 0; x < size[0]; x++) 
+      for(var y = 0; y < size[1]; y++)
+        for(var z = 0; z < size[2]; z++){
+          let pos = [origin.x + x, origin.y + y, origin.z + z];
+          if(!this.voxels[pos]) return;
+          this.removeIntersectionVoxel(pos);
+          if(!this.voxels[pos].meshRemoved){
+            this.scene.remove(this.voxels[pos].mesh);
+            this.voxels[pos].meshRemoved = true;
+          }
+          delete this.voxels[pos];
+        }
   };
 
   VoxelGrid.prototype.voxelAtPosition = function(position) {
@@ -223,13 +249,13 @@ module.exports = (function() {
 
   VoxelGrid.prototype.addIntersectionVoxel = function(position) {
     const voxel = new THREE.Mesh(this.intersectionVoxelGeometry);
-    voxel.position.copy(position);
+    voxel.position.copy(new THREE.Vector3().fromArray(position));
     voxel.updateMatrixWorld(true);
-    this.intersectionVoxels[position.toArray()] = voxel;
+    this.intersectionVoxels[position] = voxel;
   };
 
   VoxelGrid.prototype.removeIntersectionVoxel = function(position) {
-    delete this.intersectionVoxels[position.toArray()];
+    delete this.intersectionVoxels[position];
   };
 
   VoxelGrid.prototype.addAnchor = function(position) {

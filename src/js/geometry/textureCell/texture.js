@@ -25,11 +25,12 @@ const PrismGeometry = require('./prism.js');
 
 module.exports = (function() {
 
-  function Texture(type, stiffness, options) {
+  function Texture(position, type, stiffness, options) {
     /* type is reguar, spiky, box, round, zickzag, custom
     /*options contains parameters like length, hingeThickness ...*/
     this.type = type;
     this.stiffness = stiffness;
+    this.position = (new THREE.Vector3()).copy(position);
     bind(this);
     options = {memberHeight: 0.33, wallWidth: 0.2, middleConnectorWidth: 0.2};
     options = options != undefined ? options : {};
@@ -58,6 +59,23 @@ module.exports = (function() {
     left wall starts at x=0, right wall ends at x=this.width=2
     top starts at y=0, bottom ends at y=-1
     */
+    this.mesh = this.getMesh();
+  }
+
+  Texture.prototype.size = function () {
+    return [2,1,1]
+  }
+
+  Texture.prototype.getMesh = function () {
+    var color = new THREE.Color(0, 0, 0 );
+    var l = 1 - 0.8 * this.stiffness + 0.1; // from 0.1 to 0.9
+    color.setHSL(0, 1, l);
+    var material = new THREE.MeshPhongMaterial({
+      color: color,
+      flatShading: false
+    });
+    var textureGeometry = this.getGeometry();
+    return new THREE.Mesh(textureGeometry, material);
   }
 
   //different geometry types:
@@ -75,6 +93,7 @@ module.exports = (function() {
     geo.merge(fill);
     geo.merge(this._getWallGeometry('left'));
     geo.merge(this._getWallGeometry('right'));
+    geo.translate(-0.5, 0.5, 0);
     return geo;
   }
 

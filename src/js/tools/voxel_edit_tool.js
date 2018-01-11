@@ -2,6 +2,8 @@
 
 const bind  = require('../misc/bind');
 const VoxelTool  = require('./voxel_tool');
+const MechanicalCell = require('../geometry/mechanicalCell/mechanicalCell');
+const TextureCell = require('../geometry/textureCell/texture');
 
 const THREE = require('three');
 
@@ -44,8 +46,15 @@ module.exports = (function() {
     const voxels = [];
 
     while ((voxel = this.voxelGrid.voxelAtPosition(position)) && (!this.mirror[direction] ||  mirrorFactor * position.getComponent(direction) > 0)) {
-      this.voxelGrid.removeVoxel(position);
-      const voxel = this.voxelGrid.addVoxel(position, features, this.extrusionNormal.largestComponent(), this.stiffness);
+      var voxel;
+      switch (this.activeBrush.type) {
+        case "texture": 
+          voxel = new TextureCell(position, this.activeBrush.name, this.stiffness);
+          break;
+        default:
+          voxel = new MechanicalCell(position, features, this.extrusionNormal.largestComponent(), this.stiffness);
+      }
+      this.voxelGrid.addVoxel(voxel, position);
       voxels.push(voxel);
       position.sub(extrusionNormal);
     }
