@@ -3,22 +3,20 @@
 const THREE        = require('three');
 
 const bind         = require('../../misc/bind');
-const Feature = require('./feature');
 
 module.exports = (function() {
 
-  function Wall(features, direction) {
+  function Wall(features, direction, thickness) {
     bind(this);
     this.features = features;
     this.direction = direction;
+    this.thickness = thickness;
     this.buildRenderGeometry();
   }
 
   Wall.prototype.buildRenderGeometry = function() {
 
-    this.thickness = this.thickness/this.stiffnessFactor; //set to half so scaling of length works out nicely
-
-    var thickness = 0.1;
+    var thickness = this.thickness;
     var width = 1.0;
     var wall = new THREE.BoxGeometry(width, width, thickness);
     wall.merge(new THREE.BoxGeometry(width, width/2, thickness*2));

@@ -37,14 +37,14 @@ module.exports = (function() {
     this.setCuboidMode(true, false);
   }
 
-  VoxelAddTool.prototype.updateVoxel = function(position, features) {
+  VoxelAddTool.prototype.updateVoxel = function(position, features, stiffness) {
     var voxel = undefined;
     switch (this.activeBrush.type) {
-      case "texture":
-        voxel = new TextureCell(position, this.activeBrush.name, this.stiffness);
+      case "texture": 
+        voxel = new TextureCell(position, this.activeBrush.name, stiffness);
         break;
       default:
-        voxel = new MechanicalCell(position, features, this.extrusionNormal.largestComponent(), this.stiffness);
+        voxel = new MechanicalCell(position, features, this.extrusionNormal.largestComponent(), stiffness, this.voxelGrid.minThickness);
     }
 
     this.voxelGrid.addVoxel(voxel, position);

@@ -25,7 +25,10 @@ module.exports = (function() {
 
     this.allowCube = true;
     this.cursorBorder = 0.0;
-    this.stiffness = 0.01;
+    this.stiffness = {
+      from: 0.01,
+      to: 0.01
+    };
 
     this.minPosition = new THREE.Vector3(-(this.voxelGrid.size.x / 2 - 0.5),
       0.5, -(this.voxelGrid.size.z / 2 - 0.5)
@@ -264,6 +267,11 @@ module.exports = (function() {
 
   VoxelTool.prototype.updateCursor = function() {}
 
+  VoxelTool.prototype.convertRange = function( value, r1, r2 ) { 
+    if(r2[0] == r2[1]) return r2[0];
+    return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
+  }
+
   VoxelTool.prototype.updateVoxelGrid = function() {
     if (!this.startPosition || !this.endPosition || !this.cuboidMode && this.hasMoved) {
       this.processSingle();
@@ -300,6 +308,7 @@ module.exports = (function() {
             );
           }
     } else {
+      let lc = end.clone().sub(start).largestComponent();
       for (var x = start.x; x <= end.x; x++)
         for (var y = start.y; y <= end.y; y++)
           for (var z = start.z; z <= end.z; z++) {
@@ -307,9 +316,11 @@ module.exports = (function() {
             if (this.activeBrush.type == "texture" && y < end.y) {
               this.activeBrush.name = "support";
             }
-            var vox = this.updateSingleVoxel(new THREE.Vector3(x, y, z), new THREE.Vector2(x - start.x, z - start.z));
-            updatedVoxels = updatedVoxels.concat(vox);
             this.activeBrush.name = brushName;
+            let stiffness = this.convertRange([x,y,z][lc], [start.getComponent(lc), end.getComponent(lc)], [this.stiffness.from, this.stiffness.to]);
+            updatedVoxels = updatedVoxels.concat(
+              this.updateSingleVoxel(new THREE.Vector3(x, y, z), new THREE.Vector2(x - start.x, z - start.z), stiffness)
+            );
           }
     }
 
@@ -318,14 +329,14 @@ module.exports = (function() {
     this.processSingle();
   }
 
-  VoxelTool.prototype.updateSingleVoxel = function(position, offset) {
+  VoxelTool.prototype.updateSingleVoxel = function(position, offset, stiffness) {
 
     if(this.activeBrush.type == "texture") {
-      return this.updateVoxel(position);
+      return this.updateVoxel(position, null, stiffness);
     }
     const cellCoords = [offset.y % this.activeBrush.height, offset.x % this.activeBrush.width];
     const features = this.activeBrush.cells[cellCoords].features;
-    return this.updateVoxel(position, features);
+    return this.updateVoxel(position, features, stiffness);
   }
 
   VoxelTool.prototype.__defineGetter__('activeBrush', function() {

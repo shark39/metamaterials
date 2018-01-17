@@ -66,6 +66,8 @@ module.exports = (function() {
     return [2,1,1]
   }
 
+  Texture.prototype.setMinThickness = function () {} //TODO
+
   Texture.prototype.getMesh = function () {
     var color = new THREE.Color(0, 0, 0 );
     var l = 1 - 0.8 * this.stiffness + 0.1; // from 0.1 to 0.9

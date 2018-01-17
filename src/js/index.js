@@ -1,7 +1,7 @@
 'use strict';
 
 var Editor = require('./editor');
-window.jQuery = window.$ = require('jquery');
+window.jQuery = window.$ = require('jquery'); 
 require('bootstrap');
 
 window.onload = function() {

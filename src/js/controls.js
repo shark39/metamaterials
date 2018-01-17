@@ -1,6 +1,6 @@
 'use strict';
 
-const $                  = require('jquery');
+const $                  = require('jquery'); 
 const FileSaver          = require('file-saver');
 
 const THREE              = require('three');
@@ -11,12 +11,11 @@ const AdvancedEditor     = require('./tools/advanced_editor');
 const VoxelAddTool       = require('./tools/voxel_add_tool');
 const VoxelDeleteTool    = require('./tools/voxel_delete_tool');
 const VoxelEditTool      = require('./tools/voxel_edit_tool');
-const VoxelColumnTool      = require('./tools/voxel_column_tool');
+const VoxelColumnTool    = require('./tools/voxel_column_tool');
 const VoxelSmoothingTool = require('./tools/voxel_smoothing_tool');
 const AnchorTool         = require('./tools/anchor_tool');
 const ForceTool          = require('./tools/force_tool');
 const TextureEditor      = require('./tools/texture_editor');
-const Globals            = require('./global');
 
 module.exports = (function() {
 
@@ -28,9 +27,6 @@ module.exports = (function() {
     this.simulation = simulation;
 
     this.pressedKeys = {};
-
-    $('#import-cellsize').val(Globals.cellSize.getValue());
-    $('#import-thickness').val(Globals.minThickness.getValue());
 
     $('#voxel-import-btn').click(this.import);
     $('#voxel-export-btn').click(this.export);
@@ -85,7 +81,7 @@ module.exports = (function() {
       name: 'zigzag', 
       type: 'texture'
     };
-    this.tools['add-tool'].updateVoxel(new THREE.Vector3(0.5, 0.5, 0.5));
+    this.tools['add-tool'].updateVoxel(new THREE.Vector3(0.5, 0.5, 0.5), null, 0.01);
   }
 
   Controls.prototype.selectTool = function(evt) {
@@ -143,14 +139,15 @@ module.exports = (function() {
   }
 
   Controls.prototype.selectStiffness = function(evt) {
-    const stiffness = parseInt(evt.currentTarget.id.slice(16, -4)) / 100.0;
+    const stiffness = parseInt(evt.currentTarget.dataset.stiffness) / 100.0;
+    const key = evt.currentTarget.dataset.type; //else from
 
-    $('.voxel-stiffness-btn').removeClass('active');
+    $(".voxel-stiffness-btn[data-type='"+key+"']").removeClass('active');
     $(evt.currentTarget).addClass('active');
 
-    this.tools['add-tool'].stiffness = stiffness;
-    this.tools['edit-tool'].stiffness = stiffness;
-    this.tools['edit-column'].stiffness = stiffness;
+    this.tools['add-tool'].stiffness[key] = stiffness;
+    this.tools['edit-tool'].stiffness[key] = stiffness;
+    this.tools['edit-column'].stiffness[key] = stiffness;
   }
 
   Controls.prototype.import = function() {
@@ -216,8 +213,9 @@ module.exports = (function() {
   }
 
   Controls.prototype.parseGridSettings = function() {
-    Globals.cellSize.setValue(parseFloat($('#import-cellsize').val()));
-    Globals.minThickness.setValue(parseFloat($('#import-thickness').val()));
+    let cellSize = parseFloat($('#import-cellsize').val());
+    let minThickness = parseFloat($('#import-thickness').val());
+    this.voxelGrid.setMinThickness(minThickness/cellSize);
   };
 
   return Controls;

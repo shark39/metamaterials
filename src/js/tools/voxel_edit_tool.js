@@ -38,19 +38,19 @@ module.exports = (function() {
     this.cursor.material.uniforms.rotatedMode.value = this.rotatedMode ? 1 : 0;
   }
 
-  VoxelEditTool.prototype.updateVoxel = function(position, features, mirrorFactor) {
+  VoxelEditTool.prototype.updateVoxel = function(position, features, stiffness) {
     var voxel;
     const direction = this.extrusionNormal.largestComponent();
     const voxels = [];
 
-    while ((voxel = this.voxelGrid.voxelAtPosition(position)) && (!this.mirror[direction] ||  mirrorFactor * position.getComponent(direction) > 0)) {
+    while (voxel = this.voxelGrid.voxelAtPosition(position)) {
       this.voxelGrid.removeVoxel(position);
       switch (this.activeBrush.type) {
         case "texture": 
-          voxel = new TextureCell(position, this.activeBrush.name, this.stiffness);
+          voxel = new TextureCell(position, this.activeBrush.name, stiffness);
           break;
         default:
-          voxel.setFeaturesInDirection(features, direction);
+          voxel.setFeaturesInDirection(features, direction, stiffness);
       }
       this.voxelGrid.addVoxel(voxel, position);
       voxels.push(voxel);

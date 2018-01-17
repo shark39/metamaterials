@@ -3,19 +3,19 @@
 const THREE   = require('three');
 
 const bind    = require('../../misc/bind');
-const Feature = require('./feature');
 
 module.exports = (function() {
 
-  function Beam(features, direction) {
+  function Beam(features, direction, thickness) {
     bind(this);
     this.features = features;
     this.direction = direction;
+    this.thickness = thickness;
     this.buildRenderGeometry();
   }
 
   Beam.prototype.buildRenderGeometry = function() {
-    var thickness = 0.1;
+    var thickness = this.thickness;
     var width = 1.0;
     var beam = new THREE.BoxGeometry(thickness, width + thickness, thickness);
     beam.merge(new THREE.BoxGeometry(thickness*2, width/2, thickness*2));

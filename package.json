@@ -15,7 +15,8 @@
   "contributors": [
     "Johannes Frohnhofen <johannes@frohnhofen.com> (http://johannesfrohnhofen.com)",
     "Alexandra Ion <me@alexandraion.com> (http://alexandraion.com)",
-    "Pascal Crenzin <pascalcrenzin@gmail.com>"
+    "Pascal Crenzin <pascalcrenzin@gmail.com>",
+    "Michael Janke <micha@jankeweb.de>"
   ],
   "license": "MIT",
   "devDependencies": {

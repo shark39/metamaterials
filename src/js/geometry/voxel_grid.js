@@ -20,6 +20,8 @@ module.exports = (function() {
     this.size = size;
     this.settings = settings;
 
+    this.minThickness = 0.01;
+
     //this.buffer = new GeometryBuffer(scene, this.size, 100000);
 
     this.textureGeometry = new THREE.Geometry();
@@ -162,32 +164,10 @@ module.exports = (function() {
     var mesh = new THREE.Mesh(geo, material);
     mesh.name = "texture";
     this.scene.add(mesh);
-
   }
 
   VoxelGrid.prototype.update = function() {
     //this.buffer.update();
-  };
-
-  VoxelGrid.prototype.updateGridSettings = function(newThickness, newCellSize) {
-    if(this.minThickness == newThickness && this.cellSize == newCellSize)
-      return;
-
-    this.minThickness = newThickness;
-    this.cellSize = newCellSize;
-
-    for (var key in this.voxels){
-      const voxel = this.voxels[key];
-
-      for(var i = 0; i < voxel.elements.length; i++) {
-        var voxelElement = voxel.elements[i];
-
-        voxelElement.updateThickness();
-        voxelElement.updateRenderGeometry();
-      }
-    }
-
-    this.update();
   };
 
   VoxelGrid.prototype.intersectionPlane = function() {
@@ -228,7 +208,7 @@ module.exports = (function() {
     if(!voxel || voxel == exclude) return;
 
     var origin = voxel.position;
-     this.voxelsHaveChanged = true;
+    this.voxelsHaveChanged = true;
 
     var size = voxel.size();
     for(var x = 0; x < size[0]; x++) 
@@ -392,6 +372,21 @@ module.exports = (function() {
       this.badVoxels[key].markBad();
     }
   };
+
+  VoxelGrid.prototype.setMinThickness = function(minThickness) {
+    if(this.minThickness === minThickness) return;
+    this.minThickness = minThickness;
+    for(let voxel in this.voxels) {
+      voxel = this.voxels[voxel];
+      let mesh = voxel.mesh;
+      voxel.setMinThickness(minThickness);
+      if(mesh !== voxel.mesh) {
+        voxel.mesh.position.copy(voxel.position);
+        this.scene.add(voxel.mesh);
+        this.scene.remove(mesh);
+      }
+    }
+  }  
 
   return VoxelGrid;
 })();

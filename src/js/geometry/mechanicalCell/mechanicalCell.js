@@ -5,18 +5,16 @@ const THREE    = require('three');
 
 const bind     = require('../../misc/bind');
 const Beam     = require('./beam');
-const Triangle = require('./triangle');
-const Solid    = require('./solid');
 const Wall     = require('./wall');
-const Feature     = require('./feature');
 
 module.exports = (function() {
 
-  function MechanicalCell(position, features, direction, stiffness = 0.01) {
+  function MechanicalCell(position, features, direction, stiffness = 0.01, minThickness = 0.01) {
     bind(this);
 
     this.position = (new THREE.Vector3()).copy(position);
-    this.stiffness = 0.1;
+    this.stiffness = stiffness;
+    this.minThickness = minThickness;
 
     this.solid = features.length == 1 && features[0] == "box";
 
@@ -34,10 +32,10 @@ module.exports = (function() {
   }
 
   MechanicalCell.prototype.renderSolid = function() {
-    let width = 1.0 + this.stiffness;
+    let width = 1.0;
     let box = new THREE.BoxGeometry(width, width, width);
     let material = new THREE.MeshPhongMaterial({
-      color: new THREE.Color(0.2,0.2,0.2),
+      color: new THREE.Color(0.2+0.8*this.stiffness,0.2,0.2),
       flatShading: false
     });
     this.mesh = new THREE.Mesh(box, material);
@@ -58,10 +56,20 @@ module.exports = (function() {
     this.renderMesh();
   }
 
+  MechanicalCell.prototype.setMinThickness = function(minThickness) {
+    if(this.minThickness === minThickness) return false;
+    this.minThickness = minThickness;
+    this.meshRemoved = false;
+    this.buildGeometry();
+    this.renderMesh();
+    return true;
+  }
+
   MechanicalCell.prototype.buildGeometry = function() {
     if(this.solid) { return }
 
     var elements = [];
+    let thickness = this.minThickness + (0.25 - this.minThickness) * this.stiffness;
     this.featuresPerDirection.forEach((features, direction) => {
         features.forEach((feature) => {
           var elementClass = Wall; 
@@ -73,7 +81,7 @@ module.exports = (function() {
               (this.featuresPerDirection[(direction+1) % 3].length ||    
               this.featuresPerDirection[(direction+2) % 3].length) )
             elementClass = Beam; 
-          elements.push(new elementClass(feature, direction));
+          elements.push(new elementClass(feature, direction, thickness));
         }, this);
       }, this);
 
