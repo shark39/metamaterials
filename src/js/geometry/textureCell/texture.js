@@ -85,7 +85,8 @@ module.exports = (function() {
       'zigzag': this.getZigZagGeometry,
       'spiky': this.getSpikyGeometry,
       'box': this.getBoxGeometry,
-      'round': this.getRoundGeometry
+      'round': this.getRoundGeometry,
+      'support' : this.getSupportGeometry
     };
     var geo = mapping[this.type]();
     var fill = this.getFillGeometry();
@@ -188,6 +189,11 @@ module.exports = (function() {
     tempGeo.translate(0,  -this.height, -this.length/2);
 
     return tempGeo;
+  }
+
+  Texture.prototype.getSupportGeometry = function() {
+    console.log("get support");
+    return new THREE.Geometry();
   }
 
   Texture.prototype.getHingesGeometry = function() {

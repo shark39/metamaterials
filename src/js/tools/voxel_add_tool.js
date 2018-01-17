@@ -40,7 +40,7 @@ module.exports = (function() {
   VoxelAddTool.prototype.updateVoxel = function(position, features) {
     var voxel = undefined;
     switch (this.activeBrush.type) {
-      case "texture": 
+      case "texture":
         voxel = new TextureCell(position, this.activeBrush.name, this.stiffness);
         break;
       default:

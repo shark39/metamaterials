@@ -303,9 +303,13 @@ module.exports = (function() {
       for (var x = start.x; x <= end.x; x++)
         for (var y = start.y; y <= end.y; y++)
           for (var z = start.z; z <= end.z; z++) {
-            updatedVoxels = updatedVoxels.concat(
-              this.updateSingleVoxel(new THREE.Vector3(x, y, z), new THREE.Vector2(x - start.x, z - start.z))
-            );
+            var brushName = this.activeBrush.name;
+            if (this.activeBrush.type == "texture" && y < end.y) {
+              this.activeBrush.name = "support";
+            }
+            var vox = this.updateSingleVoxel(new THREE.Vector3(x, y, z), new THREE.Vector2(x - start.x, z - start.z));
+            updatedVoxels = updatedVoxels.concat(vox);
+            this.activeBrush.name = brushName;
           }
     }
 
