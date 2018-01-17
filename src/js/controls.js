@@ -45,6 +45,7 @@ module.exports = (function() {
     $('.voxel-tool-btn').click(this.selectTool);
     $('#voxel-mirror-btn').click(this.toggleMirrorMode);
     $('.voxel-stiffness-btn').click(this.selectStiffness);
+    $('.voxel-stiffness-pattern-btn').click(this.selectStiffnessPattern);
 
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
@@ -148,6 +149,23 @@ module.exports = (function() {
     this.tools['add-tool'].stiffness[key] = stiffness;
     this.tools['edit-tool'].stiffness[key] = stiffness;
     this.tools['edit-column'].stiffness[key] = stiffness;
+  }
+
+  Controls.prototype.selectStiffnessPattern = function(evt) {
+    const pattern = evt.currentTarget.dataset.type;
+
+    $(".voxel-stiffness-pattern-btn").removeClass('active');
+    $(evt.currentTarget).addClass('active');
+
+    if(pattern !== "normal") {
+      $(".second-stiffnes-value-panel").addClass('active');
+    } else {
+      $(".second-stiffnes-value-panel").removeClass('active');
+    }
+
+    this.tools['add-tool'].stiffness.pattern = pattern;
+    this.tools['edit-tool'].stiffness.pattern = pattern;
+    this.tools['edit-column'].stiffness.patern = pattern;
   }
 
   Controls.prototype.import = function() {
