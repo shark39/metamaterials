@@ -18,6 +18,9 @@ module.exports = (function() {
     line.graphics.lineTo(width/2, height);
     return line;
 
+function drawBox() {
+  
+}
 
   }
 

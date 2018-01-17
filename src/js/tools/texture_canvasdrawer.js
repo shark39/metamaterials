@@ -8,9 +8,10 @@ const THREE = require('three');
 const createjs = require('createjs-browserify');
 const bind = require('../misc/bind');
 
-const patterns = ['regular', 'box', 'round', 'zigzag', 'diamond', 'spiky'];
 
 module.exports = (function() {
+
+  const patterns = ['regular', 'box', 'round', 'zigzag', 'diamond', 'spiky'];
 
   function TextureCanvasDrawer(canvas) {
 
@@ -132,7 +133,7 @@ module.exports = (function() {
 
   TextureCanvasDrawer.prototype.addPoint = function(x, y) {
     var circle = new createjs.Shape();
-    circle.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 5);
+    circle.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 8);
     circle.x = x;
     circle.y = y;
     var self = this;

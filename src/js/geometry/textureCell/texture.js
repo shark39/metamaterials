@@ -21,7 +21,7 @@ const ThreeBSP = require('three-js-csg')(THREE);
 
 const bind = require('../../misc/bind');
 const PrismGeometry = require('./prism.js');
-
+const TextureRegular = require('./textureRegular');
 
 module.exports = (function() {
 
@@ -91,6 +91,8 @@ module.exports = (function() {
       'support' : this.getSupportGeometry
     };
     var geo = mapping[this.type]();
+    debugger;
+    var t = new TextureRegular(this);
     var fill = this.getFillGeometry();
     //fill.translate(-this.width / 2, 0, 0);
     geo.merge(fill);
@@ -194,7 +196,6 @@ module.exports = (function() {
   }
 
   Texture.prototype.getSupportGeometry = function() {
-    console.log("get support");
     return new THREE.Geometry();
   }
 
