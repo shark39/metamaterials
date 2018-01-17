@@ -24,7 +24,7 @@ module.exports = (function() {
     window.addEventListener('resize', this.onWindowResize, false);
 
     // Create camera.
-    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
+    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100);
     this.camera.position.set(0.0, 20.0, 15.0);
 
     // Create orbit controls.
