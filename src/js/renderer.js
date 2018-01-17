@@ -49,7 +49,7 @@ module.exports = (function() {
     // Create the grid and axes.
     this.coordinateSystem = new THREE.Object3D();
     var gridSize = Math.max(voxelGridSize.x, voxelGridSize.z);
-    this.grid = new THREE.GridHelper(gridSize / 2, gridSize);
+    this.grid = new THREE.GridHelper(gridSize, gridSize);
     this.coordinateSystem.add(this.grid);
 
     var xGeometry = new THREE.Geometry();

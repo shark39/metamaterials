@@ -11,6 +11,7 @@ const AdvancedEditor     = require('./tools/advanced_editor');
 const VoxelAddTool       = require('./tools/voxel_add_tool');
 const VoxelDeleteTool    = require('./tools/voxel_delete_tool');
 const VoxelEditTool      = require('./tools/voxel_edit_tool');
+const VoxelColumnTool      = require('./tools/voxel_column_tool');
 const VoxelSmoothingTool = require('./tools/voxel_smoothing_tool');
 const AnchorTool         = require('./tools/anchor_tool');
 const ForceTool          = require('./tools/force_tool');
@@ -39,6 +40,7 @@ module.exports = (function() {
       'add-tool': new VoxelAddTool(this.renderer, this.voxelGrid),
       'delete-tool': new VoxelDeleteTool(this.renderer, this.voxelGrid),
       'edit-tool': new VoxelEditTool(this.renderer, this.voxelGrid),
+      'edit-column': new VoxelColumnTool(this.renderer, this.voxelGrid),
       'smoothing-tool': new VoxelSmoothingTool(this.renderer, this.voxelGrid),
       'anchor-tool': new AnchorTool(this.renderer, this.voxelGrid),
       'force-tool': new ForceTool(this.renderer, this.voxelGrid, this.simulation)
@@ -63,6 +65,7 @@ module.exports = (function() {
       this.tools['add-tool'],
       this.tools['delete-tool'],
       this.tools['edit-tool'],
+      this.tools['edit-column'],
       this.tools['smoothing-tool']
     ]);
 
@@ -70,6 +73,7 @@ module.exports = (function() {
       this.tools['add-tool'],
       this.tools['delete-tool'],
       this.tools['edit-tool'],
+      this.tools['edit-column'],
       this.tools['smoothing-tool']
     ]);
 
@@ -146,6 +150,7 @@ module.exports = (function() {
 
     this.tools['add-tool'].stiffness = stiffness;
     this.tools['edit-tool'].stiffness = stiffness;
+    this.tools['edit-column'].stiffness = stiffness;
   }
 
   Controls.prototype.import = function() {

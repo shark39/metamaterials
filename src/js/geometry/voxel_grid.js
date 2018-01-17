@@ -216,6 +216,8 @@ module.exports = (function() {
     }         
     const mesh = voxel.mesh;
     mesh.position.copy(position);
+    //mesh.matrixAutoUpdate  = false;
+    //mesh.updateMatrix();
     this.scene.add(mesh);
     return voxel;
   };

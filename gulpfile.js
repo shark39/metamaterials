@@ -17,6 +17,10 @@ var files = {
       src: './src/img/**/*.png',
       dest: './public/img',
     },
+    {
+      src: './src/fonts/*.*',
+      dest: './public/fonts',
+    },
   ],
   js: {
     src: './src/js/**/*.js',

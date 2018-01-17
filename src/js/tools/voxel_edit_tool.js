@@ -23,7 +23,8 @@ module.exports = (function() {
 
   VoxelEditTool.prototype.extrusionParametersFromIntersection = function(intersection) {
     return intersection.object.isPlane ? {
-      startPosition: undefined
+      startPosition: intersection.object.position.clone(),
+      extrusionNormal: intersection.face.normal.clone()
     } : {
       startPosition: intersection.object.position.clone(),
       extrusionNormal: intersection.face.normal.clone()
@@ -40,23 +41,20 @@ module.exports = (function() {
   VoxelEditTool.prototype.updateVoxel = function(position, features, mirrorFactor) {
     var voxel;
     const direction = this.extrusionNormal.largestComponent();
-    const extrusionNormal = this.extrusionNormal.clone();
-    extrusionNormal.setComponent(direction, mirrorFactor * extrusionNormal.getComponent(direction));
-
     const voxels = [];
 
     while ((voxel = this.voxelGrid.voxelAtPosition(position)) && (!this.mirror[direction] ||  mirrorFactor * position.getComponent(direction) > 0)) {
-      var voxel;
+      this.voxelGrid.removeVoxel(position);
       switch (this.activeBrush.type) {
         case "texture": 
           voxel = new TextureCell(position, this.activeBrush.name, this.stiffness);
           break;
         default:
-          voxel = new MechanicalCell(position, features, this.extrusionNormal.largestComponent(), this.stiffness);
+          voxel.setFeaturesInDirection(features, direction);
       }
       this.voxelGrid.addVoxel(voxel, position);
       voxels.push(voxel);
-      position.sub(extrusionNormal);
+      position.sub(this.extrusionNormal);
     }
 
     this.activeBrush.used = true;

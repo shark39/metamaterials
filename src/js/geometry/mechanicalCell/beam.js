@@ -1,62 +1,60 @@
 'use strict';
 
-const THREE        = require('three');
+const THREE   = require('three');
 
-const bind         = require('../../misc/bind');
+const bind    = require('../../misc/bind');
 const Feature = require('./feature');
 
 module.exports = (function() {
 
-  function Beam(voxel, vertices) {
+  function Beam(features, direction) {
     bind(this);
-    Feature.call(this, voxel, vertices);
-  }
-
-  Beam.frontTop    = { element: Beam, vertices: [ 7, 3 ], id: 'bft' };
-  Beam.frontBottom = { element: Beam, vertices: [ 5, 1 ], id: 'bfb' };
-  Beam.frontLeft   = { element: Beam, vertices: [ 5, 7 ], id: 'bfl' };
-  Beam.frontRight  = { element: Beam, vertices: [ 1, 3 ], id: 'bfr' };
-
-  Beam.backTop     = { element: Beam, vertices: [ 2, 6 ], id: 'bBt' };
-  Beam.backBottom  = { element: Beam, vertices: [ 0, 4 ], id: 'bBb' };
-  Beam.backLeft    = { element: Beam, vertices: [ 4, 6 ], id: 'bBl' };
-  Beam.backRight   = { element: Beam, vertices: [ 0, 2 ], id: 'bBr' };
-
-  Beam.topLeft     = { element: Beam, vertices: [ 6, 7 ], id: 'btl' };
-  Beam.topRight    = { element: Beam, vertices: [ 2, 3 ], id: 'btr' };
-  Beam.bottomLeft  = { element: Beam, vertices: [ 4, 5 ], id: 'bbl' };
-  Beam.bottomRight = { element: Beam, vertices: [ 0, 1 ], id: 'bbr' };
-
-  Beam.prototype = Object.create(Feature.prototype);
-
-  Beam.prototype.positionMatrix = function(thickness) {
-    thickness = thickness || 0;
-    const edgeLength = thickness + 1.0;
-    const length = this.vertices[0].distanceTo(this.vertices[1]) * edgeLength;
-    return new THREE.Matrix4()
-      .lookAt(this.vertices[0], this.vertices[1], new THREE.Vector3(0, 1, 0))
-      .scale(new THREE.Vector3(thickness, thickness, length))
-      .setPosition(this.center);
-  }
-
-  Beam.prototype.offsetMatrix = function() {
-    return new THREE.Matrix4()
-      .lookAt(this.vertices[0], this.vertices[1], new THREE.Vector3(0, 1, 0));
-  }
-
-  Beam.prototype.localEdges = function() {
-    return [
-      [0, 1]
-    ];
+    this.features = features;
+    this.direction = direction;
+    this.buildRenderGeometry();
   }
 
   Beam.prototype.buildRenderGeometry = function() {
-    this.thickness = this.thickness/this.stiffnessFactor; //set to half so scaling of length works out nicely
+    var thickness = 0.1;
+    var width = 1.0;
+    var beam = new THREE.BoxGeometry(thickness, width + thickness, thickness);
+    beam.merge(new THREE.BoxGeometry(thickness*2, width/2, thickness*2));
+    var wall = new THREE.Geometry();
 
-    var beam = new THREE.BoxGeometry(1.0, 1.0, 1.0); 
-    var member = new THREE.BoxGeometry(2.0, 2.0, 0.35);
+    wall.merge(beam.clone().translate(0,0,0));
+    wall.merge(beam.clone().translate(-1,0,0));
+    wall.merge(beam.clone().translate(-0.5, 0.5,0).rotateZ(Math.PI/2));
+    wall.merge(beam.clone().translate( 0.5, 0.5,0).rotateZ(Math.PI/2));
 
-    return [beam, member];
+    wall.translate(0.5, 0, 0);
+
+    switch(this.features) {
+      case "top-edge":
+        wall.translate(0, 0, -(width/2)); break;
+      case "bottom-edge":
+        wall.translate(0, 0, (width/2)); break;
+      case "left-edge":
+        wall.rotateX(Math.PI / 2);
+        wall.translate(0, -(width/2), 0); break;
+      case "right-edge":
+        wall.rotateX(Math.PI / 2);
+        wall.translate(0, (width/2), 0); break;  
+      case "pos-diagonal":
+        wall.scale(1, Math.sqrt(2)-thickness*2/width, 1);     
+        wall.rotateX(-Math.PI / 4); break;
+      case "neg-diagonal":
+        wall.scale(1, Math.sqrt(2)-thickness*2/width, 1);
+        wall.rotateX(Math.PI / 4); break;
+      default:
+        console.error(this.features + " not handled")                   
+    }
+
+    switch(this.direction) {
+      case 0: break;
+      case 1: wall.rotateZ(Math.PI/2); break;
+      case 2: wall.rotateY(Math.PI/2); break;
+    }
+    this.renderGeometry = wall;
 }
 
   return Beam;
