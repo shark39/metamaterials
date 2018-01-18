@@ -95,9 +95,9 @@ module.exports = (function() {
       let cc = _.size(self.brushes) - patterns.length + 1;
       let pattern = "custom" + cc;
       var domElement = getButtonDom(image);
-
+      var customPath = self.canvasdrawer.getDrawing();
       domElement.click(function() {
-        self.activateBrush(pattern);
+        self.activateBrush(pattern, customPath);
       });
 
       container.append(domElement);
@@ -117,7 +117,7 @@ module.exports = (function() {
   }
 
 
-  TextureEditor.prototype.activateBrush = function(name) {
+  TextureEditor.prototype.activateBrush = function(name, customPath) {
     //this.removeUnusedBrush();
 
     $('.voxel-cells-btn').removeClass('active');
@@ -125,7 +125,8 @@ module.exports = (function() {
     let texture;
     if (name.startsWith("custom") &&  this.activeBrush.name != name) {
       texture = TextureCustom;
-      texture.getDrawing = () => this.canvasdrawer.getDrawing();
+      texture.getDrawing = () => customPath || this.canvasdrawer.getDrawing();
+      //texture.getDrawing = () => ;
     } else {
     texture = mapping[name];
     }
