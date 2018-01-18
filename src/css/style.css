@@ -195,6 +195,27 @@ body {
   background-image: url('../img/stiffness_selected.png');
 }
 
+.voxel-stiffness-pattern-btn {
+  padding:5px;
+  border: solid 2px transparent;
+}
+
+.voxel-stiffness-pattern-btn > p {
+  margin: 0px;
+  user-select: none;
+}
+
+.voxel-stiffness-pattern-btn.active {
+  border: solid 2px #00adee;
+}
+
+.second-stiffnes-value-panel {
+  display: none;
+}
+
+.second-stiffnes-value-panel.active {
+  display: block;
+}
 
 /* advanced */
 

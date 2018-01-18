@@ -4,7 +4,6 @@ const _        = require('lodash');
 const THREE    = require('three');
 
 const bind     = require('../../misc/bind');
-const Beam     = require('./beam');
 const Wall     = require('./wall');
 
 module.exports = (function() {
@@ -41,7 +40,7 @@ module.exports = (function() {
     this.mesh = new THREE.Mesh(box, material);
   }
 
-  MechanicalCell.prototype.setFeaturesInDirection = function(features, direction) {
+  MechanicalCell.prototype.setFeaturesInDirection = function(features, direction, stiffness) {
     if (features.length == 1 && features[0] == "box") {
       this.solid = true;
       this.featuresPerDirection[(direction+1)%3] = [];
@@ -50,6 +49,7 @@ module.exports = (function() {
       this.featuresPerDirection = [[],[],[]];
       this.solid = false;
     }
+    this.stiffness = stiffness;
     this.featuresPerDirection[direction] = features;
     this.meshRemoved = false;
     this.buildGeometry();
@@ -70,18 +70,19 @@ module.exports = (function() {
 
     var elements = [];
     let thickness = this.minThickness + (0.25 - this.minThickness) * this.stiffness;
+    console.log(this.featuresPerDirection);
     this.featuresPerDirection.forEach((features, direction) => {
         features.forEach((feature) => {
-          var elementClass = Wall; 
+          var solid = true; 
           if((feature == "top-edge" || feature == "bottom-edge") && this.featuresPerDirection[(direction+1) % 3].length) 
-            elementClass = Beam;
+            solid = false;
           if((feature == "left-edge" || feature == "right-edge") && this.featuresPerDirection[(direction+2) % 3].length) 
-            elementClass = Beam;
+            solid = false;
           if((feature == "pos-diagonal" || feature == "neg-diagonal") && 
               (this.featuresPerDirection[(direction+1) % 3].length ||    
               this.featuresPerDirection[(direction+2) % 3].length) )
-            elementClass = Beam; 
-          elements.push(new elementClass(feature, direction, thickness));
+            solid = false; 
+          elements.push(new Wall(solid, feature, direction, thickness));
         }, this);
       }, this);
 
@@ -98,9 +99,9 @@ module.exports = (function() {
       return this.renderSolid();
     }
     let color = new THREE.Color(
-      this.featuresPerDirection[0].length > 0 ? 0.5 : 0,
-      this.featuresPerDirection[1].length > 0 ? 0.5 : 0,
-      this.featuresPerDirection[2].length > 0 ? 0.5 : 0
+      this.featuresPerDirection[0].length > 0 ? 0.5 : 0.1,
+      this.featuresPerDirection[1].length > 0 ? 0.5 : 0.1,
+      this.featuresPerDirection[2].length > 0 ? 0.6 : 0.1
     );
     let material = new THREE.MeshPhongMaterial({
       color: color,
@@ -111,7 +112,7 @@ module.exports = (function() {
       (this.featuresPerDirection[0].length > 0) | 
       (this.featuresPerDirection[1].length > 0) << 1 |
       (this.featuresPerDirection[2].length > 0) << 2;
-    let zfighting = 1 + (0.00001*zfightingIndex);
+    let zfighting = 1 + (0.0001*zfightingIndex);
     this.renderGeometry.scale(zfighting,zfighting,zfighting);
     this.mesh = new THREE.Mesh(this.renderGeometry, material);
   }

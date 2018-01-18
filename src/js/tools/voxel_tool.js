@@ -268,9 +268,30 @@ module.exports = (function() {
 
   VoxelTool.prototype.updateCursor = function() {}
 
-  VoxelTool.prototype.convertRange = function( value, r1, r2 ) {
-    if(r2[0] == r2[1]) return r2[0];
-    return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
+
+  VoxelTool.prototype.calculateStiffness = function( value, rangeStart, rangeEnd ) {
+
+    function normal() {
+      return this.stiffness.from;
+    }
+
+    function alternating(value, rangeStart) {
+      return (rangeStart-value)%2 == 0 ? this.stiffness.from : this.stiffness.to;
+    }
+
+    function gradient( value, rangeStart, rangeEnd) {
+      let r1 = [rangeStart, rangeEnd];
+      let r2 = [this.stiffness.from, this.stiffness.to];
+      if(r2[0] == r2[1]) return r2[0];
+      return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
+    }
+
+    let calculateFunction = ({
+      normal,
+      gradient,
+      alternating
+    })[this.stiffness.pattern || 'normal'];
+    return calculateFunction.bind(this)(value, rangeStart, rangeEnd);
   }
 
   VoxelTool.prototype.updateVoxelGrid = function() {
@@ -317,7 +338,8 @@ module.exports = (function() {
             if (this.activeBrush.type == "texture" && y < end.y) {
               this.activeBrush.texture = TextureSupport;
             }
-            let stiffness = this.convertRange([x,y,z][lc], [start.getComponent(lc), end.getComponent(lc)], [this.stiffness.from, this.stiffness.to]);
+            this.activeBrush.name = brushName;
+            let stiffness = this.calculateStiffness([x,y,z][lc], start.getComponent(lc), end.getComponent(lc));
             updatedVoxels = updatedVoxels.concat(
               this.updateSingleVoxel(new THREE.Vector3(x, y, z), new THREE.Vector2(x - start.x, z - start.z), stiffness)
             );
