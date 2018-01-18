@@ -5,6 +5,7 @@ const cursorConfig = require('../misc/cursorConfig');
 const Tool = require('./tool');
 
 const Texture = require('../geometry/textureCell/texture');
+const TextureSupport = require('../geometry/textureCell/textureSupport');
 // const addBorderingIfNeeded = require('./bordering');
 
 const $ = require('jquery');
@@ -267,7 +268,7 @@ module.exports = (function() {
 
   VoxelTool.prototype.updateCursor = function() {}
 
-  VoxelTool.prototype.convertRange = function( value, r1, r2 ) { 
+  VoxelTool.prototype.convertRange = function( value, r1, r2 ) {
     if(r2[0] == r2[1]) return r2[0];
     return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
   }
@@ -312,15 +313,15 @@ module.exports = (function() {
       for (var x = start.x; x <= end.x; x++)
         for (var y = start.y; y <= end.y; y++)
           for (var z = start.z; z <= end.z; z++) {
-            var brushName = this.activeBrush.name;
+            var brushtexture = this.activeBrush.texture;
             if (this.activeBrush.type == "texture" && y < end.y) {
-              this.activeBrush.name = "support";
+              this.activeBrush.texture = TextureSupport;
             }
-            this.activeBrush.name = brushName;
             let stiffness = this.convertRange([x,y,z][lc], [start.getComponent(lc), end.getComponent(lc)], [this.stiffness.from, this.stiffness.to]);
             updatedVoxels = updatedVoxels.concat(
               this.updateSingleVoxel(new THREE.Vector3(x, y, z), new THREE.Vector2(x - start.x, z - start.z), stiffness)
             );
+            this.activeBrush.texture = brushtexture;
           }
     }
 

@@ -75,13 +75,16 @@ module.exports = (function() {
 
     this.parseGridSettings();
 
+/*
     //make a texture cell
     this.tools['add-tool'].activeBrush = {
-      rotated: false, 
-      name: 'zigzag', 
+      rotated: false,
+      name: 'regular',
       type: 'texture'
     };
     this.tools['add-tool'].updateVoxel(new THREE.Vector3(0.5, 0.5, 0.5), null, 0.01);
+*/
+
   }
 
   Controls.prototype.selectTool = function(evt) {

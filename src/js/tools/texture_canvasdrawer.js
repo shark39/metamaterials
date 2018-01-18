@@ -54,6 +54,14 @@ module.exports = (function() {
     middleLine.graphics.endStroke();
     this.middleLine = middleLine; //needed for addCell
 
+
+    this.stage.update();
+
+  }
+
+
+
+  TextureCanvasDrawer.prototype.drawExamplePath = function() {
     var line = new createjs.Shape();
     this.pathCommands.push(line.graphics.moveTo(width / 3, 0).command);
     //pathCommands.push(line.graphics.quadraticCurveTo((width / 3 + width / 2), 10, width / 2, height / 2).command);
@@ -66,8 +74,34 @@ module.exports = (function() {
       self.addPoint(c.x, c.y);
       //.cpx, .cpy for quadratic curve
     });
-    this.stage.update();
 
+  }
+
+  TextureCanvasDrawer.prototype.load = function(coordArray) {
+    // coordArray contains relative commands for lineTo commands. example [[0, 0], [1, 1]] draws a diagonal line
+    this.canvas.show();
+    this.pathCommands = [];
+    if (!coordArray || coordArray == []) {
+      return
+    }
+    var self = this;
+    var width = this.dimensions.x;
+    var height = this.dimensions.y;
+    var line = new createjs.Shape();
+    this.pathCommands.push(line.graphics.moveTo(width*coordArray[0][0], height*coordArray[0][1]).command);
+    for (var i = 1; i < coordArray.length; i++) {
+      this.pathCommands.push(line.graphics.lineTo(width*coordArray[i][0], height*coordArray[i][1]).command);
+    }
+    this.drawPath();
+    this.pathCommands.forEach(function(c) {
+      self.addPoint(c.x, c.y);
+      //.cpx, .cpy for quadratic curve
+    });
+    this.stage.update();
+  }
+
+  TextureCanvasDrawer.prototype.block = function() {
+    this.canvas.hide();
   }
 
   TextureCanvasDrawer.prototype.addCell = function() {

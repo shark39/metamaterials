@@ -9,8 +9,16 @@ const bind = require('../misc/bind');
 
 const TextureCanvasDrawer = require('./texture_canvasdrawer');
 const Texture2d = require('../geometry/textureCell/texture2d');
+const TextureRegular = require('../geometry/textureCell/textureRegular');
+const TextureRound = require('../geometry/textureCell/textureRound');
+const TextureBox = require('../geometry/textureCell/textureBox');
+const TextureZigZag = require('../geometry/textureCell/textureZigZag');
 
-const patterns = ['regular', 'box', 'round', 'zigzag', 'diamond', 'spiky', 'custom', 'debug'];
+
+
+const patterns = ['regular', 'round', 'box', 'zigzag']; //'diamond', 'spiky', 'custom', 'debug'];
+
+const mapping = {'regular' : TextureRegular, 'round': TextureRound, 'box': TextureBox, 'zigzag': TextureZigZag};
 
 module.exports = (function() {
 
@@ -38,7 +46,12 @@ module.exports = (function() {
     var container = $('#texture-presets');
     patterns.forEach(function(pattern) {
       //generate UI element
-      var image = Texture2d.getImage(pattern);
+      var width = 80;
+      var height = 60;
+      var canvas = document.createElement("canvas");
+      canvas.setAttribute('width', width);
+      canvas.setAttribute('height', height);
+      var image = Texture2d.getImageFromCoordsArray(mapping[pattern].getDrawing());
       var domElement = getButtonDom(image);
 
       domElement.click(function() {
@@ -108,10 +121,20 @@ module.exports = (function() {
 
     $('.voxel-cells-btn').removeClass('active');
 
+    let texture = mapping[name];
+
+    if ((this.activeBrush == undefined || this.activeBrush.name != name) && texture && texture.getIsCustomizable()) {
+      this.canvasdrawer.load(texture.getDrawing());
+    }
+    if (texture && !texture.getIsCustomizable()) {
+      this.canvasdrawer.block();
+    }
     var brush = this.brushes[name];
+    brush.name = name;
     brush.rotated = this.rotatation;
     brush.canvasdrawer = this.canvasdrawer;
     brush.domElement.addClass('active');
+    brush.texture = texture;
     this.activeBrush = brush;
     this.tools.forEach(function(tool) {
       tool.activeBrush = brush;

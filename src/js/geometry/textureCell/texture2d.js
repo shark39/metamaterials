@@ -19,7 +19,7 @@ module.exports = (function() {
     return line;
 
 function drawBox() {
-  
+
 }
 
   }
@@ -60,6 +60,37 @@ function drawBox() {
     var image = new Image();
     image.src = canvas.toDataURL("image/png");
     return image;
+  }
+
+  Texture2d.getImageFromCoordsArray = function(coordArray) {
+
+    var canvas = document.createElement("canvas");
+    canvas.setAttribute('width', width);
+    canvas.setAttribute('height', height);
+  //  canvas.setAttribute('class', "canvas-pattern");
+
+    var stage = new createjs.Stage(canvas);
+    var bg = new createjs.Shape();
+    bg.graphics.beginFill("white").drawRect(0, 0, width, height);
+    stage.addChild(bg);
+
+    if (!coordArray || coordArray == []) {
+      return
+    }
+    var self = this;
+    var line = new createjs.Shape();
+    line.graphics.setStrokeStyle(2).beginStroke("rgba(0,0,0,1)");
+    line.graphics.moveTo(width*coordArray[0][0], height*coordArray[0][1]);
+    for (var i = 1; i < coordArray.length; i++) {
+      line.graphics.lineTo(width*coordArray[i][0], height*coordArray[i][1]);
+    }
+    stage.addChild(line);
+    stage.update();
+
+    var image = new Image();
+    image.src = canvas.toDataURL("image/png");
+    return image;
+
   }
 
   return Texture2d;

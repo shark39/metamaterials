@@ -40,8 +40,8 @@ module.exports = (function() {
   VoxelAddTool.prototype.updateVoxel = function(position, features, stiffness) {
     var voxel = undefined;
     switch (this.activeBrush.type) {
-      case "texture": 
-        voxel = new TextureCell(position, this.activeBrush.name, stiffness);
+      case "texture":
+        voxel = new TextureCell(position, this.activeBrush.texture, stiffness);
         break;
       default:
         voxel = new MechanicalCell(position, features, this.extrusionNormal.largestComponent(), stiffness, this.voxelGrid.minThickness);

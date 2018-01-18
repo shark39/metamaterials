@@ -140,7 +140,16 @@ module.exports = (function() {
     //convert geometry to mesh
     //var material = new THREE.MeshPhongMaterial({color: 0xFF0000});
     //var mesh = new THREE.Mesh(this.textureGeometry, material);
-    var objString = exporter.parse(this.textureGeometry);
+    var geometry = new THREE.Geometry();
+    for (var vox in this.voxels) {
+      if (this.voxels.hasOwnProperty(vox)) {
+        let geo = this.voxels[vox].getGeometry();
+        geo.translate(this.voxels[vox].position.x, this.voxels[vox].position.y, this.voxels[vox].position.z);
+        geometry.merge(geo);
+      }
+    }
+
+    var objString = exporter.parse(geometry);
     return objString;
   }
 
@@ -181,19 +190,19 @@ module.exports = (function() {
   VoxelGrid.prototype.addVoxel = function(voxel, position) {
     var size = voxel.size();
     var origin = voxel.position;
-    for(var x = 0; x < size[0]; x++) 
+    for(var x = 0; x < size[0]; x++)
       for(var y = 0; y < size[1]; y++)
         for(var z = 0; z < size[2]; z++){
           let pos = [origin.x + x, origin.y + y, origin.z + z];
           this.removeVoxel(pos, voxel);
     }
-    for(var x = 0; x < size[0]; x++) 
+    for(var x = 0; x < size[0]; x++)
       for(var y = 0; y < size[1]; y++)
         for(var z = 0; z < size[2]; z++){
           let pos = [origin.x + x, origin.y + y, origin.z + z];
           this.addIntersectionVoxel(pos);
           this.voxels[pos] = voxel;
-    }         
+    }
     const mesh = voxel.mesh;
     mesh.position.copy(position);
     //mesh.matrixAutoUpdate  = false;
@@ -211,7 +220,7 @@ module.exports = (function() {
     this.voxelsHaveChanged = true;
 
     var size = voxel.size();
-    for(var x = 0; x < size[0]; x++) 
+    for(var x = 0; x < size[0]; x++)
       for(var y = 0; y < size[1]; y++)
         for(var z = 0; z < size[2]; z++){
           let pos = [origin.x + x, origin.y + y, origin.z + z];
@@ -386,7 +395,7 @@ module.exports = (function() {
         this.scene.remove(mesh);
       }
     }
-  }  
+  }
 
   return VoxelGrid;
 })();
