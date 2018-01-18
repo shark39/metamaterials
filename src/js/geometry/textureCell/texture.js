@@ -17,12 +17,12 @@ supported types:
 */
 
 const THREE = require('three');
-const ThreeBSP = require('three-js-csg')(THREE);
+//const ThreeBSP = require('three-js-csg')(THREE);
 
 const bind = require('../../misc/bind');
-const PrismGeometry = require('./prism.js');
-const TextureRegular = require('./textureRegular');
-const TextureRound = require('./textureRound');
+//const PrismGeometry = require('./prism.js');
+//const TextureRegular = require('./textureRegular');
+//const TextureRound = require('./textureRound');
 
 
 module.exports = (function() {
@@ -47,6 +47,7 @@ module.exports = (function() {
     this.memberHeight = options.memberHeight || 0.15;
 
     this.hingeHeight = 0.1 + this.stiffness/4; //this is just for visualisation
+
     if (options.hingeHeight != undefined) {
       console.warn("overwrite hingeHeight");
       this.hingeHeight = options.hingeHeight;
@@ -61,8 +62,10 @@ module.exports = (function() {
     left wall starts at x=0, right wall ends at x=this.width=2
     top starts at y=0, bottom ends at y=-1
     */
-    
+
+    options.hingeHeight = this.hingeHeight;
     this.texture = new texture(options);
+    this.texture.hingeHeight = options.hingeHeight;
     this.mesh = this.getMesh();
   }
 

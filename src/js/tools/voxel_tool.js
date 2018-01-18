@@ -338,7 +338,6 @@ module.exports = (function() {
             if (this.activeBrush.type == "texture" && y < end.y) {
               this.activeBrush.texture = TextureSupport;
             }
-            this.activeBrush.name = brushName;
             let stiffness = this.calculateStiffness([x,y,z][lc], start.getComponent(lc), end.getComponent(lc));
             updatedVoxels = updatedVoxels.concat(
               this.updateSingleVoxel(new THREE.Vector3(x, y, z), new THREE.Vector2(x - start.x, z - start.z), stiffness)

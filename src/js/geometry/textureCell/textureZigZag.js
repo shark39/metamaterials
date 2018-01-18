@@ -9,6 +9,8 @@ const Texture = require('./metatexture');
 const THREE = require('three');
 const ThreeBSP = require('three-js-csg')(THREE);
 
+const PrismGeometry = require('./prism.js');
+
 module.exports = (function() {
 
   function TextureZigZag() {
@@ -24,7 +26,7 @@ module.exports = (function() {
   TextureZigZag.getName = () => "zigzag";
   TextureZigZag.getIsCustomizable = () => true;
   TextureZigZag.getDrawing = function() {
-    return [[0, 0], [1, 1]];
+    return [[0.1, 0.1], [0.9, 0.9]];
   }
 
   TextureZigZag.prototype.getGeometry = function() {
@@ -52,6 +54,19 @@ module.exports = (function() {
     textureGeometry.merge(topPlane);
 
     return textureGeometry;
+  }
+
+  TextureZigZag.prototype._getMiddleZigZagGeometry = function() {
+    var A = new THREE.Vector2(-0.5, 0);
+    var B = new THREE.Vector2(-0.15, this.amplitude);
+    //var p = this.width / 2 - 2 * this.hingeWidth - this.wallWidth - this.middleConnectorWidth / 2;
+    var C = new THREE.Vector2(0.15, this.amplitude);
+    var D = new THREE.Vector2(0.5, 0);
+
+    var m = new PrismGeometry([A, B, C, D], 0.2);
+    m.rotateY(Math.PI / 2);
+    //member.translate(-this.middleConnectorWidth / 2 - this.hingeWidth - B.x, -this.memberHeight - this.surfaceHeight, -this.length / 2);
+    return m;
   }
 
 

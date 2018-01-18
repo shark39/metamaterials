@@ -13,7 +13,7 @@ const TextureRegular = require('../geometry/textureCell/textureRegular');
 const TextureRound = require('../geometry/textureCell/textureRound');
 const TextureBox = require('../geometry/textureCell/textureBox');
 const TextureZigZag = require('../geometry/textureCell/textureZigZag');
-
+const TextureCustom = require('../geometry/textureCell/textureCustom');
 
 
 const patterns = ['regular', 'round', 'box', 'zigzag']; //'diamond', 'spiky', 'custom', 'debug'];
@@ -76,13 +76,14 @@ module.exports = (function() {
     let canvas = $('<canvas height=100 width=200 class="texture-canvas"></canvas>');
     div.draggable({
       disabled: false,
+      axis: 'y',
       //prevent dragging when clicked on line or dot
       drag: function(event, ui) {
         return !self.canvasdrawer.movingDot;
       }
     });
     div.append(canvas);
-    let addcellDom = $('<div>+</div>');
+    let addcellDom = $('<div><button type="button" class="btn btn-secondary" style="width: 100%"">extend cell</button></div>');
     addcellDom.click(function(event) {
       self.canvasdrawer.addCell();
     });
@@ -121,13 +122,21 @@ module.exports = (function() {
 
     $('.voxel-cells-btn').removeClass('active');
 
-    let texture = mapping[name];
+    let texture;
+    if (name.startsWith("custom") &&  this.activeBrush.name != name) {
+      texture = TextureCustom;
+      texture.getDrawing = () => this.canvasdrawer.getDrawing();
+    } else {
+    texture = mapping[name];
+    }
 
     if ((this.activeBrush == undefined || this.activeBrush.name != name) && texture && texture.getIsCustomizable()) {
       this.canvasdrawer.load(texture.getDrawing());
+      $("#canvas-container").show();
     }
     if (texture && !texture.getIsCustomizable()) {
       this.canvasdrawer.block();
+      $("#canvas-container").hide();
     }
     var brush = this.brushes[name];
     brush.name = name;

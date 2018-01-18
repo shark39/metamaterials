@@ -24,7 +24,7 @@ module.exports = (function() {
   TextureRound.getName = () => "round";
   TextureRound.getIsCustomizable = () => false;
   TextureRound.getDrawing = function() {
-    return [[0.3, 0], [0.7, 0], [0.7, 1], [0.3, 1], [0.3, 0]];
+    return [[0.3, 0], [0.7, 0], [0.8, 0.2], [0.8, 0.8], [0.7, 1], [0.3, 1], [0.2, 0.8], [0.2, 0.2], [0.3, 0]];
 
   }
 

@@ -11,41 +11,72 @@ const THREE = require('three');
 
 module.exports = (function() {
 
-  function TextureRegular() {
+  function TextureCustom() {
     //bind(this);
     Texture.call(this);
     //this.texture = texture;
-    this.name = "regular";
+    this.name = "custom";
   }
 
-  TextureRegular.prototype = Object.create(Texture.prototype);
-  TextureRegular.getName = () => "regular";
-  TextureRegular.getIsCustomizable = () => true;
-  TextureRegular.getDrawing = function() {
-    return [[0.5, 0], [0.5, 1]];
+  TextureCustom.prototype = Object.create(Texture.prototype);
+  TextureCustom.getName = () => "custom";
+  TextureCustom.getIsCustomizable = () => true;
+  TextureCustom.getDrawing = function() {
+    return [];
   }
 
-  TextureRegular.prototype.getGeometry = function() {
-    var textureGeometry = new THREE.Geometry();
+  TextureCustom.prototype.getGeometry = function() {
+    //generate a negativ from the canvas path
+    var height = this.surfaceHeight;
+    var gap = 0.05;
+    var path = new THREE.Curve();
+    path.getPoint = function(t) {return canvasdrawer.getPoint(t);}; //this function ist required for extrude geometry
 
-    var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, this.height, this.length);
-    middleConnector.translate(this.width/2, -(this.height)/2, 0);
-    textureGeometry.merge(middleConnector);
+    var shapePoints2 = [ new THREE.Vector2(0, -gap),
+                        new THREE.Vector2(0.3*height, -gap),
+                        new THREE.Vector2(height, -gap*1.5),
+                        new THREE.Vector2(height, gap*1.5),
+                        new THREE.Vector2(0.3*height, gap),
+                        new THREE.Vector2(0, gap),
+                         new THREE.Vector2(0, -gap)];;
+    //shapePoints.forEach(function(p) {
+    //  shapePoints2.push(new THREE.Vector2(p.y, p.x));
+    //});
 
-    var member1 = this._getMemberGeometry(1, false);
-    member1.translate(this.wallWidth + this.hingeWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
-    textureGeometry.merge(member1);
+    var extrudeSettings = {
+				steps: 100,
+				bevelEnabled: false,
+				extrudePath: path
+			};
+      var shape = new THREE.Shape(shapePoints2);
+  		var pathGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      pathGeometry.translate(-this.width/2, this.surfaceHeight/2, -this.length/2);
+      if (shapeOnly) { //this is just for the demo and debugging
+        return pathGeometry;
+      }
 
-    var member2 = this._getMemberGeometry(-1, false);
-    member2.translate(this.width/2 + this.middleConnectorWidth/2 + this.hingeWidth + this.memberWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
-    textureGeometry.merge(member2);
+      var textureGeometry = new THREE.Geometry();
 
-    textureGeometry.merge(this._getSurfaceGeometry());
+      var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length, 4, 4, 4);
+      var topPlaneBSP = new ThreeBSP(topPlane);
+      var negativBSP = new ThreeBSP(pathGeometry);
+      var result = topPlaneBSP.subtract(negativBSP);
+      topPlane = result.toMesh().geometry;
+      topPlane.translate(this.width / 2, -this.surfaceHeight / 2, 0);
+      textureGeometry.merge(topPlane);
 
-    return textureGeometry;
+      //like for every cell:
+      var fill = this.getFillGeometry();
+      //textureGeometry.merge(fill);
+      textureGeometry.merge(this._getWallGeometry('left'));
+      textureGeometry.merge(this._getWallGeometry('right'));
+
+      textureGeometry.scale(1,1,canvasdrawer.cellCount);
+
+      return textureGeometry;
   }
 
 
-  return TextureRegular;
+  return TextureCustom;
 
 })();

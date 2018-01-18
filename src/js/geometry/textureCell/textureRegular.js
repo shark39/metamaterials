@@ -42,6 +42,20 @@ module.exports = (function() {
 
     textureGeometry.merge(this._getSurfaceGeometry());
 
+    //hinges
+    var hingeOffsets = [this.wallWidth,
+                        this.memberWidth,
+                        this.middleConnectorWidth,
+                        this.memberWidth
+                     ]
+    var offset = 0;
+    for (var i = 0; i < hingeOffsets.length; i++) {
+      offset += hingeOffsets[i];
+      var box = new THREE.BoxGeometry(this.hingeWidth, this.hingeHeight, this.length);
+      box.translate(this.hingeWidth/2+i*this.hingeWidth + offset, -this.hingeHeight/2, 0);
+      textureGeometry.merge(box);
+    }
+
     return textureGeometry;
   }
 

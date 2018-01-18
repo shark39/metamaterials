@@ -41,7 +41,7 @@ module.exports = (function() {
 
     this.memberHeight = options.memberHeight || 0.15;
 
-    this.hingeHeight = 0.1; //  + this.stiffness/4; //this is just for visualisation
+    this.hingeHeight = options.hingeHeight || 0.1 ; //  + this.stiffness/4; //this is just for visualisation
     if (options.hingeHeight != undefined) {
       console.warn("overwrite hingeHeight");
       this.hingeHeight = options.hingeHeight;
@@ -107,18 +107,7 @@ module.exports = (function() {
 
   }
 
-  Texture.prototype._getMiddleZigZagGeometry = function() {
-    var A = new THREE.Vector2(-0.5, 0);
-    var B = new THREE.Vector2(-0.15, this.amplitude);
-    //var p = this.width / 2 - 2 * this.hingeWidth - this.wallWidth - this.middleConnectorWidth / 2;
-    var C = new THREE.Vector2(0.15, this.amplitude);
-    var D = new THREE.Vector2(0.5, 0);
 
-    var m = new PrismGeometry([A, B, C, D], 0.2);
-    m.rotateY(Math.PI / 2);
-    //member.translate(-this.middleConnectorWidth / 2 - this.hingeWidth - B.x, -this.memberHeight - this.surfaceHeight, -this.length / 2);
-    return m;
-  }
 
   Texture.prototype._getMiddleBoxGeometry = function(widthTop, widthBottom) {
     var A = new THREE.Vector2(-widthBottom/2, 0);
@@ -250,7 +239,7 @@ module.exports = (function() {
   }
 
 
-  
+
   Texture.prototype.getSpikyGeometry = function() {
 
     var textureGeometry = new THREE.Geometry();

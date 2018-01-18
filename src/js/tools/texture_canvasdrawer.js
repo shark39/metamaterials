@@ -22,6 +22,7 @@ module.exports = (function() {
 
     this.stage = new createjs.Stage(this.canvas[0]);
     this.lines = []; //paths
+    this.points = [];
     this.pathCommands = [];
 
     this.stage.autoClear = true;
@@ -54,19 +55,15 @@ module.exports = (function() {
     middleLine.graphics.endStroke();
     this.middleLine = middleLine; //needed for addCell
 
-
     this.stage.update();
 
   }
-
-
 
   TextureCanvasDrawer.prototype.drawExamplePath = function() {
     var line = new createjs.Shape();
     this.pathCommands.push(line.graphics.moveTo(width / 3, 0).command);
     //pathCommands.push(line.graphics.quadraticCurveTo((width / 3 + width / 2), 10, width / 2, height / 2).command);
     this.pathCommands.push(line.graphics.lineTo(2 * width / 3, height).command);
-
 
     this.drawPath();
     var self = this;
@@ -79,7 +76,12 @@ module.exports = (function() {
 
   TextureCanvasDrawer.prototype.load = function(coordArray) {
     // coordArray contains relative commands for lineTo commands. example [[0, 0], [1, 1]] draws a diagonal line
-    this.canvas.show();
+    //this.canvas.show();
+
+    for (var i = 0; i < this.points.length; i++) {
+      this.stage.removeChild(this.points[i]);
+    }
+    this.points = [];
     this.pathCommands = [];
     if (!coordArray || coordArray == []) {
       return
@@ -101,7 +103,7 @@ module.exports = (function() {
   }
 
   TextureCanvasDrawer.prototype.block = function() {
-    this.canvas.hide();
+    //this.canvas.hide();
   }
 
   TextureCanvasDrawer.prototype.addCell = function() {
@@ -185,6 +187,7 @@ module.exports = (function() {
       self.movingDot = false;
     });
     this.stage.addChild(circle);
+    this.points.push(circle);
   }
 
   TextureCanvasDrawer.prototype.getPoint = function(t) {
@@ -218,6 +221,14 @@ module.exports = (function() {
       }
     }
 
+  }
+
+  TextureCanvasDrawer.prototype.getDrawing = function() {
+    var coordArray = [];
+    for (var i = 0; i < this.pathCommands.length; i++) {
+      coordArray.push([this.pathCommands[i].x/this.dimensions.x, this.pathCommands[i].y/this.dimensions.y]);
+    }
+    return coordArray;
   }
 
   TextureCanvasDrawer.prototype.getImage = function() {
