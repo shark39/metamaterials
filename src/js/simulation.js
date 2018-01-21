@@ -13,7 +13,7 @@ module.exports = (function() {
 
     this.voxelGrid = voxelGrid;
     var url = 'ws://' + config.simulation.ip + ':' + config.simulation.port + '/simulation';
-    this.connect(url);
+    //this.connect(url);
   }
 
   Simulation.prototype.start = function() {
