@@ -27,9 +27,7 @@ module.exports = (function() {
 
   function Texture(options) {
     /*options contains parameters like length, hingeThickness ...*/
-
     bind(this);
-    options = {memberHeight: 0.33, wallWidth: 0.2, middleConnectorWidth: 0.2};
     options = options != undefined ? options : {};
     this.length = options.length || 1;
     this.height = options.height || 1;
@@ -56,7 +54,6 @@ module.exports = (function() {
     left wall starts at x=0, right wall ends at x=this.width=2
     top starts at y=0, bottom ends at y=-1
     */
-    this.mesh = this.getMesh();
   }
 
   Texture.prototype.size = function () {

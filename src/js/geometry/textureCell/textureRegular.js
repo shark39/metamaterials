@@ -14,7 +14,6 @@ module.exports = (function() {
   function TextureRegular() {
     //bind(this);
     Texture.call(this);
-    //this.texture = texture;
     this.name = "regular";
   }
 

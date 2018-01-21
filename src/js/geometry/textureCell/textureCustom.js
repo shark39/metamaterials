@@ -1,21 +1,21 @@
 'use strict';
 
 /*
-A Regular Texture cell
+A Texture cell
 */
 
 const bind = require('../../misc/bind');
 const Texture = require('./metatexture');
 const THREE = require('three');
+const ThreeBSP = require('three-js-csg')(THREE);
 
 
 module.exports = (function() {
 
   function TextureCustom() {
-    //bind(this);
     Texture.call(this);
-    //this.texture = texture;
     this.name = "custom";
+    this.isCustomizable = true;
   }
 
   TextureCustom.prototype = Object.create(Texture.prototype);
@@ -25,12 +25,16 @@ module.exports = (function() {
     return [];
   }
 
+  TextureCustom.prototype.getDrawing = function() {
+    return [];
+  }
+
   TextureCustom.prototype.getGeometry = function() {
     //generate a negativ from the canvas path
     var height = this.surfaceHeight;
     var gap = 0.05;
     var path = new THREE.Curve();
-    path.getPoint = function(t) {return canvasdrawer.getPoint(t);}; //this function ist required for extrude geometry
+    path.getPoint = (t) => this.canvasdrawer.getPoint(t); //this function ist required for extrude geometry
 
     var shapePoints2 = [ new THREE.Vector2(0, -gap),
                         new THREE.Vector2(0.3*height, -gap),
@@ -51,9 +55,9 @@ module.exports = (function() {
       var shape = new THREE.Shape(shapePoints2);
   		var pathGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
       pathGeometry.translate(-this.width/2, this.surfaceHeight/2, -this.length/2);
-      if (shapeOnly) { //this is just for the demo and debugging
+      /*if (shapeOnly) { //this is just for the demo and debugging
         return pathGeometry;
-      }
+      }*/
 
       var textureGeometry = new THREE.Geometry();
 
@@ -71,7 +75,7 @@ module.exports = (function() {
       textureGeometry.merge(this._getWallGeometry('left'));
       textureGeometry.merge(this._getWallGeometry('right'));
 
-      textureGeometry.scale(1,1,canvasdrawer.cellCount);
+      textureGeometry.scale(1,1,this.canvasdrawer.cellCount);
 
       return textureGeometry;
   }

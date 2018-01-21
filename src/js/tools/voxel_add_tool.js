@@ -41,7 +41,11 @@ module.exports = (function() {
     var voxel = undefined;
     switch (this.activeBrush.type) {
       case "texture":
-        voxel = new TextureCell(position, this.activeBrush.texture, stiffness);
+        var texture = new this.activeBrush.texture();
+        if (texture.name.startsWith('custom')) {
+          texture.canvasdrawer = this.activeBrush.canvasdrawer;
+        }
+        voxel = new TextureCell(position, texture, stiffness);
         break;
       default:
         voxel = new MechanicalCell(position, features, this.extrusionNormal.largestComponent(), stiffness, this.voxelGrid.minThickness);

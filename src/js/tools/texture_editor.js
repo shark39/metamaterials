@@ -92,7 +92,7 @@ module.exports = (function() {
 
     div.click(function(event) {
       let image = self.canvasdrawer.getImage();
-      let cc = _.size(self.brushes) - patterns.length + 1;
+      let cc = Math.random().toString(36).substring(7);
       let pattern = "custom" + cc;
       var domElement = getButtonDom(image);
       var customPath = self.canvasdrawer.getDrawing();
@@ -118,7 +118,6 @@ module.exports = (function() {
 
 
   TextureEditor.prototype.activateBrush = function(name, customPath) {
-    //this.removeUnusedBrush();
 
     $('.voxel-cells-btn').removeClass('active');
 
@@ -126,7 +125,6 @@ module.exports = (function() {
     if (name.startsWith("custom") &&  this.activeBrush.name != name) {
       texture = TextureCustom;
       texture.getDrawing = () => customPath || this.canvasdrawer.getDrawing();
-      //texture.getDrawing = () => ;
     } else {
     texture = mapping[name];
     }
@@ -139,8 +137,13 @@ module.exports = (function() {
       this.canvasdrawer.block();
       $("#canvas-container").hide();
     }
+    if (texture && this.activeBrush && this.activeBrush.name.startsWith('custom')) {
+      console.log("remove unused brush", this.activeBrush.name);
+      this.removeUnusedBrush();
+    }
     var brush = this.brushes[name];
     brush.name = name;
+    brush.hash = name;
     brush.rotated = this.rotatation;
     brush.canvasdrawer = this.canvasdrawer;
     brush.domElement.addClass('active');

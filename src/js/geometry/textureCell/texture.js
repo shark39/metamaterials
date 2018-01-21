@@ -34,17 +34,16 @@ module.exports = (function() {
     this.stiffness = stiffness;
     this.position = (new THREE.Vector3()).copy(position);
     bind(this);
-    options = {memberHeight: 0.33, wallWidth: 0.2, middleConnectorWidth: 0.2};
     options = options != undefined ? options : {};
     this.length = options.length || 1;
     this.height = options.height || 1;
     this.width = options.width || 2;
-    this.wallWidth = options.wallWidth || 0.3;
+    this.wallWidth = options.wallWidth || 0.2;
     this.middleConnectorWidth = options.middleConnectorWidth || 0.2;
     this.surfaceHeight = options.surfaceHeight || 0.1;
     this.hingeWidth = options.hingeWidth || 0.08;
 
-    this.memberHeight = options.memberHeight || 0.15;
+    this.memberHeight = options.memberHeight || 0.3;
 
     this.hingeHeight = 0.1 + this.stiffness/4; //this is just for visualisation
 
@@ -64,7 +63,7 @@ module.exports = (function() {
     */
 
     options.hingeHeight = this.hingeHeight;
-    this.texture = new texture(options);
+    this.texture = texture;
     this.texture.hingeHeight = options.hingeHeight;
     this.mesh = this.getMesh();
   }
