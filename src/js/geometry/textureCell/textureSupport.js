@@ -31,6 +31,10 @@ module.exports = (function() {
   TextureSupport.prototype.getGeometry = function() {
     var textureGeometry = new THREE.Geometry();
 
+    var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, this.height, this.length);
+    middleConnector.translate(this.width/2, -(this.height)/2, 0);
+    textureGeometry.merge(middleConnector);
+
     return textureGeometry;
   }
 
