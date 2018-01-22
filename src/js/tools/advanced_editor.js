@@ -139,6 +139,38 @@ module.exports = (function() {
           cells: {
             '0,0': {
               coords: [0, 0],
+              features: [ 'top-left-triangle' ]
+            }
+          }
+        },
+        {
+          cells: {
+            '0,0': {
+              coords: [0, 0],
+              features: [ 'top-right-triangle' ]
+            }
+          }
+        },
+        {
+          cells: {
+            '0,0': {
+              coords: [0, 0],
+              features: [ 'bottom-left-triangle' ]
+            }
+          }
+        },
+        {
+          cells: {
+            '0,0': {
+              coords: [0, 0],
+              features: [ 'bottom-right-triangle' ]
+            }
+          }
+        },
+        {
+          cells: {
+            '0,0': {
+              coords: [0, 0],
               features: [ 'neg-diagonal' ]
             },
             '0,1': {

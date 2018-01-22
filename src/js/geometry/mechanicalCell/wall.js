@@ -16,11 +16,16 @@ module.exports = (function() {
   }
 
   Wall.prototype.getWedge = function () {
-    var triangleShape = new THREE.Shape();
+    var shape = new THREE.Shape();
+    shape.moveTo(0,0);
+    shape.lineTo(0.5, 0.5);
     shape.lineTo(1, 0);
-    shape.lineTo(0, 1);
     shape.lineTo(0, 0);
-    return new THREE.ExtrudeGeometry( triangleShape, { amount: 1, steps: 1} );
+    var wedge = new THREE.ExtrudeGeometry( shape, { amount: 1, steps: 1, bevelEnabled: false} );
+    wedge.translate(-0.5,-0.5,-0.5);
+    wedge.rotateY(Math.PI/2);
+    wedge.rotateX(Math.PI/2);
+    return wedge;
   }
 
   Wall.prototype.experimentWall = function () {
@@ -90,7 +95,17 @@ module.exports = (function() {
         wall.scale(1, Math.sqrt(2)-thickness/pWidth, 1);
         wall.rotateX(Math.PI / 4); break;
       case "top-left-triangle": 
-        wall = Wall.getWedge();
+        wall = this.getWedge();
+        wall.merge(this.getWedge().rotateX(Math.PI/2)); break;
+      case "top-right-triangle": 
+        wall = this.getWedge();
+        wall.merge(this.getWedge().rotateX(-Math.PI/2)); break;
+      case "bottom-left-triangle": 
+        wall = this.getWedge().rotateX(Math.PI);
+        wall.merge(this.getWedge().rotateX(Math.PI/2)); break;
+      case "bottom-right-triangle": 
+        wall = this.getWedge().rotateX(Math.PI);
+        wall.merge(this.getWedge().rotateX(-Math.PI/2)); break;        
       default:
         console.error(this.features + " not handled")            
     }
