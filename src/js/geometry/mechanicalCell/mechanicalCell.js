@@ -118,8 +118,6 @@ module.exports = (function() {
   }
 
   MechanicalCell.prototype.getGeometry = function() {
-    this.buildGeometry();
-    this.renderMesh();
     return this.mesh.geometry;
   }
 

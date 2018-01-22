@@ -139,6 +139,7 @@ module.exports = (function() {
   }
 
   VoxelTool.prototype.updateSelection = function() {
+
     if (!this.startPosition || !this.endPosition) {
       this.cursor.visible = false;
       this.infoBox.hide();
@@ -151,6 +152,8 @@ module.exports = (function() {
       this.infoBox.hide();
     }
 
+    console.log("updateSelection");
+
 
     this.startPosition.clamp(this.minPosition, this.maxPosition);
     this.endPosition.clamp(this.minPosition, this.maxPosition);
@@ -158,14 +161,15 @@ module.exports = (function() {
     const start = this.startPosition.clone().min(this.endPosition);
     const end = this.startPosition.clone().max(this.endPosition);
 
+
     var cursorGeometry = new THREE.Geometry();
-    for (var x = start.x; x <= end.x; x++)
-      for (var y = start.y; y <= end.y; y++)
-        for (var z = start.z; z <= end.z; z++) {
+    var voxel;
+    for (var x = start.x; x <= end.x;) {
+      for (var y = start.y; y <= end.y;) {
+        for (var z = start.z; z <= end.z;) {
           const position = new THREE.Vector3(x, y, z);
           const stiffness = 0.1;
           const offset = new THREE.Vector2(x - start.x, z - start.z);
-          var voxel;
           switch (this._activeBrush.type) {
             case "texture":
               var texture = new this.activeBrush.texture();
@@ -183,7 +187,13 @@ module.exports = (function() {
 
           geo.translate(offset.x, y - start.y, offset.y);
           cursorGeometry.merge(geo);
+
+          z += voxel.size()[2];
         }
+        y += voxel.size()[1];
+      }
+      x += voxel.size()[0];
+    }
 
     this.cursor.mesh.visible = true;
 
