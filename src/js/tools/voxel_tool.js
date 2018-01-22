@@ -159,7 +159,6 @@ module.exports = (function() {
     const end = this.startPosition.clone().max(this.endPosition);
 
     var cursorGeometry = new THREE.Geometry();
-    var mc = 0;
     for (var x = start.x; x <= end.x; x++)
       for (var y = start.y; y <= end.y; y++)
         for (var z = start.z; z <= end.z; z++) {
@@ -181,18 +180,14 @@ module.exports = (function() {
               voxel = new MechanicalCell(position, features, this.extrusionNormal.largestComponent(), stiffness, this.voxelGrid.minThickness);
           }
           var geo = voxel.getGeometry();
-          geo.translate(offset.x, 0, offset.y);
+
+          geo.translate(offset.x, y - start.y, offset.y);
           cursorGeometry.merge(geo);
-          mc++;
         }
-    console.log("mc", mc);
-
-
-
 
     this.cursor.mesh.visible = true;
 
-    cursorGeometry.translate(-(end.x - start.x)/2, 0, -(end.z - start.z)/2);
+    cursorGeometry.translate(-(end.x - start.x)/2, -(end.y - start.y)/2, -(end.z - start.z)/2);
     this.cursor.setGeometry(cursorGeometry);
     this.cursor.mesh.position.copy(start.clone().add(end).divideScalar(2.0));
   }
