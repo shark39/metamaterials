@@ -66,9 +66,9 @@ module.exports = (function() {
   }  
 
   Wall.prototype.getSolidWall = function() {
-    var width = 1.0+this.thickness;
+    var width = 1.0+this.thickness/2;
     var wall = new THREE.BoxGeometry(width, width, this.thickness  );
-    wall.merge(new THREE.BoxGeometry(width, width/2,              this.thickness*2));
+    wall.merge(new THREE.BoxGeometry(width, width/2, this.thickness*2));
     wall.translate(0,0,-this.thickness/2);
     return wall;
   }

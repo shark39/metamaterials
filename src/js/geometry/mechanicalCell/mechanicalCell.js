@@ -74,8 +74,18 @@ module.exports = (function() {
     return this.minThickness + (0.25 - this.minThickness) * this.stiffness;
   }
 
+  MechanicalCell.geometryCache = {};
+
   MechanicalCell.prototype.buildGeometry = function() {
     if(this.solid) { return }
+    let cacheKey = this.featuresPerDirection[0].toString() + '|' + 
+                   this.featuresPerDirection[1].toString() + '|' + 
+                   this.featuresPerDirection[2].toString() + '|' +  
+                   this.thickness();
+    console.log(cacheKey);
+    if(MechanicalCell.geometryCache.hasOwnProperty(cacheKey)) {
+      return this.renderGeometry = MechanicalCell.geometryCache[cacheKey];
+    }
 
     var elements = [];
     let thickness = this.thickness();
@@ -100,6 +110,15 @@ module.exports = (function() {
     }, new THREE.Geometry());
 
     this.renderGeometry.mergeVertices();
+
+    let zfightingIndex = 
+      (this.featuresPerDirection[0].length > 0) | 
+      (this.featuresPerDirection[1].length > 0) << 1 |
+      (this.featuresPerDirection[2].length > 0) << 2;
+    let zfighting = 1 + (0.0001*zfightingIndex);
+    this.renderGeometry.scale(zfighting,zfighting,zfighting);
+
+    MechanicalCell.geometryCache[cacheKey] = this.renderGeometry;
   };
 
   MechanicalCell.prototype.renderMesh = function() {
@@ -115,13 +134,6 @@ module.exports = (function() {
       color: color,
       flatShading: false,
     });
-
-    let zfightingIndex = 
-      (this.featuresPerDirection[0].length > 0) | 
-      (this.featuresPerDirection[1].length > 0) << 1 |
-      (this.featuresPerDirection[2].length > 0) << 2;
-    let zfighting = 1 + (0.0001*zfightingIndex);
-    this.renderGeometry.scale(zfighting,zfighting,zfighting);
     this.mesh = new THREE.Mesh(this.renderGeometry, material);
   }
 

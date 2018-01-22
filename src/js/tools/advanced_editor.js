@@ -381,6 +381,7 @@ module.exports = (function() {
   AdvancedEditor.prototype.onMouseDown = function(evt) {
     this.down = true;
     this.moved = false;
+    this.startedMovingAt = [evt.offsetX,evt.offsetY];
   }
 
   AdvancedEditor.prototype.onMouseUp = function(evt) {
@@ -389,14 +390,19 @@ module.exports = (function() {
     if (!this.moved) {
       this.click(evt);
     }
+    this.startedMovingAt = undefined;
   }
 
   AdvancedEditor.prototype.onMouseMove = function(evt) {
-    this.moved = true;
+  
+    if(Math.abs(this.startedMovingAt[0]-evt.offsetX) > 5 || 
+       Math.abs(this.startedMovingAt[1]-evt.offsetY) > 5)
+       this.moved = true;
 
-    if (!this.down) {
+    if (!this.down || !this.moved) {
       return;
     }
+
 
     this.canvasPosition.add(new THREE.Vector2(evt.movementX, evt.movementY));
     $(this.canvas).css('left', this.canvasPosition.x);

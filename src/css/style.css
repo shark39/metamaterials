@@ -230,6 +230,7 @@ body {
   position: absolute;
   left: -540px;
   top: -540px;
+  user-select: none;
 }
 
 #voxel-advanced-rotate-btn {
