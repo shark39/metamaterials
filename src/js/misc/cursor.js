@@ -13,56 +13,15 @@ module.exports = (function() {
 
     this.material = new THREE.RawShaderMaterial({
       transparent: true,
-      uniforms: {
-        'scale': {
-          type: 'v3',
-          value: new THREE.Vector3(1.0, 1.0, 1.0)
-        },
-        'color': {
-          type: 'c',
-          value: new THREE.Color(0x444444)
-        },
-        'borderColor': {
-          type: 'c',
-          value: new THREE.Color(0x666666)
-        },
-        'borderSize': {
-          type: 'f',
-          value: 0.0
-        },
-        'rotatedMode': {
-          type: 'i',
-          value: 0
-        },
-        'rotatedScale': {
-          type: 'f',
-          value: 0.0
-        },
-        'rotatedHeight': {
-          type: 'f',
-          value: 0.0
-        },
-        'rotatedDirection': {
-          type: 'i',
-          value: 0
-        },
-        'image': {
-          type: 't',
-          value: new THREE.Texture()
-        },
-        'tool': {
-          type: 'i',
-          value: 0
-        }
-      },
+      uniforms: cursorConfig.uniforms,
       vertexShader: cursorConfig.vertexShader,
       fragmentShader: cursorConfig.fragmentShader
     });
 
-    this.material =  new THREE.MeshPhongMaterial({
+    /*this.material =  new THREE.MeshPhongMaterial({
       color: new THREE.Color(0.5, 0.5, 0.5),
       flatShading: false
-    });
+    });*/
     var geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0);
     this.mesh = new THREE.Mesh(geometry, this.material);
   }
@@ -77,6 +36,14 @@ module.exports = (function() {
     this.mesh.geometry.colorsNeedUpdate = true;
     this.mesh.geometry.tangentsNeedUpdate = true;
   }
+
+  Cursor.prototype.deleteMode = function() {
+  const cursorBorder = 0.5;
+  this.mesh.material.uniforms.color.value = new THREE.Color(0xffffff);
+  this.mesh.material.uniforms.borderColor.value = new THREE.Color(0xdddddd);
+  this.mesh.material.uniforms.tool.value = 1;
+  this.mesh.material.uniforms.borderSize.value = this.cursorBorder / 2.0;
+}
 
   return Cursor;
 })();

@@ -13,12 +13,8 @@ module.exports = (function() {
 
     this.setCuboidMode(true, false);
 
-    //this.cursorrder = 0.5;
+    this.cursor.deleteMode();
 
-    //this.cursor.material.uniforms.color.value = new THREE.Color(0xffffff);
-    //this.cursor.material.uniforms.borderColor.value = new THREE.Color(0xdddddd);
-    //this.cursor.material.uniforms.tool.value = 1;
-    //this.cursor.material.uniforms.borderSize.value = this.cursorBorder / 2.0;
   }
 
   VoxelDeleteTool.prototype = Object.create(VoxelTool.prototype);

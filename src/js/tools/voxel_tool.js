@@ -163,7 +163,7 @@ module.exports = (function() {
     const end = this.startPosition.clone().max(this.endPosition);
     if (this.lastPosition.start.clone().sub(start).lengthSq() != 0 ||
     this.lastPosition.end.clone().sub(end).lengthSq() != 0 ) {
-      this.renderSelection();
+      this.renderSelectionShader();
       this.lastPosition.start = start.clone();
       this.lastPosition.end = end.clone();
     }
@@ -384,11 +384,11 @@ module.exports = (function() {
     this._activeBrush = activeBrush;
     if (activeBrush.type == 'texture') { //create the texture and update the cursor geometry
       var texture = new activeBrush.texture();
-      this.cursor.setGeometry(texture.getGeometry());
+      //this.cursor.setGeometry(texture.getGeometry());
 
     } else {
       var geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0);
-      this.cursor.setGeometry(geometry);
+      //this.cursor.setGeometry(geometry);
     }
   });
 
