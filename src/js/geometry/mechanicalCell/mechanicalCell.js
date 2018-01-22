@@ -31,7 +31,7 @@ module.exports = (function() {
   }
 
   MechanicalCell.prototype.renderSolid = function() {
-    let width = 1.0;
+    let width = 1.0 + this.thickness();
     let box = new THREE.BoxGeometry(width, width, width);
     let material = new THREE.MeshPhongMaterial({
       color: new THREE.Color(0.2+0.8*this.stiffness,0.2,0.2),
@@ -50,10 +50,15 @@ module.exports = (function() {
       this.solid = false;
     }
     this.stiffness = stiffness;
-    this.featuresPerDirection[direction] = features;
+    this.featuresPerDirection[direction] = intersect(this.featuresPerDirection[direction], features);
     this.meshRemoved = false;
     this.buildGeometry();
     this.renderMesh();
+
+    function intersect(set1, set2) {
+      if (set1.length == 0) return set2;
+      return set1; //TODO which stratergy?
+    }
   }
 
   MechanicalCell.prototype.setMinThickness = function(minThickness) {
@@ -65,12 +70,15 @@ module.exports = (function() {
     return true;
   }
 
+  MechanicalCell.prototype.thickness = function () {
+    return this.minThickness + (0.25 - this.minThickness) * this.stiffness;
+  }
+
   MechanicalCell.prototype.buildGeometry = function() {
     if(this.solid) { return }
 
     var elements = [];
-    let thickness = this.minThickness + (0.25 - this.minThickness) * this.stiffness;
-    console.log(this.featuresPerDirection);
+    let thickness = this.thickness();
     this.featuresPerDirection.forEach((features, direction) => {
         features.forEach((feature) => {
           var solid = true; 
