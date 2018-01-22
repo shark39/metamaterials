@@ -13,7 +13,7 @@ module.exports = (function() {
     bind(this);
     VoxelTool.call(this, renderer, voxelGrid);
 
-    this.cursor.material.uniforms.tool.value = 2;
+    //this.cursor.material.uniforms.tool.value = 2;
     this.allowCube = false;
 
     this.setCuboidMode(true, false);
@@ -76,25 +76,25 @@ module.exports = (function() {
 
     console.log(start, end);
     this.cursor.position.copy(start.clone().add(end).divideScalar(2.0));
-    this.cursor.scale.copy(end.clone().sub(start).addScalar(1.0 + this.cursorBorder));
-    this.cursor.rotation.fromArray([0.0, 0.0, 0.0]);
+    //this.cursor.scale.copy(end.clone().sub(start).addScalar(1.0 + //this.cursorBorder));
+    //this.cursor.rotation.fromArray([0.0, 0.0, 0.0]);
 
-    this.cursor.material.uniforms.scale.value.copy(this.cursor.scale);
-    this.cursor.material.uniforms.rotatedMode.value = 0;
-    this.cursor.material.uniforms.rotatedDirection.value = this.extrusionComponent;
+    //this.cursor.material.uniforms.scale.value.copy(this.cursor.scale);
+    //this.cursor.material.uniforms.rotatedMode.value = 0;
+    //this.cursor.material.uniforms.rotatedDirection.value = this.extrusionComponent;
 
     if (this.activeBrush && this.activeBrush.type == 'texture') {
       if (this.activeBrush.rotated) {
-        this.cursor.position.z += 0.5;
-        this.cursor.scale.z *= 2;
+        //this.cursor.position.z += 0.5;
+        //this.cursor.scale.z *= 2;
         if (this.activeBrush.name.startsWith("custom")) {
-          this.cursor.scale.x *= this.activeBrush.canvasdrawer.cellCount;
+          //this.cursor.scale.x *= this.activeBrush.canvasdrawer.cellCount;
         }
       } else {
-        this.cursor.position.x += 0.5;
-        this.cursor.scale.x *= 2;
+        //this.cursor.position.x += 0.5;
+        //this.cursor.scale.x *= 2;
         if (this.activeBrush.name.startsWith("custom")) {
-          this.cursor.scale.z *= this.activeBrush.canvasdrawer.cellCount;
+          //this.cursor.scale.z *= this.activeBrush.canvasdrawer.cellCount;
         }
       }
     }
@@ -103,10 +103,10 @@ module.exports = (function() {
   }
 
   VoxelColumnTool.prototype.updateCursor = function() {
-    this.cursor.scale.setComponent(this.extrusionComponent, 0.1);
-    this.cursor.position.add(this.extrusionNormal.clone().multiplyScalar(0.7));
-    this.cursor.material.uniforms.scale.value = this.cursor.scale;
-    this.cursor.material.uniforms.rotatedMode.value = this.rotatedMode ? 1 : 0;
+    //this.cursor.scale.setComponent(this.extrusionComponent, 0.1);
+    //this.cursor.position.add(this.extrusionNormal.clone().multiplyScalar(0.7));
+    //this.cursor.material.uniforms.scale.value = //this.cursor.scale;
+    //this.cursor.material.uniforms.rotatedMode.value = this.rotatedMode ? 1 : 0;
   }
 
   VoxelColumnTool.prototype.updateVoxel = function(position, features, mirrorFactor) {
@@ -120,7 +120,7 @@ module.exports = (function() {
     while ((voxel = this.voxelGrid.voxelAtPosition(position)) && (!this.mirror[direction] ||  mirrorFactor * position.getComponent(direction) > 0)) {
       var voxel;
       switch (this.activeBrush.type) {
-        case "texture": 
+        case "texture":
           voxel = new TextureCell(position, this.activeBrush.name, this.stiffness);
           break;
         default:

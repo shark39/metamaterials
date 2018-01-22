@@ -73,22 +73,22 @@ module.exports = (function() {
     console.log(this.featuresPerDirection);
     this.featuresPerDirection.forEach((features, direction) => {
         features.forEach((feature) => {
-          var solid = true; 
-          if((feature == "top-edge" || feature == "bottom-edge") && this.featuresPerDirection[(direction+1) % 3].length) 
+          var solid = true;
+          if((feature == "top-edge" || feature == "bottom-edge") && this.featuresPerDirection[(direction+1) % 3].length)
             solid = false;
-          if((feature == "left-edge" || feature == "right-edge") && this.featuresPerDirection[(direction+2) % 3].length) 
+          if((feature == "left-edge" || feature == "right-edge") && this.featuresPerDirection[(direction+2) % 3].length)
             solid = false;
-          if((feature == "pos-diagonal" || feature == "neg-diagonal") && 
-              (this.featuresPerDirection[(direction+1) % 3].length ||    
+          if((feature == "pos-diagonal" || feature == "neg-diagonal") &&
+              (this.featuresPerDirection[(direction+1) % 3].length ||
               this.featuresPerDirection[(direction+2) % 3].length) )
-            solid = false; 
+            solid = false;
           elements.push(new Wall(solid, feature, direction, thickness));
         }, this);
       }, this);
 
     this.renderGeometry = elements.reduce((sum, geometry) => {
       sum.merge(geometry.renderGeometry);
-      return sum; 
+      return sum;
     }, new THREE.Geometry());
 
     this.renderGeometry.mergeVertices();
@@ -108,13 +108,19 @@ module.exports = (function() {
       flatShading: false,
     });
 
-    let zfightingIndex = 
-      (this.featuresPerDirection[0].length > 0) | 
+    let zfightingIndex =
+      (this.featuresPerDirection[0].length > 0) |
       (this.featuresPerDirection[1].length > 0) << 1 |
       (this.featuresPerDirection[2].length > 0) << 2;
     let zfighting = 1 + (0.0001*zfightingIndex);
     this.renderGeometry.scale(zfighting,zfighting,zfighting);
     this.mesh = new THREE.Mesh(this.renderGeometry, material);
+  }
+
+  MechanicalCell.prototype.getGeometry = function() {
+    this.buildGeometry();
+    this.renderMesh();
+    return this.mesh.geometry;
   }
 
   return MechanicalCell;
