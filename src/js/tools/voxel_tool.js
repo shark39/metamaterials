@@ -170,6 +170,70 @@ module.exports = (function() {
 
   }
 
+  VoxelTool.prototype.renderSelectionShader = function() {
+    const start = this.startPosition.clone().min(this.endPosition);
+    const end = this.startPosition.clone().max(this.endPosition);
+
+    this.cursor.mesh.visible = true;
+
+    if (this.cuboidMode) {
+      this.infoBox.show();
+    } else {
+      this.infoBox.hide();
+    }
+
+    if (this.rotatedMode) {
+      this.cursor.mesh.position.copy(start.clone().add(end).divideScalar(2.0));
+
+      const height = 1.0 + end.getComponent(this.extrusionComponent) - start.getComponent(this.extrusionComponent);
+      start.setComponent(this.extrusionComponent, 0.0);
+      end.setComponent(this.extrusionComponent, 0.0);
+      const rotatedScale = (2.0 + start.distanceTo(end));
+      const scale = rotatedScale / Math.sqrt(2.0);
+      this.cursor.mesh.scale.setComponent(this.extrusionComponent, height + this.cursorBorder);
+      this.cursor.mesh.scale.setComponent((this.extrusionComponent + 1) % 3, scale + this.cursorBorder);
+      this.cursor.mesh.scale.setComponent((this.extrusionComponent + 2) % 3, scale + this.cursorBorder);
+
+      const rotation = [0.0, 0.0, 0.0];
+      rotation[this.extrusionComponent] = 45.0 / 180.0 * Math.PI;
+      this.cursor.mesh.rotation.fromArray(rotation);
+
+      this.cursor.mesh.material.uniforms.rotatedMode.value = 1;
+      this.cursor.mesh.material.uniforms.rotatedScale.value = rotatedScale / 2.0;
+      this.cursor.mesh.material.uniforms.rotatedHeight.value = height;
+      this.cursor.mesh.material.uniforms.rotatedDirection.value = this.extrusionComponent;
+
+      this.infoBox.html('size ' + [rotatedScale / 2, height, rotatedScale / 2].join(' x '));
+    } else {
+      this.cursor.mesh.position.copy(start.clone().add(end).divideScalar(2.0));
+      this.cursor.mesh.scale.copy(end.clone().sub(start).addScalar(1.0 + this.cursorBorder));
+      this.cursor.mesh.rotation.fromArray([0.0, 0.0, 0.0]);
+
+      this.cursor.mesh.material.uniforms.scale.value.copy(this.cursor.mesh.scale);
+      this.cursor.mesh.material.uniforms.rotatedMode.value = 0;
+      this.cursor.mesh.material.uniforms.rotatedDirection.value = this.extrusionComponent;
+
+      this.infoBox.html('size ' + this.cursor.mesh.scale.toArray().join(' x '));
+    }
+
+    if (this.activeBrush && this.activeBrush.type == 'texture') {
+      if (this.activeBrush.rotated) {
+        this.cursor.mesh.position.z += 0.5;
+        this.cursor.mesh.scale.z *= 2;
+        if (this.activeBrush.name.startsWith("custom")) {
+          this.cursor.mesh.scale.x *= this.activeBrush.canvasdrawer.cellCount;
+        }
+      } else {
+        this.cursor.mesh.position.x += 0.5;
+        this.cursor.mesh.scale.x *= 2;
+        if (this.activeBrush.name.startsWith("custom")) {
+          this.cursor.mesh.scale.z *= this.activeBrush.canvasdrawer.cellCount;
+        }
+      }
+
+    }
+  }
+
   VoxelTool.prototype.renderSelection = function() {
     console.log("render updateSelection");
 
