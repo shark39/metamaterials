@@ -7,7 +7,6 @@ const voxelize       = require('voxelize');
 const CSG            = require('openjscad-csg').CSG;
 const saveAs         = require('file-saver').saveAs;
 
-const GeometryBuffer = require('./geometry_buffer');
 const Voxel          = require('./mechanicalCell/mechanicalCell');
 const STLExporter    = require('../misc/STLExporter');
 const OBJExporter    = require('../misc/OBJExporter');
@@ -21,8 +20,6 @@ module.exports = (function() {
     this.settings = settings;
 
     this.minThickness = 0.01;
-
-    //this.buffer = new GeometryBuffer(scene, this.size, 100000);
 
     this.textureGeometry = new THREE.Geometry();
 
@@ -39,7 +36,6 @@ module.exports = (function() {
   }
 
   VoxelGrid.prototype.reset = function() {
-    //this.buffer.reset();
 
     this.voxels = {};
     this.badVoxels = {};
@@ -80,7 +76,6 @@ module.exports = (function() {
   };
 
   VoxelGrid.prototype.export = function() {
-    const elementGeometry = this.buffer.renderMesh.geometry;
     const vertices = elementGeometry.attributes.position.array;
     const indices = elementGeometry.index.array;
 
@@ -176,7 +171,6 @@ module.exports = (function() {
   }
 
   VoxelGrid.prototype.update = function() {
-    //this.buffer.update();
   };
 
   VoxelGrid.prototype.intersectionPlane = function() {
@@ -318,8 +312,6 @@ module.exports = (function() {
       simulationIndices[vertex.toArray()] = index;
     }.bind(this));
 
-    this.buffer.updateVertexIndices(vertices);
-
     /* edges */
     const edges = this.edges();
     const edgeArray = [];
@@ -346,40 +338,8 @@ module.exports = (function() {
     return { vertices: vertexArray, edges: edgeArray, stiffness: stiffnessArray };
   };
 
-  VoxelGrid.prototype.anchorsForSimulation = function() {
-    return _.flatten(_.values(this.anchors).map(function(anchor) {
-      return anchor.position.toArray();
-    }));
-  };
-
-  VoxelGrid.prototype.updateSimulation = function(vertices, simulatedForce) {
-    this.buffer.updateVertices(vertices);
-    this.buffer.startSimulation();
-    this.buffer.simulatedForce = simulatedForce;
-  };
-
-  VoxelGrid.prototype.updateSimulationFromObj = function(obj) {
-    this.setTextureFromObj(obj);
-
-  }
-
-  VoxelGrid.prototype.interpolateSimulation = function(force) {
-    this.buffer.userForce = force;
-  };
-
-  VoxelGrid.prototype.stopSimulation = function() {
-    this.buffer.stopSimulation();
-  };
-
   VoxelGrid.prototype.isFreeAtPosition = function( position ) {
         return typeof this.voxelAtPosition( position ) === 'undefined';
-  };
-
-
-  VoxelGrid.prototype.highlightBadVoxels = function() {
-    for (var key in this.badVoxels){
-      this.badVoxels[key].markBad();
-    }
   };
 
   VoxelGrid.prototype.setMinThickness = function(minThickness) {
