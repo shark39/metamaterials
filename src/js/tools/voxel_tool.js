@@ -22,6 +22,10 @@ module.exports = (function() {
     this.voxelGrid = voxelGrid;
     this.startPosition = new THREE.Vector3();
     this.endPosition = new THREE.Vector3();
+    this.lastPosition = {
+      "start": new THREE.Vector3(),
+      "end": new THREE.Vector3()
+    }; //save the latest position to avoid unecessary updates
 
     this.extrusionNormal = new THREE.Vector3();
     this.extrusionComponent = 0;
@@ -152,15 +156,25 @@ module.exports = (function() {
       this.infoBox.hide();
     }
 
-    console.log("updateSelection");
-
-
     this.startPosition.clamp(this.minPosition, this.maxPosition);
     this.endPosition.clamp(this.minPosition, this.maxPosition);
 
     const start = this.startPosition.clone().min(this.endPosition);
     const end = this.startPosition.clone().max(this.endPosition);
+    if (this.lastPosition.start.clone().sub(start).lengthSq() != 0 ||
+    this.lastPosition.end.clone().sub(end).lengthSq() != 0 ) {
+      this.renderSelection();
+      this.lastPosition.start = start.clone();
+      this.lastPosition.end = end.clone();
+    }
 
+  }
+
+  VoxelTool.prototype.renderSelection = function() {
+    console.log("render updateSelection");
+
+    const start = this.startPosition.clone().min(this.endPosition);
+    const end = this.startPosition.clone().max(this.endPosition);
 
     var cursorGeometry = new THREE.Geometry();
     var voxel;
@@ -197,9 +211,10 @@ module.exports = (function() {
 
     this.cursor.mesh.visible = true;
 
-    cursorGeometry.translate(-(end.x - start.x)/2, -(end.y - start.y)/2, -(end.z - start.z)/2);
+    cursorGeometry.translate(-(end.x - start.x) / 2, -(end.y - start.y) / 2, -(end.z - start.z) / 2);
     this.cursor.setGeometry(cursorGeometry);
     this.cursor.mesh.position.copy(start.clone().add(end).divideScalar(2.0));
+
   }
 
   VoxelTool.prototype.updateCursor = function() {}
