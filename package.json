@@ -46,6 +46,7 @@
     "three-js-csg": "^72.0.0",
     "three-orbit-controls": "^82.1.0",
     "three-subdivision-modifier": "^1.0.5",
+    "threejs-slice-geometry": "^0.2.2",
     "voxelize": "^1.0.0",
     "websocket": "^1.0.23"
   }

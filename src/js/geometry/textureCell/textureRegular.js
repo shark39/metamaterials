@@ -29,17 +29,17 @@ module.exports = (function() {
 
     var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, this.height, this.length);
     middleConnector.translate(this.width/2, -(this.height)/2, 0);
-    textureGeometry.merge(middleConnector);
+    textureGeometry = this.merge(textureGeometry, middleConnector);
 
     var member1 = this._getMemberGeometry(1, false);
     member1.translate(this.wallWidth + this.hingeWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
-    textureGeometry.merge(member1);
+    textureGeometry = this.merge(textureGeometry, member1);
 
     var member2 = this._getMemberGeometry(-1, false);
     member2.translate(this.width/2 + this.middleConnectorWidth/2 + this.hingeWidth + this.memberWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
-    textureGeometry.merge(member2);
+    textureGeometry = this.merge(textureGeometry, member2);
 
-    textureGeometry.merge(this._getSurfaceGeometry());
+    textureGeometry = this.merge(textureGeometry, this._getSurfaceGeometry());
 
     //hinges
     var hingeOffsets = [this.wallWidth,
@@ -52,7 +52,7 @@ module.exports = (function() {
       offset += hingeOffsets[i];
       var box = new THREE.BoxGeometry(this.hingeWidth, this.hingeHeight, this.length);
       box.translate(this.hingeWidth/2+i*this.hingeWidth + offset, -this.hingeHeight/2, 0);
-      textureGeometry.merge(box);
+      textureGeometry = this.merge(textureGeometry, box);
     }
 
     return textureGeometry;

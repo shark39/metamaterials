@@ -82,7 +82,7 @@ module.exports = (function() {
                    this.featuresPerDirection[1].toString() + '|' + 
                    this.featuresPerDirection[2].toString() + '|' +  
                    this.thickness();
-    console.log(cacheKey);
+
     if(MechanicalCell.geometryCache.hasOwnProperty(cacheKey)) {
       return this.renderGeometry = MechanicalCell.geometryCache[cacheKey];
     }

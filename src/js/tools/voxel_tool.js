@@ -331,17 +331,16 @@ module.exports = (function() {
           }
     } else {
       let lc = end.clone().sub(start).largestComponent();
-      for (var x = start.x; x <= end.x; x++)
-        for (var y = start.y; y <= end.y; y++)
-          for (var z = start.z; z <= end.z; z++) {
+      var voxel;
+      for (var x = start.x; x <= end.x; x+=voxel.size()[0])
+        for (var y = start.y; y <= end.y; y+=voxel.size()[1])
+          for (var z = start.z; z <= end.z; z+=voxel.size()[2]) {
             var brushtexture = this.activeBrush.texture;
             if (this.activeBrush.type == "texture" && y < end.y) {
               this.activeBrush.texture = TextureSupport;
             }
             let stiffness = this.calculateStiffness([x,y,z][lc], start.getComponent(lc), end.getComponent(lc));
-            updatedVoxels = updatedVoxels.concat(
-              this.updateSingleVoxel(new THREE.Vector3(x, y, z), new THREE.Vector2(x - start.x, z - start.z), stiffness)
-            );
+            voxel = this.updateSingleVoxel(new THREE.Vector3(x, y, z), new THREE.Vector2(x - start.x, z - start.z), stiffness)[0]
             this.activeBrush.texture = brushtexture;
           }
     }

@@ -60,6 +60,14 @@ module.exports = (function() {
     return [2,1,1]
   }
 
+  Texture.prototype.merge = function(geo1, geo2) {
+    let _geo1 = new ThreeBSP(geo1);
+    if(!geo1.vertices.length) return geo2;
+    let _geo2 = new ThreeBSP(geo2);
+    if(!geo2.vertices.length) return geo1;
+    return _geo1.union(_geo2).toMesh().geometry;    
+  } 
+
   Texture.prototype.setMinThickness = function () {} //TODO
 
   Texture.prototype.getMesh = function () {
@@ -145,15 +153,15 @@ module.exports = (function() {
     var tempGeo = new THREE.Geometry();
     var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length);
     topPlane.translate(this.width/2, memberHeight+this.surfaceHeight/2, this.length/2);
-    tempGeo.merge(topPlane);
+    tempGeo = this.merge(tempGeo, topPlane);
 
     var lowerMember1 = this._getMemberGeometry(1, false, {memberHeight: memberHeight});
     lowerMember1.translate(this.wallWidth + this.hingeWidth, 0, 0);
-    tempGeo.merge(lowerMember1);
+    tempGeo = this.merge(tempGeo, lowerMember1);
 
     var lowerMember2 = this._getMemberGeometry(-1, false, {memberHeight: memberHeight});
     lowerMember2.translate(this.width/2 + this.middleConnectorWidth/2 + this.hingeWidth + this.memberWidth, 0, 0);
-    tempGeo.merge(lowerMember2);
+    tempGeo = this.merge(tempGeo, lowerMember2);
     tempGeo.translate(0,  -this.height, -this.length/2);
 
     return tempGeo;
@@ -176,7 +184,7 @@ module.exports = (function() {
       offset += hingeOffsets[i];
       var box = new THREE.BoxGeometry(this.hingeWidth, this.hingeHeight, this.length);
       box.translate(this.hingeWidth/2+i*this.hingeWidth + offset, -this.hingeHeight/2, 0);
-      textureGeometry.merge(box);
+      textureGeometry = this.merge(textureGeometry, box);
     }
 
     return textureGeometry;
@@ -189,11 +197,11 @@ module.exports = (function() {
 
     var member1 = this._getMemberGeometry(1, false);
     member1.translate(this.wallWidth + this.hingeWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
-    textureGeometry.merge(member1);
+    textureGeometry = this.merge(textureGeometry, member1);
 
     var member2 = this._getMemberGeometry(-1, false);
     member2.translate(this.width/2 + this.middleConnectorWidth/2 + this.hingeWidth + this.memberWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
-    textureGeometry.merge(member2);
+    textureGeometry = this.merge(textureGeometry, member2);
 
     return textureGeometry;
   }
@@ -206,17 +214,17 @@ module.exports = (function() {
 
     var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, this.height, this.length);
     middleConnector.translate(this.width/2, -(this.height)/2, 0);
-    textureGeometry.merge(middleConnector);
+    textureGeometry = this.merge(textureGeometry, middleConnector);
 
     var member1 = this._getMemberGeometry(1, false);
     member1.translate(this.wallWidth + this.hingeWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
-    textureGeometry.merge(member1);
+    textureGeometry = this.merge(textureGeometry, member1);
 
     var member2 = this._getMemberGeometry(-1, false);
     member2.translate(this.width/2 + this.middleConnectorWidth/2 + this.hingeWidth + this.memberWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
-    textureGeometry.merge(member2);
+    textureGeometry = this.merge(textureGeometry, member2);
 
-    textureGeometry.merge(this._getSurfaceGeometry());
+    textureGeometry = this.merge(textureGeometry, this._getSurfaceGeometry());
 
     //hinges
     var hingeOffsets = [this.wallWidth,
@@ -229,7 +237,7 @@ module.exports = (function() {
       offset += hingeOffsets[i];
       var box = new THREE.BoxGeometry(this.hingeWidth, this.hingeHeight, this.length);
       box.translate(this.hingeWidth/2+i*this.hingeWidth + offset, -this.hingeHeight/2, 0);
-      textureGeometry.merge(box);
+      textureGeometry = this.merge(textureGeometry, box);
 
     }
     return textureGeometry;
@@ -243,7 +251,7 @@ module.exports = (function() {
 
     var middleConnector = this._getMiddleZigZagGeometry();
     middleConnector.translate(-1 - 0.15 - 0.15 / 2, -this.amplitude, 0);
-    textureGeometry.merge(middleConnector);
+    textureGeometry = this.merge(textureGeometry, middleConnector);
 
     var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length, 4, 4, 4);
 
@@ -257,7 +265,7 @@ module.exports = (function() {
     var result = topPlaneBSP.subtract(negativBSP);
     topPlane = result.toMesh().geometry;
     topPlane.translate(-this.width / 2, -this.surfaceHeight / 2, 0);
-    textureGeometry.merge(topPlane);
+    textureGeometry = this.merge(textureGeometry, topPlane);
 
     return textureGeometry;
   }
@@ -301,13 +309,13 @@ module.exports = (function() {
       var result = topPlaneBSP.subtract(negativBSP);
       topPlane = result.toMesh().geometry;
       topPlane.translate(this.width / 2, -this.surfaceHeight / 2, 0);
-      textureGeometry.merge(topPlane);
+      textureGeometry = this.merge(textureGeometry, topPlane);
 
       //like for every cell:
       var fill = this.getFillGeometry();
-      //textureGeometry.merge(fill);
-      textureGeometry.merge(this._getWallGeometry('left'));
-      textureGeometry.merge(this._getWallGeometry('right'));
+      // = //this.merge(//textureGeometry, fill);
+      textureGeometry = this.merge(textureGeometry, this._getWallGeometry('left'));
+      textureGeometry = this.merge(textureGeometry, this._getWallGeometry('right'));
 
       textureGeometry.scale(1,1,canvasdrawer.cellCount);
 
