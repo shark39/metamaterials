@@ -216,22 +216,7 @@ module.exports = (function() {
       this.infoBox.html('size ' + this.cursor.mesh.scale.toArray().join(' x '));
     }
 
-    if (this.activeBrush && this.activeBrush.type == 'texture') {
-      if (this.activeBrush.rotated) {
-        this.cursor.mesh.position.z += 0.5;
-        this.cursor.mesh.scale.z *= 2;
-        if (this.activeBrush.name.startsWith("custom")) {
-          this.cursor.mesh.scale.x *= this.activeBrush.canvasdrawer.cellCount;
-        }
-      } else {
-        this.cursor.mesh.position.x += 0.5;
-        this.cursor.mesh.scale.x *= 2;
-        if (this.activeBrush.name.startsWith("custom")) {
-          this.cursor.mesh.scale.z *= this.activeBrush.canvasdrawer.cellCount;
-        }
-      }
-
-    }
+    this.updateCursor(); //implemented in voxel_edit_tool
   }
 
   VoxelTool.prototype.renderSelection = function() {
@@ -281,7 +266,7 @@ module.exports = (function() {
 
   }
 
-  VoxelTool.prototype.updateCursor = function() {}
+  VoxelTool.prototype.updateCursor = function() {} //overwritten by inhertated functions
 
 
   VoxelTool.prototype.calculateStiffness = function(value, rangeStart, rangeEnd) {
@@ -382,12 +367,15 @@ module.exports = (function() {
 
   VoxelTool.prototype.__defineSetter__('activeBrush', function(activeBrush) {
     this._activeBrush = activeBrush;
+
     if (activeBrush.type == 'texture') { //create the texture and update the cursor geometry
       var texture = new activeBrush.texture();
       //this.cursor.setGeometry(texture.getGeometry());
 
     } else {
       var geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0);
+      this.cursor.mesh.material.uniforms.image.value = new THREE.Texture(activeBrush.textureIcon);
+      this.cursor.mesh.material.uniforms.image.value.needsUpdate = true;
       //this.cursor.setGeometry(geometry);
     }
   });

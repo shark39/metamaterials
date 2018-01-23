@@ -1,8 +1,8 @@
 
 //const bind = require('./bind');
 
-//const $ = require('jquery');
-//const _ = require('lodash');
+const $ = require('jquery');
+const _ = require('lodash');
 const THREE = require('three');
 const cursorConfig = require('./cursorConfig');
 
@@ -13,7 +13,7 @@ module.exports = (function() {
 
     this.material = new THREE.RawShaderMaterial({
       transparent: true,
-      uniforms: cursorConfig.uniforms,
+      uniforms: $.extend(true, {}, cursorConfig.uniforms),
       vertexShader: cursorConfig.vertexShader,
       fragmentShader: cursorConfig.fragmentShader
     });
@@ -42,7 +42,14 @@ module.exports = (function() {
   this.mesh.material.uniforms.color.value = new THREE.Color(0xffffff);
   this.mesh.material.uniforms.borderColor.value = new THREE.Color(0xdddddd);
   this.mesh.material.uniforms.tool.value = 1;
-  this.mesh.material.uniforms.borderSize.value = this.cursorBorder / 2.0;
+  this.mesh.material.uniforms.borderSize.value = cursorBorder / 2.0;
+}
+
+Cursor.prototype.addMode = function() {
+  this.mesh.material.uniforms.color.value = new THREE.Color(0x444444);
+  this.mesh.material.uniforms.borderColor.value = new THREE.Color(0x666666);
+  this.mesh.material.uniforms.tool.value = 0;
+  this.mesh.material.uniforms.borderSize.value = 0;
 }
 
   return Cursor;

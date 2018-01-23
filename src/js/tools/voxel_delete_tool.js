@@ -13,7 +13,7 @@ module.exports = (function() {
 
     this.setCuboidMode(true, false);
 
-    this.cursor.deleteMode();
+
 
   }
 
@@ -33,6 +33,7 @@ module.exports = (function() {
   // It is more like a hack.
   VoxelDeleteTool.prototype.reset = function() {
     this.setCuboidMode(true, false);
+    this.cursor.deleteMode();
   }
 
   VoxelDeleteTool.prototype.extrusionLengthFromIntersection = function(intersection) {

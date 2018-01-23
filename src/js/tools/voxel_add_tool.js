@@ -35,6 +35,7 @@ module.exports = (function() {
   // It is more like a hack.
   VoxelAddTool.prototype.reset = function() {
     this.setCuboidMode(true, false);
+    this.cursor.addMode();
   }
 
   VoxelAddTool.prototype.updateVoxel = function(position, features, stiffness) {
