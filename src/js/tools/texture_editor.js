@@ -86,15 +86,19 @@ module.exports = (function() {
     let addcellDom = $('<div><button type="button" class="btn btn-secondary" style="width: 100%"">extend cell</button></div>');
     addcellDom.click(function(event) {
       self.canvasdrawer.addCell();
+      self.canvasdrawer.cellCount == 1 ? $('#remove-cell').hide() : $('#remove-cell').show();
     });
     div.append(addcellDom);
-    let removecellDom = $('<div><button type="button" class="btn btn-secondary" style="width: 100%"">reduce cell</button></div>');
+    let removecellDom = $('<div><button type="button" id="remove-cell" class="btn btn-secondary" style="width: 100%"">reduce cell</button></div>');
     removecellDom.click(function(event) {
       self.canvasdrawer.removeCell();
       //move everything down
       let offsetTop = Number(self.container[0].style.top.replace("px", ""));
       self.container[0].style.top = offsetTop + self.canvasdrawer.cellHeight + "px";
+      //hide reduce button
+      self.canvasdrawer.cellCount == 1 ? $(event.target).hide() : $(event.target).show();
     });
+    removecellDom.hide(); //because cellCount==1
     div.append(removecellDom);
     this.canvasdrawer = new TextureCanvasDrawer(canvas);
     this.container = div;
