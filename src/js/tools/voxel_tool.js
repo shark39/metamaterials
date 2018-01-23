@@ -163,7 +163,7 @@ module.exports = (function() {
     const end = this.startPosition.clone().max(this.endPosition);
     if (this.lastPosition.start.clone().sub(start).lengthSq() != 0 ||
     this.lastPosition.end.clone().sub(end).lengthSq() != 0 ) {
-      this.renderSelectionShader();
+      this.cursor.isShader ? this.renderSelectionShader() : this.renderSelectionGeometry();
       this.lastPosition.start = start.clone();
       this.lastPosition.end = end.clone();
     }
@@ -219,7 +219,7 @@ module.exports = (function() {
     this.updateCursor(); //implemented in voxel_edit_tool
   }
 
-  VoxelTool.prototype.renderSelection = function() {
+  VoxelTool.prototype.renderSelectionGeometry = function() {
     console.log("render updateSelection");
 
     const start = this.startPosition.clone().min(this.endPosition);
@@ -334,7 +334,7 @@ module.exports = (function() {
       for (var x = start.x; x <= end.x; x++)
         for (var y = start.y; y <= end.y; y++)
           for (var z = start.z; z <= end.z; z++) {
-            var brushtexture = this.activeBrush.texture;
+            var brushtexture = this.activeBrush.hasOwnProperty('texture') ? this.activeBrush.texture : null;
             if (this.activeBrush.type == "texture" && y < end.y) {
               this.activeBrush.texture = TextureSupport;
             }
@@ -368,15 +368,15 @@ module.exports = (function() {
   VoxelTool.prototype.__defineSetter__('activeBrush', function(activeBrush) {
     this._activeBrush = activeBrush;
 
-    if (activeBrush.type == 'texture') { //create the texture and update the cursor geometry
+    if (activeBrush.type == 'texture' && this.cursor.isAddMode) {
       var texture = new activeBrush.texture();
-      //this.cursor.setGeometry(texture.getGeometry());
-
+      this.cursor.setGeometry(texture.getGeometry());
     } else {
-      var geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0);
+      this.cursor.shaderMode();
+    }
+    if (activeBrush.type != 'texture') {
       this.cursor.mesh.material.uniforms.image.value = new THREE.Texture(activeBrush.textureIcon);
       this.cursor.mesh.material.uniforms.image.value.needsUpdate = true;
-      //this.cursor.setGeometry(geometry);
     }
   });
 
