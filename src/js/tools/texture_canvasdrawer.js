@@ -107,6 +107,7 @@ module.exports = (function() {
   }
 
   TextureCanvasDrawer.prototype.addCell = function() {
+
 			this.dimensions.y += this.cellHeight;
       this.cellCount++;
 
@@ -124,6 +125,24 @@ module.exports = (function() {
 
 			this.stage.update();
 		}
+
+  TextureCanvasDrawer.prototype.removeCell = function() {
+    this.dimensions.y -= this.cellHeight;
+    this.cellCount--;
+
+    this.canvas.attr({height: this.dimensions.y});
+    this.middleLine.scaleY = this.dimensions.y/this.cellHeight;
+
+    for (var i = 0; i < this.pathCommands.length; i++) {
+      this.pathCommands[i].y = this.pathCommands[i].y/(this.dimensions.y + this.cellHeight) * this.dimensions.y;
+    }
+    for (var i = 0; i < this.points.length; i++) {
+      this.points[i].y = this.points[i].y/(this.dimensions.y + this.cellHeight) * this.dimensions.y;
+    }
+
+    this.drawPath();
+
+  }
 
   TextureCanvasDrawer.prototype.drawPath = function() {
     var self = this;

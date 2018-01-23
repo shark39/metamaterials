@@ -88,7 +88,16 @@ module.exports = (function() {
       self.canvasdrawer.addCell();
     });
     div.append(addcellDom);
+    let removecellDom = $('<div><button type="button" class="btn btn-secondary" style="width: 100%"">reduce cell</button></div>');
+    removecellDom.click(function(event) {
+      self.canvasdrawer.removeCell();
+      //move everything down
+      let offsetTop = Number(self.container[0].style.top.replace("px", ""));
+      self.container[0].style.top = offsetTop + self.canvasdrawer.cellHeight + "px";
+    });
+    div.append(removecellDom);
     this.canvasdrawer = new TextureCanvasDrawer(canvas);
+    this.container = div;
 
     div.click(function(event) {
       let image = self.canvasdrawer.getImage();
