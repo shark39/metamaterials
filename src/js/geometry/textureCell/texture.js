@@ -91,6 +91,7 @@ module.exports = (function() {
   //different geometry types:
   Texture.prototype.getGeometry = function() {
 
+    console.log(this.cacheKey);
     if(Texture.geometryCache.hasOwnProperty(this.cacheKey)) 
     return Texture.geometryCache[this.cacheKey];
 
