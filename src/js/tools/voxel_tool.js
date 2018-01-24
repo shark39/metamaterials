@@ -239,7 +239,7 @@ module.exports = (function() {
         const features = this._activeBrush.cells[cellCoords].features;
         voxel = new MechanicalCell(null, features, this.extrusionNormal.largestComponent(), 0.1, this.voxelGrid.minThickness);
     }
-      
+
     var cursorGeometry = this.createSelectionGeometry(voxel, end.x - start.x, end.y - start.y, end.z - start.z);
 
     this.cursor.mesh.visible = true;
@@ -253,7 +253,7 @@ module.exports = (function() {
     var geo = voxel.getGeometry().clone();
     var size = voxel.size();
     var last = this.lastSelectionGeometry || {sx:size[0], sy:size[1], sz:size[2]};
-   
+
     if(last.sx == sx && last.sy == sy && last.sz == sz && last.geo)
       return last.geo;
 
@@ -263,7 +263,7 @@ module.exports = (function() {
       var clone = geo.clone();
       for (var x = size[0]; x <= sx; x += size[0]) {
         clone.translate(size[0], 0, 0);
-        geo.merge(clone);  
+        geo.merge(clone);
       }
       this.lastSelectionGeometry = this.lastSelectionGeometry || {};
       this.lastSelectionGeometry.xGeo = geo;
@@ -271,12 +271,12 @@ module.exports = (function() {
     var clone = geo.clone();
     for (var y = size[1]; y <= sy; y += size[1]) {
       clone.translate(0, size[1], 0);
-      geo.merge(clone);  
+      geo.merge(clone);
     }
     var clone = geo.clone();
     for (var z = size[2]; z <= sz; z += size[2]) {
       clone.translate(0, 0, size[2]);
-      geo.merge(clone);  
+      geo.merge(clone);
     }
 
     this.lastSelectionGeometry = {geo, sx, sy, sz};
@@ -336,7 +336,7 @@ module.exports = (function() {
 
           this.activeBrush.texture = brushtexture;
         }
-    
+
     this.voxelGrid.update();
     this.setCuboidMode(this.cuboidMode, this.rotatedMode);
     this.processSingle();
@@ -365,8 +365,11 @@ module.exports = (function() {
     } else {
       this.cursor.shaderMode();
     }
-    this.cursor.mesh.material.uniforms.image.value = activeBrush.type == 'texture' ? null : new THREE.Texture(activeBrush.textureIcon);
-    this.cursor.mesh.material.uniforms.image.value.needsUpdate = true;
+    if (activeBrush.type != 'texture') {
+      this.cursor.mesh.material.uniforms.image.value = new THREE.Texture(activeBrush.textureIcon);
+      this.cursor.mesh.material.uniforms.image.value.needsUpdate = true;
+    }
+
   });
 
   VoxelTool.prototype.alterMouseEvents = function() {
