@@ -98,7 +98,7 @@ module.exports = (function() {
       //hide reduce button
       self.canvasdrawer.cellCount == 1 ? $(event.target).hide() : $(event.target).show();
     });
-    removecellDom.hide(); //because cellCount==1
+    //removecellDom.hide(); //because cellCount==1
     div.append(removecellDom);
     this.canvasdrawer = new TextureCanvasDrawer(canvas);
     this.container = div;
