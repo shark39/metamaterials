@@ -89,14 +89,23 @@ module.exports = (function() {
   }
 
   //different geometry types:
-  Texture.prototype.getGeometry2 = function() {
+  Texture.prototype.getGeometry = function() {
 
-    var geo = this.texture.getGeometry();
-    geo.merge(this.texture.getFillGeometry());
-    geo.merge(this.texture._getWallGeometry('left'));
-    geo.merge(this.texture._getWallGeometry('right'));
+    if(Texture.geometryCache.hasOwnProperty(this.cacheKey)) 
+    return Texture.geometryCache[this.cacheKey];
+
+    var geometries = [
+      this.texture.getGeometry(),
+      this.texture.getFillGeometry(),
+      this.texture._getWallGeometry('left'),
+      this.texture._getWallGeometry('right'),
+    ];
+
+    var geo = geometries.reduce((sum, geo) => this.texture.merge(sum, geo), new THREE.Geometry());
     geo.translate(-0.5, 0.5, 0);
-    return geo;
+
+    Texture.geometryCache[this.cacheKey] = geo;
+    return geo;  
   }
 
   Texture.prototype.getGeometry3 = function() {
@@ -156,10 +165,10 @@ module.exports = (function() {
 
   Texture.geometryCache = {};
 
-  Texture.prototype.getGeometry = function() {
+  Texture.prototype.getBendedGeometry = function() {
 
-    if(Texture.geometryCache.hasOwnProperty(this.cacheKey)) 
-      return Texture.geometryCache[this.cacheKey];
+    if(Texture.geometryCache.hasOwnProperty('B'+this.cacheKey)) 
+      return Texture.geometryCache['B'+this.cacheKey];
 
     var geometries = [
       this.texture.getGeometry(),
@@ -206,10 +215,9 @@ module.exports = (function() {
     }
 
     newGeo.verticesNeedUpdate = true;
-
     newGeo.computeFlatVertexNormals();
 
-    Texture.geometryCache[this.cacheKey] = newGeo;
+    Texture.geometryCache['B'+this.cacheKey] = newGeo;
     return newGeo;  
 
   }  

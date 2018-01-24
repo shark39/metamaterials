@@ -1,12 +1,14 @@
 'use strict';
 
 const bind = require('../misc/bind');
-const cursorConfig = require('../misc/cursorConfig');
+const Cursor = require('../misc/cursor');
 const Tool = require('./tool');
 
 const Texture = require('../geometry/textureCell/texture');
 const TextureSupport = require('../geometry/textureCell/textureSupport');
 // const addBorderingIfNeeded = require('./bordering');
+const MechanicalCell = require('../geometry/mechanicalCell/mechanicalCell');
+
 
 const $ = require('jquery');
 const _ = require('lodash');
@@ -20,6 +22,10 @@ module.exports = (function() {
     this.voxelGrid = voxelGrid;
     this.startPosition = new THREE.Vector3();
     this.endPosition = new THREE.Vector3();
+    this.lastPosition = {
+      "start": new THREE.Vector3(),
+      "end": new THREE.Vector3()
+    }; //save the latest position to avoid unecessary updates
 
     this.extrusionNormal = new THREE.Vector3();
     this.extrusionComponent = 0;
@@ -40,9 +46,9 @@ module.exports = (function() {
       this.voxelGrid.size.z / 2 - 0.5
     );
 
-    this.cursor = this.buildCursor();
-    this.cursor.visible = false;
-    this.scene.add(this.cursor);
+    this.cursor = new Cursor();
+    this.cursor.mesh.visible = false;
+    this.scene.add(this.cursor.mesh);
 
     // this.setCuboidMode(false, false);
     this.setCuboidMode(true, false);
@@ -54,60 +60,6 @@ module.exports = (function() {
 
   VoxelTool.prototype.setMirrorMode = function(mirrorMode) {
     this.mirror = [mirrorMode, false, false];
-  }
-
-  VoxelTool.prototype.buildCursor = function() {
-    const geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0);
-    const material = new THREE.RawShaderMaterial({
-      transparent: true,
-      uniforms: {
-        'scale': {
-          type: 'v3',
-          value: new THREE.Vector3(1.0, 1.0, 1.0)
-        },
-        'color': {
-          type: 'c',
-          value: new THREE.Color(0x444444)
-        },
-        'borderColor': {
-          type: 'c',
-          value: new THREE.Color(0x666666)
-        },
-        'borderSize': {
-          type: 'f',
-          value: 0.0
-        },
-        'rotatedMode': {
-          type: 'i',
-          value: 0
-        },
-        'rotatedScale': {
-          type: 'f',
-          value: 0.0
-        },
-        'rotatedHeight': {
-          type: 'f',
-          value: 0.0
-        },
-        'rotatedDirection': {
-          type: 'i',
-          value: 0
-        },
-        'image': {
-          type: 't',
-          value: new THREE.Texture()
-        },
-        'tool': {
-          type: 'i',
-          value: 0
-        }
-      },
-      vertexShader: cursorConfig.vertexShader,
-      fragmentShader: cursorConfig.fragmentShader
-    });
-
-    const cursor = new THREE.Mesh(geometry, material);
-    return cursor;
   }
 
   VoxelTool.prototype.setCuboidMode = function(cuboidMode) {
@@ -191,10 +143,17 @@ module.exports = (function() {
   }
 
   VoxelTool.prototype.updateSelection = function() {
+
     if (!this.startPosition || !this.endPosition) {
       this.cursor.visible = false;
       this.infoBox.hide();
       return;
+    }
+
+    if (this.cuboidMode) {
+      this.infoBox.show();
+    } else {
+      this.infoBox.hide();
     }
 
     this.startPosition.clamp(this.minPosition, this.maxPosition);
@@ -202,9 +161,20 @@ module.exports = (function() {
 
     const start = this.startPosition.clone().min(this.endPosition);
     const end = this.startPosition.clone().max(this.endPosition);
+    if (this.lastPosition.start.clone().sub(start).lengthSq() != 0 ||
+    this.lastPosition.end.clone().sub(end).lengthSq() != 0 ) {
+      this.cursor.isShader ? this.renderSelectionShader() : this.renderSelectionGeometry();
+      this.lastPosition.start = start.clone();
+      this.lastPosition.end = end.clone();
+    }
 
+  }
 
-    this.cursor.visible = true;
+  VoxelTool.prototype.renderSelectionShader = function() {
+    const start = this.startPosition.clone().min(this.endPosition);
+    const end = this.startPosition.clone().max(this.endPosition);
+
+    this.cursor.mesh.visible = true;
 
     if (this.cuboidMode) {
       this.infoBox.show();
@@ -213,77 +183,124 @@ module.exports = (function() {
     }
 
     if (this.rotatedMode) {
-      this.cursor.position.copy(start.clone().add(end).divideScalar(2.0));
+      this.cursor.mesh.position.copy(start.clone().add(end).divideScalar(2.0));
 
       const height = 1.0 + end.getComponent(this.extrusionComponent) - start.getComponent(this.extrusionComponent);
       start.setComponent(this.extrusionComponent, 0.0);
       end.setComponent(this.extrusionComponent, 0.0);
       const rotatedScale = (2.0 + start.distanceTo(end));
       const scale = rotatedScale / Math.sqrt(2.0);
-      this.cursor.scale.setComponent(this.extrusionComponent, height + this.cursorBorder);
-      this.cursor.scale.setComponent((this.extrusionComponent + 1) % 3, scale + this.cursorBorder);
-      this.cursor.scale.setComponent((this.extrusionComponent + 2) % 3, scale + this.cursorBorder);
+      this.cursor.mesh.scale.setComponent(this.extrusionComponent, height + this.cursorBorder);
+      this.cursor.mesh.scale.setComponent((this.extrusionComponent + 1) % 3, scale + this.cursorBorder);
+      this.cursor.mesh.scale.setComponent((this.extrusionComponent + 2) % 3, scale + this.cursorBorder);
 
       const rotation = [0.0, 0.0, 0.0];
       rotation[this.extrusionComponent] = 45.0 / 180.0 * Math.PI;
-      this.cursor.rotation.fromArray(rotation);
+      this.cursor.mesh.rotation.fromArray(rotation);
 
-      this.cursor.material.uniforms.rotatedMode.value = 1;
-      this.cursor.material.uniforms.rotatedScale.value = rotatedScale / 2.0;
-      this.cursor.material.uniforms.rotatedHeight.value = height;
-      this.cursor.material.uniforms.rotatedDirection.value = this.extrusionComponent;
+      this.cursor.mesh.material.uniforms.rotatedMode.value = 1;
+      this.cursor.mesh.material.uniforms.rotatedScale.value = rotatedScale / 2.0;
+      this.cursor.mesh.material.uniforms.rotatedHeight.value = height;
+      this.cursor.mesh.material.uniforms.rotatedDirection.value = this.extrusionComponent;
 
       this.infoBox.html('size ' + [rotatedScale / 2, height, rotatedScale / 2].join(' x '));
     } else {
-      this.cursor.position.copy(start.clone().add(end).divideScalar(2.0));
-      this.cursor.scale.copy(end.clone().sub(start).addScalar(1.0 + this.cursorBorder));
-      this.cursor.rotation.fromArray([0.0, 0.0, 0.0]);
+      this.cursor.mesh.position.copy(start.clone().add(end).divideScalar(2.0));
+      this.cursor.mesh.scale.copy(end.clone().sub(start).addScalar(1.0 + this.cursorBorder));
+      this.cursor.mesh.rotation.fromArray([0.0, 0.0, 0.0]);
 
-      this.cursor.material.uniforms.scale.value.copy(this.cursor.scale);
-      this.cursor.material.uniforms.rotatedMode.value = 0;
-      this.cursor.material.uniforms.rotatedDirection.value = this.extrusionComponent;
+      this.cursor.mesh.material.uniforms.scale.value.copy(this.cursor.mesh.scale);
+      this.cursor.mesh.material.uniforms.rotatedMode.value = 0;
+      this.cursor.mesh.material.uniforms.rotatedDirection.value = this.extrusionComponent;
 
-      this.infoBox.html('size ' + this.cursor.scale.toArray().join(' x '));
+      this.infoBox.html('size ' + this.cursor.mesh.scale.toArray().join(' x '));
     }
 
-    if (this.activeBrush && this.activeBrush.type == 'texture') {
-      if (this.activeBrush.rotated) {
-        this.cursor.position.z += 0.5;
-        this.cursor.scale.z *= 2;
-        if (this.activeBrush.name.startsWith("custom")) {
-          this.cursor.scale.x *= this.activeBrush.canvasdrawer.cellCount;
-        }
-      } else {
-        this.cursor.position.x += 0.5;
-        this.cursor.scale.x *= 2;
-        if (this.activeBrush.name.startsWith("custom")) {
-          this.cursor.scale.z *= this.activeBrush.canvasdrawer.cellCount;
-        }
-      }
-
-    }
-
-    this.updateCursor();
+    this.updateCursor(); //implemented in voxel_edit_tool
   }
 
-  VoxelTool.prototype.updateCursor = function() {}
+  VoxelTool.prototype.renderSelectionGeometry = function() {
+    console.log("render updateSelection");
+
+    const start = this.startPosition.clone().min(this.endPosition);
+    const end = this.startPosition.clone().max(this.endPosition);
+
+    var voxel;
+    switch (this._activeBrush.type) {
+      case "texture":
+        var texture = new this.activeBrush.texture();
+        if (texture.name.startsWith('custom')) {
+          texture.canvasdrawer = this.activeBrush.canvasdrawer;
+        }
+        voxel = new Texture(new THREE.Vector3(), texture, 0.1);
+        break;
+      default:
+        const cellCoords = [offset.y % this._activeBrush.height, offset.x % this._activeBrush.width];
+        const features = this._activeBrush.cells[cellCoords].features;
+        voxel = new MechanicalCell(null, features, this.extrusionNormal.largestComponent(), 0.1, this.voxelGrid.minThickness);
+    }
+      
+    var cursorGeometry = this.createSelectionGeometry(voxel, end.x - start.x, end.y - start.y, end.z - start.z);
+
+    this.cursor.mesh.visible = true;
+
+    cursorGeometry.translate(-(end.x - start.x) / 2, -(end.y - start.y) / 2, -(end.z - start.z) / 2);
+    this.cursor.setGeometry(cursorGeometry);
+    this.cursor.mesh.position.copy(start.clone().add(end).divideScalar(2.0));
+  }
+
+  VoxelTool.prototype.createSelectionGeometry = function (voxel, sx, sy, sz) {
+    var geo = voxel.getGeometry().clone();
+    var size = voxel.size();
+    var last = this.lastSelectionGeometry || {sx:size[0], sy:size[1], sz:size[2]};
+   
+    if(last.sx == sx && last.sy == sy && last.sz == sz && last.geo)
+      return last.geo;
+
+    if(last.sx == sx && last.xGeo) {
+      geo = last.xGeo;
+    } else {
+      var clone = geo.clone();
+      for (var x = size[0]; x <= sx; x += size[0]) {
+        clone.translate(size[0], 0, 0);
+        geo.merge(clone);  
+      }
+      this.lastSelectionGeometry = this.lastSelectionGeometry || {};
+      this.lastSelectionGeometry.xGeo = geo;
+    }
+    var clone = geo.clone();
+    for (var y = size[1]; y <= sy; y += size[1]) {
+      clone.translate(0, size[1], 0);
+      geo.merge(clone);  
+    }
+    var clone = geo.clone();
+    for (var z = size[2]; z <= sz; z += size[2]) {
+      clone.translate(0, 0, size[2]);
+      geo.merge(clone);  
+    }
+
+    this.lastSelectionGeometry = {geo, sx, sy, sz};
+    return geo.clone();
+  }
+
+  VoxelTool.prototype.updateCursor = function() {} //overwritten by inhertated functions
 
 
-  VoxelTool.prototype.calculateStiffness = function( value, rangeStart, rangeEnd ) {
+  VoxelTool.prototype.calculateStiffness = function(value, rangeStart, rangeEnd) {
 
     function normal() {
       return this.stiffness.from;
     }
 
     function alternating(value, rangeStart) {
-      return (rangeStart-value)%2 == 0 ? this.stiffness.from : this.stiffness.to;
+      return (rangeStart - value) % 2 == 0 ? this.stiffness.from : this.stiffness.to;
     }
 
-    function gradient( value, rangeStart, rangeEnd) {
+    function gradient(value, rangeStart, rangeEnd) {
       let r1 = [rangeStart, rangeEnd];
       let r2 = [this.stiffness.from, this.stiffness.to];
-      if(r2[0] == r2[1]) return r2[0];
-      return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
+      if (r2[0] == r2[1]) return r2[0];
+      return (value - r1[0]) * (r2[1] - r2[0]) / (r1[1] - r1[0]) + r2[0];
     }
 
     let calculateFunction = ({
@@ -305,46 +322,21 @@ module.exports = (function() {
 
     var updatedVoxels = [];
 
-    if (this.rotatedMode) {
-      const h = this.extrusionComponent;
-      const u = (h + 1) % 3;
-      const v = (h + 2) % 3;
-      const radius = Math.abs(start.getComponent(u) + start.getComponent(v) - end.getComponent(u) - end.getComponent(v)) / 2.0 + 1.0;
-      const height = end.getComponent(h) - start.getComponent(h) + 1.0;
-      const center = start.clone().add(end).divideScalar(2.0);
-
-      for (var du = 0; du < radius * 2; du++)
-        for (var dv = 0; dv < radius * 2; dv++)
-          for (var dh = 0; dh < height; dh++) {
-            if (Math.abs(du - radius + 0.5) + Math.abs(dv - radius + 0.5) > radius) {
-              continue;
-            }
-
-            const position = [0.0, 0.0, 0.0];
-            position[u] = center.getComponent(u) - radius + 0.5 + du;
-            position[v] = center.getComponent(v) - radius + 0.5 + dv;
-            position[h] = start.getComponent(h) + dh;
-
-            updatedVoxels = updatedVoxels.concat(
-              this.updateSingleVoxel(new THREE.Vector3().fromArray(position), new THREE.Vector2(du + (radius + 1) % 2, dv))
-            );
+    let lc = end.clone().sub(start).largestComponent();
+    var voxel;
+    for (var x = start.x; x <= end.x; x+=voxel.size()[0])
+      for (var y = start.y; y <= end.y; y+=voxel.size()[1])
+        for (var z = start.z; z <= end.z; z+=voxel.size()[2]) {
+          var brushtexture = this.activeBrush.hasOwnProperty('texture') ? this.activeBrush.texture : null;
+          if (this.activeBrush.type == "texture" && y < end.y) {
+            this.activeBrush.texture = TextureSupport;
           }
-    } else {
-      let lc = end.clone().sub(start).largestComponent();
-      var voxel;
-      for (var x = start.x; x <= end.x; x+=voxel.size()[0])
-        for (var y = start.y; y <= end.y; y+=voxel.size()[1])
-          for (var z = start.z; z <= end.z; z+=voxel.size()[2]) {
-            var brushtexture = this.activeBrush.texture;
-            if (this.activeBrush.type == "texture" && y < end.y) {
-              this.activeBrush.texture = TextureSupport;
-            }
-            let stiffness = this.calculateStiffness([x,y,z][lc], start.getComponent(lc), end.getComponent(lc));
-            voxel = this.updateSingleVoxel(new THREE.Vector3(x, y, z), new THREE.Vector2(x - start.x, z - start.z), stiffness)[0]
-            this.activeBrush.texture = brushtexture;
-          }
-    }
+          let stiffness = this.calculateStiffness([x,y,z][lc], start.getComponent(lc), end.getComponent(lc));
+          voxel = this.updateSingleVoxel(new THREE.Vector3(x, y, z), new THREE.Vector2(x - start.x, z - start.z), stiffness)[0]
 
+          this.activeBrush.texture = brushtexture;
+        }
+    
     this.voxelGrid.update();
     this.setCuboidMode(this.cuboidMode, this.rotatedMode);
     this.processSingle();
@@ -352,7 +344,7 @@ module.exports = (function() {
 
   VoxelTool.prototype.updateSingleVoxel = function(position, offset, stiffness) {
 
-    if(this.activeBrush.type == "texture") {
+    if (this.activeBrush.type == "texture") {
       return this.updateVoxel(position, null, stiffness);
     }
     const cellCoords = [offset.y % this.activeBrush.height, offset.x % this.activeBrush.width];
@@ -366,8 +358,15 @@ module.exports = (function() {
 
   VoxelTool.prototype.__defineSetter__('activeBrush', function(activeBrush) {
     this._activeBrush = activeBrush;
-    this.cursor.material.uniforms.image.value = new THREE.Texture(activeBrush.textureIcon);
-    this.cursor.material.uniforms.image.value.needsUpdate = true;
+
+    if (activeBrush.type == 'texture' && this.cursor.isAddMode) {
+      var texture = new activeBrush.texture();
+      this.cursor.setGeometry(texture.getGeometry());
+    } else {
+      this.cursor.shaderMode();
+    }
+    this.cursor.mesh.material.uniforms.image.value = activeBrush.type == 'texture' ? null : new THREE.Texture(activeBrush.textureIcon);
+    this.cursor.mesh.material.uniforms.image.value.needsUpdate = true;
   });
 
   VoxelTool.prototype.alterMouseEvents = function() {

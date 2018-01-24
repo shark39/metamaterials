@@ -13,12 +13,8 @@ module.exports = (function() {
 
     this.setCuboidMode(true, false);
 
-    this.cursorBorder = 0.5;
 
-    this.cursor.material.uniforms.color.value = new THREE.Color(0xffffff);
-    this.cursor.material.uniforms.borderColor.value = new THREE.Color(0xdddddd);
-    this.cursor.material.uniforms.tool.value = 1;
-    this.cursor.material.uniforms.borderSize.value = this.cursorBorder / 2.0;
+
   }
 
   VoxelDeleteTool.prototype = Object.create(VoxelTool.prototype);
@@ -37,6 +33,7 @@ module.exports = (function() {
   // It is more like a hack.
   VoxelDeleteTool.prototype.reset = function() {
     this.setCuboidMode(true, false);
+    this.cursor.deleteMode();
   }
 
   VoxelDeleteTool.prototype.extrusionLengthFromIntersection = function(intersection) {
@@ -49,5 +46,5 @@ module.exports = (function() {
   }
 
   return VoxelDeleteTool;
-  
+
 })();

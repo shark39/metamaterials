@@ -1,4 +1,49 @@
-module.exports = {vertexShader: '\
+const THREE = require('three');
+
+module.exports = {
+  uniforms: {
+    'scale': {
+      type: 'v3',
+      value: new THREE.Vector3(1.0, 1.0, 1.0)
+    },
+    'color': {
+      type: 'c',
+      value: new THREE.Color(0x444444)
+    },
+    'borderColor': {
+      type: 'c',
+      value: new THREE.Color(0x666666)
+    },
+    'borderSize': {
+      type: 'f',
+      value: 0.0
+    },
+    'rotatedMode': {
+      type: 'i',
+      value: 0
+    },
+    'rotatedScale': {
+      type: 'f',
+      value: 0.0
+    },
+    'rotatedHeight': {
+      type: 'f',
+      value: 0.0
+    },
+    'rotatedDirection': {
+      type: 'i',
+      value: 0
+    },
+    'image': {
+      type: 't',
+      value: new THREE.Texture()
+    },
+    'tool': {
+      type: 'i',
+      value: 0
+    }
+  },
+  vertexShader: '\
   precision highp float; \
   precision highp int; \
   \
@@ -85,7 +130,7 @@ module.exports = {vertexShader: '\
     \
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); \
   }',
-fragmentShader: '\
+  fragmentShader: '\
   precision highp float; \
   precision highp int; \
   \
@@ -128,4 +173,5 @@ fragmentShader: '\
       } \
       gl_FragColor = vec4(baseColor, 1.0); \
     } \
-  }'} 
+  }'
+}
