@@ -361,6 +361,7 @@ module.exports = (function() {
 
     if (activeBrush.type == 'texture' && this.cursor.isAddMode) {
       var texture = new activeBrush.texture();
+      texture.canvasdrawer = activeBrush.canvasdrawer;
       this.cursor.setGeometry(texture.getGeometry());
     } else {
       this.cursor.shaderMode();

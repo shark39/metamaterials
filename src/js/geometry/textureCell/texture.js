@@ -55,7 +55,7 @@ module.exports = (function() {
       this[option] = options[option] = options[option] || defaultOptions[option];
     }
 
-    this.cacheKey = texture + JSON.stringify(options) + stiffness;
+    this.cacheKey = texture.name + JSON.stringify(options) + stiffness;
     //calculate width of member
     this.memberWidth = this.width/2 - this.wallWidth - this.hingeWidth*2 - this.middleConnectorWidth/2;
 
