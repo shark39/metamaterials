@@ -13,11 +13,11 @@ module.exports = (function() {
     VoxelTool.call(this, renderer, voxelGrid);
 
     // changing coursor to be a sphere.
-    var newGeom = new THREE.SphereGeometry( 0.4, 64, 64 );
-    this.cursor.geometry = newGeom;
-    this.cursor.geometry.needsUpdate = true;
+    //this.cursor new THREE.SphereGeometry( 0.4, 64, 64 );
+    //this.cursor.geometry = newGeom;
+    //this.cursor.geometry.needsUpdate = true;
     // changes colors based on dimension. 3 stands for this mode.
-    this.cursor.material.uniforms.tool.value = 3;
+    //this.cursor.material.uniforms.tool.value = 3;
 
     this.allowCube = false;
 
@@ -47,11 +47,11 @@ module.exports = (function() {
         if (direction === 1) colorBasedOnDimension = 0x008800;
         if (direction === 2) colorBasedOnDimension = 0x000088;
 
-        material = new THREE.LineBasicMaterial({ color: colorBasedOnDimension, linewidth: 10 }); 
+        material = new THREE.LineBasicMaterial({ color: colorBasedOnDimension, linewidth: 10 });
         geometry = new THREE.Geometry();
         const newVertex = intersection.point.clone().add( this.extrusionNormal.clone() .multiplyScalar( 0.1 ) );
         geometry.vertices.push( newVertex );
-        line = new THREE.Line( geometry, material ) 
+        line = new THREE.Line( geometry, material )
         renderer.scene.add( line );
       }
     };
@@ -100,9 +100,9 @@ module.exports = (function() {
   }
 
   VoxelSmoothingTool.prototype.updateCursor = function() {
-    this.cursor.scale.setComponent(this.extrusionComponent, 0.1);
-    this.cursor.position.add(this.extrusionNormal.clone().multiplyScalar(0.7));
-    this.cursor.material.uniforms.scale.value = this.cursor.scale;
+    //this.cursor.scale.setComponent(this.extrusionComponent, 0.1);
+    //this.cursor.position.add(this.extrusionNormal.clone().multiplyScalar(0.7));
+    //this.cursor.material.uniforms.scale.value = //this.cursor.scale;
     this.cursor.material.uniforms.rotatedMode.value = this.rotatedMode ? 1 : 0;
   }
 
@@ -168,7 +168,7 @@ module.exports = (function() {
         neighbors.bottomRight.z++;
       } else if( direction == 2 ) {
         // Z dimension
-        
+
         neighbors.top.y++;
         neighbors.bottom.y--;
         neighbors.left.x--;
@@ -207,9 +207,9 @@ module.exports = (function() {
       // only update when stuff has changed
       if( features !== undefined )
         voxel.update(features, direction);
-      
+
   }
 
   return VoxelSmoothingTool;
-  
+
 })();

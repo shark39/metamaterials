@@ -91,22 +91,22 @@ module.exports = (function() {
     let thickness = this.thickness();
     this.featuresPerDirection.forEach((features, direction) => {
         features.forEach((feature) => {
-          var solid = true; 
-          if((feature == "top-edge" || feature == "bottom-edge") && this.featuresPerDirection[(direction+1) % 3].length) 
+          var solid = true;
+          if((feature == "top-edge" || feature == "bottom-edge") && this.featuresPerDirection[(direction+1) % 3].length)
             solid = false;
-          if((feature == "left-edge" || feature == "right-edge") && this.featuresPerDirection[(direction+2) % 3].length) 
+          if((feature == "left-edge" || feature == "right-edge") && this.featuresPerDirection[(direction+2) % 3].length)
             solid = false;
-          if((feature == "pos-diagonal" || feature == "neg-diagonal") && 
-              (this.featuresPerDirection[(direction+1) % 3].length ||    
+          if((feature == "pos-diagonal" || feature == "neg-diagonal") &&
+              (this.featuresPerDirection[(direction+1) % 3].length ||
               this.featuresPerDirection[(direction+2) % 3].length) )
-            solid = false; 
+            solid = false;
           elements.push(new Wall(solid, feature, direction, thickness));
         }, this);
       }, this);
 
     this.renderGeometry = elements.reduce((sum, geometry) => {
       sum.merge(geometry.renderGeometry);
-      return sum; 
+      return sum;
     }, new THREE.Geometry());
 
     this.renderGeometry.mergeVertices();
@@ -134,7 +134,12 @@ module.exports = (function() {
       color: color,
       flatShading: false,
     });
+
     this.mesh = new THREE.Mesh(this.renderGeometry, material);
+  }
+
+  MechanicalCell.prototype.getGeometry = function() {
+    return this.mesh.geometry;
   }
 
   return MechanicalCell;

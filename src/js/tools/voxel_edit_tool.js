@@ -13,7 +13,7 @@ module.exports = (function() {
     bind(this);
     VoxelTool.call(this, renderer, voxelGrid);
 
-    this.cursor.material.uniforms.tool.value = 2;
+    //this.cursor.material.uniforms.tool.value = 2;
     this.allowCube = false;
 
     this.setCuboidMode(true, false);
@@ -32,10 +32,10 @@ module.exports = (function() {
   }
 
   VoxelEditTool.prototype.updateCursor = function() {
-    this.cursor.scale.setComponent(this.extrusionComponent, 0.1);
-    this.cursor.position.add(this.extrusionNormal.clone().multiplyScalar(0.7));
-    this.cursor.material.uniforms.scale.value = this.cursor.scale;
-    this.cursor.material.uniforms.rotatedMode.value = this.rotatedMode ? 1 : 0;
+    this.cursor.mesh.scale.setComponent(this.extrusionComponent, 0.1);
+    this.cursor.mesh.position.add(this.extrusionNormal.clone().multiplyScalar(0.7));
+    this.cursor.mesh.material.uniforms.scale.value = this.cursor.mesh.scale;
+    this.cursor.mesh.material.uniforms.rotatedMode.value = this.rotatedMode ? 1 : 0;
   }
 
   VoxelEditTool.prototype.updateVoxel = function(position, features, stiffness) {
@@ -46,7 +46,7 @@ module.exports = (function() {
     while (voxel = this.voxelGrid.voxelAtPosition(position)) {
       this.voxelGrid.removeVoxel(position);
       switch (this.activeBrush.type) {
-        case "texture": 
+        case "texture":
           voxel = new TextureCell(position, this.activeBrush.name, stiffness);
           break;
         default:
