@@ -252,22 +252,12 @@ module.exports = (function() {
   VoxelTool.prototype.createSelectionGeometry = function (voxel, sx, sy, sz) {
     var geo = voxel.getGeometry().clone();
     var size = voxel.size();
-    var last = this.lastSelectionGeometry || {sx:size[0], sy:size[1], sz:size[2]};
-   
-    if(last.sx == sx && last.sy == sy && last.sz == sz && last.geo)
-      return last.geo;
-
-    if(last.sx == sx && last.xGeo) {
-      geo = last.xGeo;
-    } else {
-      var clone = geo.clone();
-      for (var x = size[0]; x <= sx; x += size[0]) {
-        clone.translate(size[0], 0, 0);
-        geo.merge(clone);  
-      }
-      this.lastSelectionGeometry = this.lastSelectionGeometry || {};
-      this.lastSelectionGeometry.xGeo = geo;
-    }
+    
+    var clone = geo.clone();
+    for (var x = size[0]; x <= sx; x += size[0]) {
+      clone.translate(size[0], 0, 0);
+      geo.merge(clone);  
+    }  
     var clone = geo.clone();
     for (var y = size[1]; y <= sy; y += size[1]) {
       clone.translate(0, size[1], 0);
@@ -278,8 +268,6 @@ module.exports = (function() {
       clone.translate(0, 0, size[2]);
       geo.merge(clone);  
     }
-
-    this.lastSelectionGeometry = {geo, sx, sy, sz};
     return geo.clone();
   }
 
