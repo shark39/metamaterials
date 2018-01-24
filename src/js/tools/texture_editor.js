@@ -144,6 +144,7 @@ module.exports = (function() {
 
     if ((this.activeBrush == undefined || this.activeBrush.name != name) && texture && texture.getIsCustomizable()) {
       this.canvasdrawer.load(texture.getDrawing());
+      //this.canvasdrawer.setCellCount(2);
       $("#canvas-container").show();
     }
     if (texture && !texture.getIsCustomizable()) {

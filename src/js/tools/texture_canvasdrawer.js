@@ -106,6 +106,13 @@ module.exports = (function() {
     //this.canvas.hide();
   }
 
+  TextureCanvasDrawer.prototype.setCellCount = function(count) {
+    this.cellCount = count;
+    this.dimensions.y = this.cellHeight * count;
+    this.canvas.attr({height:this.dimensions.y});
+    this.middleLine.scaleY = this.dimensions.y/this.cellHeight;
+  }
+
   TextureCanvasDrawer.prototype.addCell = function() {
 
 			this.dimensions.y += this.cellHeight;
