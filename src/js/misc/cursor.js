@@ -45,6 +45,13 @@ module.exports = (function() {
     this.mesh.material.uniforms.borderSize.value = cursorBorder / 2.0;
 }
 
+Cursor.prototype.editMode = function() {
+  this.isAddMode = false;
+  this.shaderMode(); // switch to shader mode here
+  this.mesh.material.uniforms.tool.value = 2;
+
+}
+
 Cursor.prototype.addMode = function() {
   //can be in geometry mode or shaderMode
   this.isAddMode = true;

@@ -13,13 +13,15 @@ module.exports = (function() {
     bind(this);
     VoxelTool.call(this, renderer, voxelGrid);
 
-    //this.cursor.material.uniforms.tool.value = 2;
     this.allowCube = false;
-
     this.setCuboidMode(true, false);
   }
 
   VoxelEditTool.prototype = Object.create(VoxelTool.prototype);
+
+  VoxelEditTool.prototype.reset = function() {
+    this.cursor.editMode();
+  }
 
   VoxelEditTool.prototype.extrusionParametersFromIntersection = function(intersection) {
     return intersection.object.isPlane ? {
@@ -32,10 +34,15 @@ module.exports = (function() {
   }
 
   VoxelEditTool.prototype.updateCursor = function() {
+    if (this.activeBrush.type == "texture") {
+      this.cursor.mesh.scale.setComponent(0, 2);
+      this.cursor.mesh.position.add(new THREE.Vector3(0.5, 0, 0));
+    }
     this.cursor.mesh.scale.setComponent(this.extrusionComponent, 0.1);
     this.cursor.mesh.position.add(this.extrusionNormal.clone().multiplyScalar(0.7));
     this.cursor.mesh.material.uniforms.scale.value = this.cursor.mesh.scale;
     this.cursor.mesh.material.uniforms.rotatedMode.value = this.rotatedMode ? 1 : 0;
+
   }
 
   VoxelEditTool.prototype.updateVoxel = function(position, features, stiffness) {
@@ -47,7 +54,11 @@ module.exports = (function() {
       this.voxelGrid.removeVoxel(position);
       switch (this.activeBrush.type) {
         case "texture":
-          voxel = new TextureCell(position, this.activeBrush.name, stiffness);
+        var texture = new this.activeBrush.texture();
+        if (texture.name.startsWith('custom')) {
+          texture.canvasdrawer = this.activeBrush.canvasdrawer;
+        }
+          voxel = new TextureCell(position, texture, stiffness, this.extrusionNormal);
           break;
         default:
           voxel.setFeaturesInDirection(features, direction, stiffness);
