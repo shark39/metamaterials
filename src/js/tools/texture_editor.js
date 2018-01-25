@@ -122,11 +122,7 @@ module.exports = (function() {
 
       self.activateBrush(pattern);
     });
-
-    //this.canvasdrawer = new TextureCanvasDrawer($('#canvas-container'));
-    // onchange: update --> generate image, name, add to brushes, generate dom element and activateBrush
-
-
+    $("#canvas-container").hide();
   }
 
 
@@ -152,7 +148,6 @@ module.exports = (function() {
       $("#canvas-container").hide();
     }
     if (texture && this.activeBrush && this.activeBrush.name.startsWith('custom')) {
-      console.log("remove unused brush", this.activeBrush.name);
       this.removeUnusedBrush();
     }
     var brush = this.brushes[name];
