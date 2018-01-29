@@ -43,7 +43,7 @@ module.exports = (function() {
     light.position.set(0.0, 20.0, 10.0);
     this.scene.add(light);
 
-    var light2 = new THREE.AmbientLight( 0x666666 );
+    var light2 = new THREE.AmbientLight( 0x999999 );
     this.scene.add( light2 );
 
     // Create the grid and axes.

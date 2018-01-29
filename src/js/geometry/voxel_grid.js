@@ -132,16 +132,12 @@ module.exports = (function() {
 
   VoxelGrid.prototype.getTextureAsObj = function() {
     var exporter = new THREE.OBJExporter();
-    //convert geometry to mesh
-    //var material = new THREE.MeshPhongMaterial({color: 0xFF0000});
-    //var mesh = new THREE.Mesh(this.textureGeometry, material);
     var geometry = new THREE.Geometry();
-    for (var vox in this.voxels) {
-      if (this.voxels.hasOwnProperty(vox)) {
-        let geo = this.voxels[vox].getGeometry();
-        geo.translate(this.voxels[vox].position.x, this.voxels[vox].position.y, this.voxels[vox].position.z);
-        geometry.merge(geo);
-      }
+    var voxels = _.uniq(Object.values(this.voxels));
+    for (var vox of voxels) {
+      let geo = vox.getGeometry().clone();
+      geo.translate(vox.position.x, vox.position.y, vox.position.z);
+      geometry.merge(geo);
     }
 
     var objString = exporter.parse(geometry);

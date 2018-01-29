@@ -77,15 +77,20 @@ module.exports = (function() {
 
   Texture.prototype.setMinThickness = function() {} //TODO
 
+  Texture.prototype.calculateColor = function() {
+    let color = new THREE.Color(this.orientation.x !== 0 ? 1: 0, this.orientation.y !== 0 ? 1: 0, this.orientation.z !== 0 ? 1: 0);
+    let l = 1 - (0.8 * this.stiffness + 0.1); // from 0.1 to 0.9
+    let hue = (color.getHSL()).h;
+    color.setHSL(hue, 1.0, l);
+    return color;
+  }
+
   Texture.prototype.getMesh = function() {
-    var color = new THREE.Color(0, 0, 0);
-    var l = 1 - 0.8 * this.stiffness + 0.1; // from 0.1 to 0.9
-    color.setHSL(0, 1, l);
-    var material = new THREE.MeshPhongMaterial({
-      color: color,
+    let material = new THREE.MeshPhongMaterial({
+      color: this.calculateColor(),
       flatShading: false
     });
-    var textureGeometry = this.getGeometry();
+    let textureGeometry = this.getBentGeometry();
     return new THREE.Mesh(textureGeometry, material);
   }
 
@@ -95,7 +100,7 @@ module.exports = (function() {
     if (Texture.geometryCache.hasOwnProperty(this.cacheKey) && this.name != "custom")
       return Texture.geometryCache[this.cacheKey];
 
-    var geometries = [
+    let geometries = [
       this.texture.getGeometry(),
       this.texture.getFillGeometry(),
       this.texture._getWallGeometry('left'),
@@ -128,64 +133,9 @@ module.exports = (function() {
     return geo;
   }
 
-  Texture.prototype.getGeometry3 = function() {
-    var geometries = [
-      this.texture.getGeometry(),
-      this.texture.getFillGeometry(),
-      this.texture._getWallGeometry('left'),
-      this.texture._getWallGeometry('right'),
-    ];
-
-    var geo = geometries.reduce((sum, geo) => this.texture.merge(sum, geo), new THREE.Geometry());
-
-    geo.translate(-0.5, 0.5, 0);
-
-    let width = 1.0;
-    let steps = 20;
-    let radius = 2.0;
-    let step_angle = Math.atan(2.0 / (radius * steps));
-
-    var stepsize = width / steps;
-
-    var slices = [];
-    for (var step = 0; step < steps; step++) {
-      var box = new THREE.BoxGeometry(2, 1, stepsize);
-      box.translate(0.5, 0, -0.5 + step * stepsize);
-      let toSlice = new ThreeBSP(box);
-      var textureGeo = new ThreeBSP(geo);
-      var result = textureGeo.intersect(toSlice);
-      var slice = result.toMesh().geometry;
-
-      slice.translate(0.5, 0.5, 0);
-      for (var vertex of slice.vertices) {
-        vertex.z = vertex.z * vertex.y;
-      }
-      slice.verticesNeedUpdate = true;
-      slice.translate(-0.5, -0.5, 0);
-
-      let x = Math.abs(steps / 2 - step) * stepsize;
-      let actualRadius = Math.sqrt(x * x + 1);
-      let expectedRadius = Math.sqrt(1.25);
-      let scaleY = expectedRadius / actualRadius;
-      slice.scale(1, scaleY, 1);
-      slice.translate(0, (scaleY - 1) / 2, 0);
-      slices.push(slice);
-    }
-
-    while (slices.length >= 2) {
-      let a = slices.shift();
-      let b = slices.shift();
-      a.merge(b);
-      slices.push(a);
-    }
-
-    return slices[0];
-
-  }
-
   Texture.geometryCache = {};
 
-  Texture.prototype.getBendedGeometry = function() {
+  Texture.prototype.getBentGeometry = function() {
 
     if (Texture.geometryCache.hasOwnProperty('B' + this.cacheKey))
       return Texture.geometryCache['B' + this.cacheKey];
