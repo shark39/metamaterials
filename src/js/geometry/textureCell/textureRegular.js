@@ -1,64 +1,54 @@
 'use strict';
-
-/*
-A Regular Texture cell
-*/
-
-const bind = require('../../misc/bind');
-const Texture = require('./metatexture');
+const Texture = require('./texture');
 const THREE = require('three');
 
-
-module.exports = (function() {
-
-  function TextureRegular() {
-    //bind(this);
-    Texture.call(this);
-    this.name = "regular";
+class RegularTexture extends Texture {
+  textureType() {
+    return "regular"
+  }
+  static isCustomizable() {
+    return true
+  }
+  static drawing() {
+    return [
+      [0.5, 0],
+      [0.5, 1]
+    ];
   }
 
-  TextureRegular.prototype = Object.create(Texture.prototype);
-  TextureRegular.getName = () => "regular";
-  TextureRegular.getIsCustomizable = () => true;
-  TextureRegular.getDrawing = function() {
-    return [[0.5, 0], [0.5, 1]];
-  }
+  inner() {
 
-  TextureRegular.prototype.getGeometry = function() {
-    var textureGeometry = new THREE.Geometry();
+    let geo = new THREE.Geometry();
 
-    var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, this.height, this.length);
-    middleConnector.translate(this.width/2, -(this.height)/2, 0);
-    textureGeometry = this.merge(textureGeometry, middleConnector);
+    var middleConnector = this.middleConnector();
+    geo = this.merge(geo, middleConnector);
 
-    var member1 = this._getMemberGeometry(1, false);
-    member1.translate(this.wallWidth + this.hingeWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
-    textureGeometry = this.merge(textureGeometry, member1);
+    var member1 = this.member(1, false);
+    member1.translate(this.wallWidth + this.hingeWidth, -this.memberHeight - this.surfaceHeight, -this.length / 2);
+    geo = this.merge(geo, member1);
 
-    var member2 = this._getMemberGeometry(-1, false);
-    member2.translate(this.width/2 + this.middleConnectorWidth/2 + this.hingeWidth + this.memberWidth, -this.memberHeight-this.surfaceHeight, -this.length/2);
-    textureGeometry = this.merge(textureGeometry, member2);
+    var member2 = this.member(-1, false);
+    member2.translate(this.width / 2 + this.middleConnectorWidth / 2 + this.hingeWidth + this.memberWidth, -this.memberHeight - this.surfaceHeight, -this.length / 2);
+    geo = this.merge(geo, member2);
 
-    textureGeometry = this.merge(textureGeometry, this._getSurfaceGeometry());
+    geo = this.merge(geo, this.surface());
 
     //hinges
     var hingeOffsets = [this.wallWidth,
-                        this.memberWidth,
-                        this.middleConnectorWidth,
-                        this.memberWidth
-                     ]
+      this.memberWidth,
+      this.middleConnectorWidth,
+      this.memberWidth
+    ]
     var offset = 0;
     for (var i = 0; i < hingeOffsets.length; i++) {
       offset += hingeOffsets[i];
       var box = new THREE.BoxGeometry(this.hingeWidth, this.hingeHeight, this.length);
-      box.translate(this.hingeWidth/2+i*this.hingeWidth + offset, -this.hingeHeight/2, 0);
-      textureGeometry = this.merge(textureGeometry, box);
+      box.translate(this.hingeWidth / 2 + i * this.hingeWidth + offset, -this.hingeHeight / 2, 0);
+      geo = this.merge(geo, box);
     }
 
-    return textureGeometry;
+    return geo;
   }
+}
 
-
-  return TextureRegular;
-
-})();
+module.exports = RegularTexture

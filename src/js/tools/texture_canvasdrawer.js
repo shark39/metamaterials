@@ -6,261 +6,163 @@ const $ = require('jquery');
 const _ = require('lodash');
 const THREE = require('three');
 const createjs = require('createjs-browserify');
+const TexturePreview = require('../geometry/textureCell/texturePreviewImageBuilder');
 const bind = require('../misc/bind');
 
 
 module.exports = (function() {
 
-  const patterns = ['regular', 'box', 'round', 'zigzag', 'diamond', 'spiky'];
-
-  function TextureCanvasDrawer(canvas) {
-
-    this.canvas = canvas;
-    this.cellCount = 0;
-
-    var line;
-
-    this.stage = new createjs.Stage(this.canvas[0]);
-    this.lines = []; //paths
-    this.points = [];
-    this.pathCommands = [];
-
-    this.stage.autoClear = true;
-
-    this.dimensions = {
-      x: this.canvas.width(), //200
-      y: this.canvas.height() //100
-    };
-    this.cellHeight = this.dimensions.y;
-    this.cellWidth = this.dimensions.x;
-
-    this.initCanvas();
-
-
+  function TextureCanvasDrawer(container, onChange) {
+    this.parent = $('<div></div>');
+    container.append($('<div>+</div>')); 
+    container.append(this.parent); 
+    container.append($('<div>+</div>'));  
+    this.svgs = [this.cell()];
+    this.coordArrays = [[[0,0], [0,1]]];
+    this.onChange = onChange;
   }
 
-  TextureCanvasDrawer.prototype.initCanvas = function() {
-
-    var width = this.dimensions.x;
-    var height = this.dimensions.y;
-    this.cellCount++;
-
-    //middle
-    var middleLine = new createjs.Shape();
-    this.stage.addChild(middleLine);
-    //middleLine.graphics.setStrokeDash([2,2]);
-    middleLine.graphics.setStrokeStyle([2, 2]).beginStroke("rgba(0.5,0.5,0.5,0.1)");
-    middleLine.graphics.moveTo(width / 2, 0);
-    middleLine.graphics.lineTo(width / 2, height);
-    middleLine.graphics.endStroke();
-    this.middleLine = middleLine; //needed for addCell
-
-    this.stage.update();
-
+  TextureCanvasDrawer.prototype.middleLine = function(from, to, i) {
+    return $(document.createElementNS('http://www.w3.org/2000/svg','line')).attr({
+      id:"line" + i, 
+      stroke:"gray",
+      "stroke-width":"3",
+      "stroke-dasharray":"5, 5",
+      x1:from[0]*100, y1:from[1]*100,
+      x2:to[0]*100, y2:to[1]*100
+    });
   }
 
-  TextureCanvasDrawer.prototype.drawExamplePath = function() {
-    var line = new createjs.Shape();
-    this.pathCommands.push(line.graphics.moveTo(width / 3, 0).command);
-    //pathCommands.push(line.graphics.quadraticCurveTo((width / 3 + width / 2), 10, width / 2, height / 2).command);
-    this.pathCommands.push(line.graphics.lineTo(2 * width / 3, height).command);
+  TextureCanvasDrawer.prototype.removeButton = function(pos, remove) {
+    return $(document.createElementNS('http://www.w3.org/2000/svg','text')
+              .appendChild(document.createTextNode("X")))
+    .attr({
+      id:"removeButton", 
+      fill:"gray",
+      x:pos[0]*100, y:pos[1]*100,
+    }).mousedown(remove.bind(this));
+  }
 
-    this.drawPath();
-    var self = this;
-    this.pathCommands.forEach(function(c) {
-      self.addPoint(c.x, c.y);
-      //.cpx, .cpy for quadratic curve
+  TextureCanvasDrawer.prototype.line = function(from, to, i, coordArray) {
+    return $(document.createElementNS('http://www.w3.org/2000/svg','line')).attr({
+      id:"line" + i, 
+      stroke:"darkgray",
+      width:5,
+      x1:from[0]*100, y1:from[1]*100,
+      x2:to[0]*100, y2:to[1]*100}).mousedown((evt) => 
+        this.addPoint(i, this.getSVGPoint(evt), coordArray)
+      );
+  }
+
+  TextureCanvasDrawer.prototype.dot = function(length, point, i) {
+    let dot = $(document.createElementNS('http://www.w3.org/2000/svg','circle')).attr({
+      id:"dot" + i,
+      stroke:"lightblue",
+      fill:"lightblue",
+      r: 5,
+      cx:point[0]*100, cy:point[1]*100
+    }).data("id", i).data("first", i==0).data("last", i==length-1);
+
+    dot.mousedown((evt) => {
+      this.selectedDot = evt.target;
+    })
+
+    return dot;
+  }
+
+  TextureCanvasDrawer.prototype.cell = function(coordArray = []) {
+    this.coordArrays = [coordArray];
+    let cell = $(document.createElementNS("http://www.w3.org/2000/svg", "svg"))
+                      .attr({viewBox:"0,0,200,100", width:300, height:150})
+    cell.append(this.middleLine([1,0],[1,1], 'middle'));
+    cell.append(this.removeButton([1,1], () => {cell.remove()}));
+
+    coordArray.reduce((prev, curr, i) => {
+      if(i == 0) return curr;
+      cell.append(this.line(prev, curr, i-1, coordArray)); 
+      return curr
+    }, coordArray[0]); //draw all lines
+
+    let dots = coordArray.map(this.dot.bind(this, coordArray.length)) || [];
+    cell.append(dots); //draw all dots
+
+    cell.mousemove((evt) => {
+      if (this.selectedDot) {
+        let point = this.getSVGPoint(evt, cell[0]);
+        let cx = Math.max(Math.min(point.x, 200), 0);
+        let cy = Math.max(Math.min(point.y, 100), 0);
+        if($(this.selectedDot).data("first")) cy = 0;
+        if($(this.selectedDot).data("last")) cy = 100;
+        this.selectedDot.setAttributeNS(null, "cx", cx);
+        this.selectedDot.setAttributeNS(null, "cy", cy);
+        this.selectedDotPoint = point;
+        let id = $(this.selectedDot).data("id");
+        this.moveLine(cell, id, cx, cy);
+        coordArray[id] = [cx/100,cy/100];
+        this.onChange("custom");
+      }
     });
 
+    cell.mouseup((evt) => {this.selectedDot = undefined; console.log("up")});
+
+    this.parent.append(cell);
+    return cell;
+  }
+
+  TextureCanvasDrawer.prototype.getSVGPoint = function (evt, svg) {
+    svg = svg || evt.target.farthestViewportElement;
+    let ctm = svg.getCTM().inverse();
+    let point = svg.createSVGPoint();
+    point.x = evt.offsetX; 
+    point.y = evt.offsetY;
+    return point.matrixTransform(ctm);
+  }
+
+  TextureCanvasDrawer.prototype.moveLine = function (svg, id, cx, cy) {
+    let line1 = svg.find("#line"+(id-1));
+    let line2 = svg.find("#line"+(id));
+    line1.length && line1[0].setAttributeNS(null, "x2", cx);
+    line1.length && line1[0].setAttributeNS(null, "y2", cy);
+    line2.length && line2[0].setAttributeNS(null, "x1", cx);
+    line2.length && line2[0].setAttributeNS(null, "y1", cy);
+  }
+
+  TextureCanvasDrawer.prototype.addPoint = function (id, point, coordArray) {
+    coordArray.splice(id+1, 0, [point.x/100, point.y/100]); //insert at pos
+    this.reset();
+    this.coordArrays.forEach(this.cell.bind(this));
   }
 
   TextureCanvasDrawer.prototype.load = function(coordArray) {
-    // coordArray contains relative commands for lineTo commands. example [[0, 0], [1, 1]] draws a diagonal line
-    //this.canvas.show();
-
-    for (var i = 0; i < this.points.length; i++) {
-      this.stage.removeChild(this.points[i]);
-    }
-    this.points = [];
-    this.pathCommands = [];
-    if (!coordArray || coordArray == []) {
-      return
-    }
-    var self = this;
-    var width = this.dimensions.x;
-    var height = this.dimensions.y;
-    var line = new createjs.Shape();
-    this.pathCommands.push(line.graphics.moveTo(width*coordArray[0][0], height*coordArray[0][1]).command);
-    for (var i = 1; i < coordArray.length; i++) {
-      this.pathCommands.push(line.graphics.lineTo(width*coordArray[i][0], height*coordArray[i][1]).command);
-    }
-    this.drawPath();
-    this.pathCommands.forEach(function(c) {
-      self.addPoint(c.x, c.y);
-      //.cpx, .cpy for quadratic curve
-    });
-    this.stage.update();
-  }
-
-  TextureCanvasDrawer.prototype.block = function() {
-    //this.canvas.hide();
-  }
-
-  TextureCanvasDrawer.prototype.setCellCount = function(count) {
-    this.cellCount = count;
-    this.dimensions.y = this.cellHeight * count;
-    this.canvas.attr({height:this.dimensions.y});
-    this.middleLine.scaleY = this.dimensions.y/this.cellHeight;
+    this.reset();
+    this.cell(coordArray);
   }
 
   TextureCanvasDrawer.prototype.addCell = function() {
+    this.cell();
+	}
 
-			this.dimensions.y += this.cellHeight;
-      this.cellCount++;
-
-			this.canvas.attr({height:this.dimensions.y});
-			this.middleLine.scaleY = this.dimensions.y/this.cellHeight;
-
-			//add a vertical line
-			var verticalLine = new createjs.Shape();
-			this.stage.addChild(verticalLine);
-			//middleLine.graphics.setStrokeDash([2,2]);
-			verticalLine.graphics.setStrokeStyle([2, 2]).beginStroke("rgba(0.5,0.5,0.5,0.1)");
-			verticalLine.graphics.moveTo(0, this.dimensions.y-this.cellHeight);
-			verticalLine.graphics.lineTo(this.dimensions.x, this.dimensions.y-this.cellHeight);
-			verticalLine.graphics.endStroke();
-
-			this.stage.update();
-		}
-
-  TextureCanvasDrawer.prototype.removeCell = function() {
-    this.dimensions.y -= this.cellHeight;
-    this.cellCount--;
-
-    this.canvas.attr({height: this.dimensions.y});
-    this.middleLine.scaleY = this.dimensions.y/this.cellHeight;
-
-    for (var i = 0; i < this.pathCommands.length; i++) {
-      this.pathCommands[i].y = this.pathCommands[i].y/(this.dimensions.y + this.cellHeight) * this.dimensions.y;
-    }
-    for (var i = 0; i < this.points.length; i++) {
-      this.points[i].y = this.points[i].y/(this.dimensions.y + this.cellHeight) * this.dimensions.y;
-    }
-
-    this.drawPath();
-
+  TextureCanvasDrawer.prototype.removeCell = function(i) {
+    this.parent.remove(i);
   }
 
-  TextureCanvasDrawer.prototype.drawPath = function() {
-    var self = this;
-    this.lines.forEach(function(line) {
-      self.stage.removeChild(line);
-    });
-    for (var i = 1; i < this.pathCommands.length; i++) {
-
-      var line = new createjs.Shape();
-      line.name = "line" + i;
-      line.lid = i;
-      line.graphics.setStrokeStyle(2).beginStroke("rgba(0,0,0,1)");
-      line.graphics.moveTo(this.pathCommands[i - 1].x, this.pathCommands[i - 1].y)
-      line.graphics.append(this.pathCommands[i]);
-      line.graphics.endStroke();
-      line.on("mousedown", function(event) {
-        console.log(event.currentTarget.name, event.currentTarget.lid);
-        self.injectDot(event.stageX, event.stageY, event.currentTarget.lid);
-      });
-      this.lines.push(line);
-      this.stage.addChild(line);
-
-    }
-    this.stage.update();
+  TextureCanvasDrawer.prototype.reset = function() {
+    this.parent.empty();
   }
 
-  TextureCanvasDrawer.prototype.injectDot = function(x, y, lid) {
-    this.addPoint(x, y);
-    var line = new createjs.Shape();
-    var command = line.graphics.lineTo(x, y).command;
-    this.pathCommands.splice(lid, 0, command);
-    this.drawPath();
-
-  }
-
-  TextureCanvasDrawer.prototype.getCommand = function(x, y) {
-    for (var i = 0; i < this.pathCommands.length; i++) {
-      if (this.pathCommands[i].x == x && this.pathCommands[i].y == y) {
-        return this.pathCommands[i];
-      }
-    }
-  }
-
-  TextureCanvasDrawer.prototype.addPoint = function(x, y) {
-    var circle = new createjs.Shape();
-    circle.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 8);
-    circle.x = x;
-    circle.y = y;
-    var self = this;
-    circle.on("pressmove", function(evt) {
-      self.movingDot = true;
-      var command = self.getCommand(evt.currentTarget.x, evt.currentTarget.y);
-      command.x = evt.stageX;
-      command.y = evt.stageY;
-      self.drawPath(this.pathCommands);
-      evt.currentTarget.x = evt.stageX;
-      evt.currentTarget.y = evt.stageY;
-      self.stage.update();
-    });
-    circle.on("pressup", function(evt) {
-      self.movingDot = false;
-    });
-    this.stage.addChild(circle);
-    this.points.push(circle);
-  }
-
-  TextureCanvasDrawer.prototype.getPoint = function(t) {
-    //t is in [0;1]
-    //1. calculate length of whole path
-    var length = 0;
-    var parts = [0]; //array with total length till point i
-    for (var i = 1; i < this.pathCommands.length; i++) {
-      var v1 = new THREE.Vector2(this.pathCommands[i - 1].x, this.pathCommands[i - 1].y);
-      var v2 = new THREE.Vector2(this.pathCommands[i].x, this.pathCommands[i].y);
-
-      var distance = v2.distanceTo(v1);
-      length += distance;
-      parts.push(length);
-    }
-
-
-    //2. find the right segment
-    //normalisieren with dimension.y (100)
-    var i = 0;
-    for (i; i < parts.length; i++) {
-      if (parts[i] == t * length) {
-        return new THREE.Vector3(this.pathCommands[i].x / this.dimensions.y, 0, this.pathCommands[i].y / this.dimensions.y);
-      }
-      if (parts[i] > t * length) {
-        //interpolate
-        var start = [this.pathCommands[i - 1].x / this.dimensions.y, this.pathCommands[i - 1].y / this.dimensions.y];
-        var end = [this.pathCommands[i].x / this.dimensions.y, this.pathCommands[i].y / this.dimensions.y];
-        var point = [t * (end[0] - start[0]) + start[0], t * (end[1] - start[1]) + start[1]];
-        return new THREE.Vector3(point[0], 0, point[1]);
-      }
-    }
-
+  TextureCanvasDrawer.prototype.block = function() {
+    this.parent.empty();
   }
 
   TextureCanvasDrawer.prototype.getDrawing = function() {
-    var coordArray = [];
-    for (var i = 0; i < this.pathCommands.length; i++) {
-      coordArray.push([this.pathCommands[i].x/this.dimensions.x, this.pathCommands[i].y/this.dimensions.y]);
-    }
-    return coordArray;
+    return this.coordArrays.reduce((prev, curr, i) => 
+      [...prev,
+      ...curr.map((array) => [array[0], array[1]+i])]
+    ,[]);
   }
 
   TextureCanvasDrawer.prototype.getImage = function() {
-    var image = new Image();
-    image.src = this.canvas[0].toDataURL("image/png");
-    return image;
+    return TexturePreview(this.coordArrays[0]);
   }
 
   return TextureCanvasDrawer;

@@ -3,6 +3,7 @@
 const $     = require('jquery');
 const _     = require('lodash');
 const THREE = require('three');
+const MechanicalCell = require('../geometry/mechanicalCell/mechanicalCell');
 
 const bind  = require('../misc/bind');
 
@@ -215,6 +216,7 @@ module.exports = (function() {
     $('.voxel-cells-btn').removeClass('active');
 
     this.activeBrush = brush;
+    this.activeBrush.class = MechanicalCell; 
     brush.domElement.addClass('active');
     
     this.tools.forEach(function(tool) {

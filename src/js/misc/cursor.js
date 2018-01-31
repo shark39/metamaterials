@@ -26,6 +26,7 @@ module.exports = (function() {
     var geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0);
     this.mesh = new THREE.Mesh(geometry, material);
 
+    this.cursorBorder = 0.0;
     this.isShader = true;
     this.isAddMode = true;
   }
@@ -38,18 +39,17 @@ module.exports = (function() {
   Cursor.prototype.deleteMode = function() {
     this.isAddMode = false;
     this.shaderMode(); // switch to shader mode here
-    const cursorBorder = 0.5;
+    this.cursorBorder = 0.5;
     this.mesh.material.uniforms.color.value = new THREE.Color(0xffffff);
     this.mesh.material.uniforms.borderColor.value = new THREE.Color(0xdddddd);
     this.mesh.material.uniforms.tool.value = 1;
-    this.mesh.material.uniforms.borderSize.value = cursorBorder / 2.0;
+    this.mesh.material.uniforms.borderSize.value = this.cursorBorder / 2.0;
 }
 
 Cursor.prototype.editMode = function() {
   this.isAddMode = false;
   this.shaderMode(); // switch to shader mode here
   this.mesh.material.uniforms.tool.value = 2;
-
 }
 
 Cursor.prototype.addMode = function() {
@@ -71,10 +71,11 @@ Cursor.prototype.geometryMode = function() {
 }
 
 Cursor.prototype.shaderMode = function() {
-  this.setGeometry(new THREE.BoxGeometry(1.0, 1.0, 1.0));
+  this.setGeometry(new THREE.BoxGeometry(1, 1, 1));
   this.mesh.material = this.shaderMaterial;
   this.mesh.needsUpdate = true;
   this.isShader = true;
+  this.cursorBorder = 0.0;
 }
 
   return Cursor;

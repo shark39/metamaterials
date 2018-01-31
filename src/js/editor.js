@@ -48,7 +48,7 @@ module.exports = (function() {
         requestAnimationFrame(render);
       }
     }
-    window.addEventListener("scroll", requestRender, true);
+    window.addEventListener("wheel", requestRender, true);
     window.addEventListener("mousemove", requestRender, true);
     window.addEventListener("mouseup", requestRender, true);
     window.addEventListener("mousedown", requestRender, true);

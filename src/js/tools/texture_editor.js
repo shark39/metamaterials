@@ -8,17 +8,13 @@ const createjs = require('createjs-browserify');
 const bind = require('../misc/bind');
 
 const TextureCanvasDrawer = require('./texture_canvasdrawer');
-const Texture2d = require('../geometry/textureCell/texture2d');
-const TextureRegular = require('../geometry/textureCell/textureRegular');
-const TextureRound = require('../geometry/textureCell/textureRound');
-const TextureBox = require('../geometry/textureCell/textureBox');
-const TextureZigZag = require('../geometry/textureCell/textureZigZag');
+const TexturePreview = require('../geometry/textureCell/texturePreviewImageBuilder');
+const TextureBuilder = require('../geometry/textureCell/textureBuilder');
 const TextureCustom = require('../geometry/textureCell/textureCustom');
 
 
 const patterns = ['regular', 'round', 'box', 'zigzag']; //'diamond', 'spiky', 'custom', 'debug'];
-
-const mapping = {'regular' : TextureRegular, 'round': TextureRound, 'box': TextureBox, 'zigzag': TextureZigZag};
+const mapping = TextureBuilder.mapping;
 
 module.exports = (function() {
 
@@ -45,13 +41,7 @@ module.exports = (function() {
     var self = this;
     var container = $('#texture-presets');
     patterns.forEach(function(pattern) {
-      //generate UI element
-      var width = 80;
-      var height = 60;
-      var canvas = document.createElement("canvas");
-      canvas.setAttribute('width', width);
-      canvas.setAttribute('height', height);
-      var image = Texture2d.getImageFromCoordsArray(mapping[pattern].getDrawing());
+      var image = TexturePreview(mapping[pattern].drawing());
       var domElement = getButtonDom(image);
 
       domElement.click(function() {
@@ -70,80 +60,29 @@ module.exports = (function() {
       self.activateBrush(); //reactivate brush with new parameter
     });
 
-    //
-    let div = $('<div></div>');
-    $('#canvas-container').append(div);
-    let canvas = $('<canvas height=100 width=200 class="texture-canvas"></canvas>');
-    div.draggable({
-      disabled: false,
-      axis: 'y',
-      //prevent dragging when clicked on line or dot
-      drag: function(event, ui) {
-        return !self.canvasdrawer.movingDot;
-      }
-    });
-    div.append(canvas);
-    let addcellDom = $('<div><button type="button" class="btn btn-secondary" style="width: 100%"">extend cell</button></div>');
-    addcellDom.click(function(event) {
-      self.canvasdrawer.addCell();
-      self.canvasdrawer.cellCount == 1 ? $('#remove-cell').hide() : $('#remove-cell').show();
-    });
-    div.append(addcellDom);
-    let removecellDom = $('<div><button type="button" id="remove-cell" class="btn btn-secondary" style="width: 100%"">reduce cell</button></div>');
-    removecellDom.click(function(event) {
-      self.canvasdrawer.removeCell();
-      //move everything down
-      let offsetTop = Number(self.container[0].style.top.replace("px", ""));
-      self.container[0].style.top = offsetTop + self.canvasdrawer.cellHeight + "px";
-      //hide reduce button
-      self.canvasdrawer.cellCount == 1 ? $(event.target).hide() : $(event.target).show();
-    });
-    //removecellDom.hide(); //because cellCount==1
-    div.append(removecellDom);
-    this.canvasdrawer = new TextureCanvasDrawer(canvas);
-    this.container = div;
+    this.canvasdrawer = new TextureCanvasDrawer($('#canvas-container'), this.activateBrush.bind(this));
 
-    div.click(function(event) {
-      let image = self.canvasdrawer.getImage();
-      let cc = Math.random().toString(36).substring(7);
-      let pattern = "custom" + cc;
-      var domElement = getButtonDom(image);
-      var customPath = self.canvasdrawer.getDrawing();
-      domElement.click(function() {
-        self.activateBrush(pattern, customPath);
-      });
-
-      container.append(domElement);
-      self.brushes[pattern] = {
-        name: pattern,
-        domElement: domElement,
-        type: "texture"
-      };
-
-      self.activateBrush(pattern);
-    });
-    $("#canvas-container").hide();
+    //$("#canvas-container").hide();
   }
 
 
-  TextureEditor.prototype.activateBrush = function(name, customPath) {
+  TextureEditor.prototype.activateBrush = function(name) {
 
     $('.voxel-cells-btn').removeClass('active');
 
     let texture;
     if (name.startsWith("custom") &&  this.activeBrush.name != name) {
       texture = TextureCustom;
-      texture.getDrawing = () => customPath || this.canvasdrawer.getDrawing();
+      texture.drawing = () => customPath || this.canvasdrawer.getDrawing();
     } else {
-    texture = mapping[name];
+      texture = mapping[name];
     }
 
-    if ((this.activeBrush == undefined || this.activeBrush.name != name) && texture && texture.getIsCustomizable()) {
-      this.canvasdrawer.load(texture.getDrawing());
-      //this.canvasdrawer.setCellCount(2);
+    if ((this.activeBrush == undefined || this.activeBrush.name != name) && texture && texture.isCustomizable()) {
+      this.canvasdrawer.load(texture.drawing());
       $("#canvas-container").show();
     }
-    if (texture && !texture.getIsCustomizable()) {
+    if (texture && !texture.isCustomizable()) {
       this.canvasdrawer.block();
       $("#canvas-container").hide();
     }
@@ -157,13 +96,11 @@ module.exports = (function() {
     brush.canvasdrawer = this.canvasdrawer;
     brush.domElement.addClass('active');
     brush.texture = texture;
+    brush.class = texture;
     this.activeBrush = brush;
     this.tools.forEach(function(tool) {
       tool.activeBrush = brush;
-      //tool.rotatedMode = brush.rotated;
     });
-
-    //this.update();
   }
 
   TextureEditor.prototype.removeUnusedBrush = function() {
@@ -172,8 +109,6 @@ module.exports = (function() {
       delete this.brushes[this.activeBrush.hash];
     }
   }
-
-
 
   return TextureEditor;
 

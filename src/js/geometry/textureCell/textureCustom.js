@@ -1,86 +1,61 @@
 'use strict';
-
-/*
-A Texture cell
-*/
-
-const bind = require('../../misc/bind');
-const Texture = require('./metatexture');
+const Texture = require('./texture');
 const THREE = require('three');
 const ThreeBSP = require('three-js-csg')(THREE);
 
-
-module.exports = (function() {
-
-  function TextureCustom() {
-    Texture.call(this);
-    this.name = "custom";
-    this.isCustomizable = true;
+class CustomTexture extends Texture {
+  textureType() {
+    return "custom"
   }
-
-  TextureCustom.prototype = Object.create(Texture.prototype);
-  TextureCustom.getName = () => "custom";
-  TextureCustom.getIsCustomizable = () => true;
-  TextureCustom.getDrawing = function() {
+  static isCustomizable() {
+    return true
+  }
+  static drawing() {
     return [];
   }
 
-  TextureCustom.prototype.getDrawing = function() {
-    return [];
-  }
-
-  TextureCustom.prototype.getGeometry = function() {
+  inner() {
     //generate a negativ from the canvas path
     var height = this.surfaceHeight;
     var gap = 0.05;
     var path = new THREE.Curve();
     path.getPoint = (t) => this.canvasdrawer.getPoint(t); //this function ist required for extrude geometry
 
-    var shapePoints2 = [ new THREE.Vector2(0, -gap),
-                        new THREE.Vector2(0.3*height, -gap),
-                        new THREE.Vector2(height, -gap*1.5),
-                        new THREE.Vector2(height, gap*1.5),
-                        new THREE.Vector2(0.3*height, gap),
-                        new THREE.Vector2(0, gap),
-                         new THREE.Vector2(0, -gap)];;
-    //shapePoints.forEach(function(p) {
-    //  shapePoints2.push(new THREE.Vector2(p.y, p.x));
-    //});
+    var shapePoints2 = [new THREE.Vector2(0, -gap),
+      new THREE.Vector2(0.3 * height, -gap),
+      new THREE.Vector2(height, -gap * 1.5),
+      new THREE.Vector2(height, gap * 1.5),
+      new THREE.Vector2(0.3 * height, gap),
+      new THREE.Vector2(0, gap),
+      new THREE.Vector2(0, -gap)
+    ];
 
     var extrudeSettings = {
-				steps: 100,
-				bevelEnabled: false,
-				extrudePath: path
-			};
-      var shape = new THREE.Shape(shapePoints2);
-  		var pathGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-      pathGeometry.translate(-this.width/2, this.surfaceHeight/2, -this.length/2);
-      /*if (shapeOnly) { //this is just for the demo and debugging
-        return pathGeometry;
-      }*/
+      steps: 100,
+      bevelEnabled: false,
+      extrudePath: path
+    };
+    var shape = new THREE.Shape(shapePoints2);
+    var pathGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    pathGeometry.translate(-this.width / 2, this.surfaceHeight / 2, -this.length / 2);
 
-      var textureGeometry = new THREE.Geometry();
+    var textureGeometry = new THREE.Geometry();
 
-      var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length, 4, 4, 4);
-      var topPlaneBSP = new ThreeBSP(topPlane);
-      var negativBSP = new ThreeBSP(pathGeometry);
-      var result = topPlaneBSP.subtract(negativBSP);
-      topPlane = result.toMesh().geometry;
-      topPlane.translate(this.width / 2, -this.surfaceHeight / 2, 0);
-      textureGeometry.merge(topPlane);
-
-      //like for every cell:
-      var fill = this.getFillGeometry();
-      //textureGeometry.merge(fill);
-      textureGeometry.merge(this._getWallGeometry('left'));
-      textureGeometry.merge(this._getWallGeometry('right'));
-
-      textureGeometry.scale(1,1,this.canvasdrawer.cellCount);
-
-      return textureGeometry;
+    var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length, 4, 4, 4);
+    var topPlaneBSP = new ThreeBSP(topPlane);
+    var negativBSP = new ThreeBSP(pathGeometry);
+    var result = topPlaneBSP.subtract(negativBSP);
+    topPlane = result.toMesh().geometry;
+    topPlane.translate(this.width / 2, -this.surfaceHeight / 2, 0);
+    textureGeometry.merge(topPlane);
+    return textureGeometry;
   }
 
+  _buildGeometry() {  //override
+    let geo = super._buildGeometry();
+    geo.scale(1, 1, this.canvasdrawer.cellCount);
+    return geo;
+  }
+}
 
-  return TextureCustom;
-
-})();
+module.exports = CustomTexture

@@ -1,5 +1,4 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300);
-
 * {
   border-radius: 0 !important;
 }
@@ -19,8 +18,9 @@ body {
   width: 350px;
   padding: 10px;
   height: 100%;
-  overflow-y: auto; /*scroll if needed */
-  background: rgba(0,0,0,0.4);
+  overflow-y: auto;
+  /*scroll if needed */
+  background: rgba(0, 0, 0, 0.4);
 }
 
 
@@ -78,7 +78,7 @@ body {
 }
 
 .voxel-text-btn.active {
-/*   color: #d6d7d9;
+  /*   color: #d6d7d9;
   background: #939597; */
   border-color: #00adee;
 }
@@ -196,11 +196,11 @@ body {
 }
 
 .voxel-stiffness-pattern-btn {
-  padding:5px;
+  padding: 5px;
   border: solid 2px transparent;
 }
 
-.voxel-stiffness-pattern-btn > p {
+.voxel-stiffness-pattern-btn>p {
   margin: 0px;
   user-select: none;
 }
@@ -216,6 +216,7 @@ body {
 .second-stiffnes-value-panel.active {
   display: block;
 }
+
 
 /* advanced */
 
@@ -246,7 +247,7 @@ body {
 }
 
 #voxel-advanced-rotate-btn:active {
-	outline: solid 4px #00adee;
+  outline: solid 4px #00adee;
 }
 
 
@@ -281,26 +282,27 @@ body {
 }
 
 #texture_canvas {
-			border-style: solid;
-			border-color: black;
-			border-width: 2px;
-		}
+  border-style: solid;
+  border-color: black;
+  border-width: 2px;
+}
 
 .canvas-pattern {
   padding: 3px;
 }
 
 .texture-presets {
-    display: block;
-    clear: both;
-    margin-left: 15px;
-  }
+  display: block;
+  clear: both;
+  margin-left: 15px;
+}
 
 #canvas-container {
-  width: 200px;
-  height: 200px;
-  overflow: hidden;
-  background-color: #D2D2D2;
+  width: 100%;
+  max-height: 300px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  background-color: white;
   z-index: 0;
 }
 

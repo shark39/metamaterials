@@ -10,11 +10,7 @@ module.exports = (function() {
   function VoxelDeleteTool(renderer, voxelGrid) {
     bind(this);
     VoxelTool.call(this, renderer, voxelGrid);
-
     this.setCuboidMode(true, false);
-
-
-
   }
 
   VoxelDeleteTool.prototype = Object.create(VoxelTool.prototype);
@@ -29,8 +25,6 @@ module.exports = (function() {
     }
   }
 
-  // This break the current selection and acts as a reset.
-  // It is more like a hack.
   VoxelDeleteTool.prototype.reset = function() {
     this.setCuboidMode(true, false);
     this.cursor.deleteMode();
@@ -41,8 +35,7 @@ module.exports = (function() {
   }
 
   VoxelDeleteTool.prototype.updateVoxel = function(position) {
-    this.voxelGrid.removeVoxel(position);
-    return [];
+    return this.voxelGrid.removeVoxel(position);
   }
 
   return VoxelDeleteTool;

@@ -1,12 +1,10 @@
 'use strict';
 
-const bind        = require('../misc/bind');
-const VoxelTool   = require('./voxel_tool');
-const THREE       = require('three');
-const MechanicalCell = require('../geometry/mechanicalCell/mechanicalCell');
-const TextureCell = require('../geometry/textureCell/texture');
+const bind = require('../misc/bind');
+const VoxelTool = require('./voxel_tool');
+const THREE = require('three');
 
-module.exports = (function() {
+module.exports = (function () {
 
   function VoxelAddTool(renderer, voxelGrid) {
     bind(this);
@@ -18,7 +16,7 @@ module.exports = (function() {
 
   VoxelAddTool.prototype = Object.create(VoxelTool.prototype);
 
-  VoxelAddTool.prototype.extrusionParametersFromIntersection = function(intersection) {
+  VoxelAddTool.prototype.extrusionParametersFromIntersection = function (intersection) {
     return intersection.object.isPlane ? {
       startPosition: intersection.point.floor().addScalar(0.5),
       extrusionNormal: new THREE.Vector3(0.0, 1.0, 0.0)
@@ -28,36 +26,33 @@ module.exports = (function() {
     }
   }
 
-  VoxelAddTool.prototype.extrusionLengthFromIntersection = function(intersection) {
+  VoxelAddTool.prototype.extrusionLengthFromIntersection = function (intersection) {
     return Math.max(Math.round(intersection), 0.0);
   }
 
   // This break the current selection and acts as a reset.
   // It is more like a hack.
-  VoxelAddTool.prototype.reset = function() {
+  VoxelAddTool.prototype.reset = function () {
     this.setCuboidMode(true, false);
     this.cursor.addMode();
   }
 
-  VoxelAddTool.prototype.updateVoxel = function(position, features, stiffness) {
+  VoxelAddTool.prototype.updateVoxel = function (position, features, stiffness, relativeExtrusion) {
     var voxel = undefined;
-    switch (this.activeBrush.type) {
-      case "texture":
-        var texture = new this.activeBrush.texture();
-        if (texture.name.startsWith('custom')) {
-          texture.canvasdrawer = this.activeBrush.canvasdrawer;
-        }
-        voxel = new TextureCell(position, texture, stiffness);
-        break;
-      default:
-        voxel = new MechanicalCell(position, features, this.extrusionNormal.largestComponent(), stiffness, this.voxelGrid.minThickness);
-    }
-
+    let direction = this.extrusionNormal.largestComponent();
+    let minThickness = this.voxelGrid.minThickness;
+    voxel = new this.activeBrush.class(position, {
+      stiffness,
+      minThickness,
+      features,
+      direction,
+      orientation: this.extrusionNormal,
+      relativeExtrusion
+    });
     this.voxelGrid.addVoxel(voxel, position);
     this.activeBrush.used = true;
-    return [ voxel ];
+    return voxel;
   }
-
 
   return VoxelAddTool;
 

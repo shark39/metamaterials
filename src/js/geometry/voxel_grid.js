@@ -7,7 +7,6 @@ const voxelize       = require('voxelize');
 const CSG            = require('openjscad-csg').CSG;
 const saveAs         = require('file-saver').saveAs;
 
-const Voxel          = require('./mechanicalCell/mechanicalCell');
 const STLExporter    = require('../misc/STLExporter');
 const OBJExporter    = require('../misc/OBJExporter');
 const OBJLoader2      = require('../misc/OBJLoader');
@@ -75,62 +74,7 @@ module.exports = (function() {
     this.update();
   };
 
-  VoxelGrid.prototype.export = function() {
-    const vertices = elementGeometry.attributes.position.array;
-    const indices = elementGeometry.index.array;
-
-    var polygons  = [];
-    var csgVertices = [];
-
-    for(var k = 0; k < indices.length; k++){
-      if(k > 0 && k % 3 == 0){
-        polygons.push(new CSG.Polygon(csgVertices));
-        csgVertices = [];
-      }
-
-      var index = indices[k] * 3;
-      csgVertices.push(new CSG.Vertex(new CSG.Vector3D(
-        vertices[index] * this.cellSize,
-        vertices[index+1] * this.cellSize,
-        vertices[index+2] * this.cellSize
-      )));
-    }
-
-    polygons.push(new CSG.Polygon(csgVertices));
-
-    const exportScene = CSG.fromPolygons(polygons);
-    return exportScene;
-  };
-
-  VoxelGrid.prototype.addTexture = function(geometry) {
-    this.textureGeometry.merge(geometry);
-    //mark voxel in voxelgrid as full
-  }
-
-  VoxelGrid.prototype.exportTexture = function() {
-    //debugger;
-    var name = "export_texture";
-    var exporter = new THREE.STLExporter();
-    var stlString = exporter.parse( this.scene );
-
-    var blob = new Blob([stlString], {type: 'text/plain'});
-
-    saveAs(blob, name + '.stl');
-
-  };
-
   VoxelGrid.prototype.exportObj = function() {
-    //debugger;
-    var name = "export";
-
-    var objString = this.getTextureAsObj();
-    var blob = new Blob([objString], {type: 'text/plain'});
-    return blob
-    
-
-  };
-
-  VoxelGrid.prototype.getTextureAsObj = function() {
     var exporter = new THREE.OBJExporter();
     var geometry = new THREE.Geometry();
     var voxels = _.uniq(Object.values(this.voxels));
@@ -141,30 +85,24 @@ module.exports = (function() {
     }
 
     var objString = exporter.parse(geometry);
-    return objString;
-  }
+    var blob = new Blob([objString], {type: 'text/plain'});
+    return blob
+  };
 
-  VoxelGrid.prototype.setTextureFromObj = function(obj) {
+  VoxelGrid.prototype.exportJson = function() {
+    var voxels = _.uniq(Object.values(this.voxels));
+    var voxelJsons = voxels.map((voxel) => voxel.json());
+    var blob = new Blob(JSON.stringify(voxelJsons), {type: 'text/plain'});
+    return blob
+  };
 
-    var loader = new THREE.OBJLoader2();
-    var group = loader.parse(obj);
-    var geo = group.children[0].geometry;
-    this.textureGeometry = geo;
-    var self = this;
-    this.scene.traverse(function(object) {
-      if (object.name == "texture") {
-        self.scene.remove(object);
-      }
-    });
-    var material = new THREE.MeshPhongMaterial({
-				color: 0xa00000,
-				flatShading: false
-			});
-
-    var mesh = new THREE.Mesh(geo, material);
-    mesh.name = "texture";
-    this.scene.add(mesh);
-  }
+  VoxelGrid.prototype.importJson = function(json) {
+    var voxels = JSON.parse(json);
+    for (var voxel of voxels) {
+      this.reset();
+      //TODO: this.addVoxel();
+    }
+  };
 
   VoxelGrid.prototype.update = function() {
   };
@@ -190,10 +128,10 @@ module.exports = (function() {
       for(var y = 0; y < size[1]; y++)
         for(var z = 0; z < size[2]; z++){
           let pos = [origin.x + x, origin.y + y, origin.z + z];
-          this.addIntersectionVoxel(pos);
+          this.addIntersectionVoxel(pos, voxel);
           this.voxels[pos] = voxel;
     }
-    const mesh = voxel.mesh;
+    var mesh = voxel.getMesh();
     mesh.position.copy(position);
     //mesh.matrixAutoUpdate  = false;
     //mesh.updateMatrix();
@@ -222,17 +160,19 @@ module.exports = (function() {
           }
           delete this.voxels[pos];
         }
+    return voxel;
   };
 
   VoxelGrid.prototype.voxelAtPosition = function(position) {
     return this.voxels[position.toArray()];
   };
 
-  VoxelGrid.prototype.addIntersectionVoxel = function(position) {
-    const voxel = new THREE.Mesh(this.intersectionVoxelGeometry);
-    voxel.position.copy(new THREE.Vector3().fromArray(position));
-    voxel.updateMatrixWorld(true);
-    this.intersectionVoxels[position] = voxel;
+  VoxelGrid.prototype.addIntersectionVoxel = function(position, voxel) {
+    const mesh = new THREE.Mesh(this.intersectionVoxelGeometry);
+    mesh.position.copy(new THREE.Vector3().fromArray(position));
+    mesh.updateMatrixWorld(true);
+    mesh.userData.voxel = voxel;
+    this.intersectionVoxels[position] = mesh;
   };
 
   VoxelGrid.prototype.removeIntersectionVoxel = function(position) {
@@ -271,67 +211,6 @@ module.exports = (function() {
 
   VoxelGrid.prototype.hideAnchors = function() {
     this.anchorParent.visible = false;
-  };
-
-  VoxelGrid.prototype.vertices = function() {
-    const rawVertices = _.flattenDeep(_.values(this.voxels).map(function(voxel) {
-      return voxel.usedVertices();
-    }));
-    return _.uniqWith(rawVertices, function(a, b) { return a.equals(b); });
-  };
-
-  VoxelGrid.prototype.edges = function() {
-    return _.flattenDeep(_.values(this.voxels).map(function(voxel) {
-      return voxel.edges();
-    }));
-  };
-
-  VoxelGrid.prototype.simulationData = function() {
-    const mesh = this.voxelsHaveChanged ? this.meshForSimulation() : null;
-    const anchors = this.anchorsHaveChanged ? this.anchorsForSimulation() : null;
-    const textureObj = this.getTextureAsObj();
-
-    this.voxelsHaveChanged = this.anchorsHaveChanged = false;
-
-    return { mesh: mesh, anchors: anchors, textureObj: textureObj };
-  };
-
-  VoxelGrid.prototype.meshForSimulation = function() {
-    /* vertices */
-    const vertices = this.vertices();
-    const vertexArray = [];
-
-    const simulationIndices = {};
-
-    vertices.forEach(function(vertex, index) {
-      vertexArray.push(vertex.x, vertex.y, vertex.z);
-      simulationIndices[vertex.toArray()] = index;
-    }.bind(this));
-
-    /* edges */
-    const edges = this.edges();
-    const edgeArray = [];
-    const stiffnessArray = [];
-    const stiffnessMap = {};
-
-    edges.forEach(function(edge) {
-      const indices = [
-        simulationIndices[edge.vertices[0].toArray()],
-        simulationIndices[edge.vertices[1].toArray()]
-      ];
-      const hash = _.sortBy(indices);
-      const edgeIndex = stiffnessMap[hash];
-
-      if (edgeIndex == undefined) {
-        stiffnessMap[hash] = edgeArray.length / 2;
-        edgeArray.push(indices[0], indices[1]);
-        stiffnessArray.push(edge.stiffness);
-      } else {
-        stiffnessArray[edgeIndex] = Math.max(stiffnessArray[edgeIndex], edge.stiffness);
-      }
-    });
-
-    return { vertices: vertexArray, edges: edgeArray, stiffness: stiffnessArray };
   };
 
   VoxelGrid.prototype.isFreeAtPosition = function( position ) {

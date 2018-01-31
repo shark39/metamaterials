@@ -41,7 +41,7 @@ gulp.task('build:static', function() {
 });
 
 gulp.task('build:js', function() {
-  return browserify(files.js.entry, { debug: true, detectGlobals: false })
+  return browserify(files.js.entry, { debug: true, detectGlobals: false, extensions: ['es6'] })
     .bundle()
     .pipe(source(files.js.bundle))
     .pipe(gulp.dest(files.js.dest));
