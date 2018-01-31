@@ -179,10 +179,10 @@ module.exports = (function() {
 
   VoxelTool.prototype.renderSelectionGeometry = function(start, end) {
     var voxel;
-    voxel = new this.activeBrush.class(undefined, {orientation: this.extrusionNormal});
-    if (voxel.textureType().startsWith('custom')) {
-      voxel.canvasdrawer = this.activeBrush.canvasdrawer;
-    }
+    const diff = this.endPosition.clone().sub(this.startPosition);
+    let diameter = Math.max(diff.getComponent((this.extrusionComponent+1) % 3), diff.getComponent((this.extrusionComponent+2) % 3)) + 1;
+    voxel = new this.activeBrush.class(undefined, {orientation: this.extrusionNormal, diameter});
+    voxel.canvasdrawer = this.activeBrush.canvasdrawer;
     var cursorGeometry = this.createSelectionGeometry(voxel, end.x - start.x, end.y - start.y, end.z - start.z);
 
     cursorGeometry.translate(-(end.x - start.x) / 2, -(end.y - start.y) / 2, -(end.z - start.z) / 2);
@@ -248,21 +248,23 @@ module.exports = (function() {
 
     const start = this.startPosition.clone().min(this.endPosition);
     const end = this.startPosition.clone().max(this.endPosition);
+    const diff = this.endPosition.clone().sub(this.startPosition);
 
     var updatedVoxels = [];
 
     let lc = end.clone().sub(start).largestComponent();
     let ec = this.extrusionComponent;
     let reverseOrder = !start.equals(this.startPosition);
+    let diameter = Math.max(diff.getComponent((ec+1) % 3), diff.getComponent((ec+2) % 3)) + 1;
     var voxel, size;
     for (var x = start.x; x <= end.x; x+=size[0])
       for (var y = start.y; y <= end.y; y+=size[1])
         for (var z = start.z; z <= end.z; z+=size[2]) {
           let stiffness = this.calculateStiffness([x,y,z][lc], start.getComponent(lc), end.getComponent(lc));
-          let relativeExtrusion = ([x,y,z][ec]-start.getComponent(ec)) / (end.getComponent(ec) - start.getComponent(ec));
+          let relativeExtrusion = ([x,y,z][ec]-start.getComponent(ec)) / diff.getComponent(ec);
           if(reverseOrder) relativeExtrusion = 1 - relativeExtrusion;
           relativeExtrusion = isNaN(relativeExtrusion) ? undefined : relativeExtrusion;
-          voxel = this.updateSingleVoxel(new THREE.Vector3(x, y, z), new THREE.Vector2(x - start.x, z - start.z), stiffness, relativeExtrusion)
+          voxel = this.updateSingleVoxel(new THREE.Vector3(x, y, z), {stiffness, relativeExtrusion, diameter})
           size = voxel && voxel.size() || [1,1,1];
         }
 
@@ -271,14 +273,12 @@ module.exports = (function() {
     this.processSingle();
   }
 
-  VoxelTool.prototype.updateSingleVoxel = function(position, offset, stiffness, relativeExtrusion) {
-
-    if (this.activeBrush.type == "texture") {
-      return this.updateVoxel(position, null, stiffness, relativeExtrusion);
-    }
-    const cellCoords = [offset.y % this.activeBrush.height, offset.x % this.activeBrush.width];
-    const features = this.activeBrush.cells[cellCoords].features;
-    return this.updateVoxel(position, features, stiffness, relativeExtrusion);
+  VoxelTool.prototype.updateSingleVoxel = function(position, options) {
+    return this.updateVoxel(position, {
+        minThickness: this.voxelGrid.minThickness,
+        orientation: this.extrusionNormal,
+        ...options, 
+        ...(this.activeBrush || {}).options});
   }
 
   VoxelTool.prototype.__defineGetter__('activeBrush', function() {
@@ -288,16 +288,17 @@ module.exports = (function() {
   VoxelTool.prototype.__defineSetter__('activeBrush', function(activeBrush) {
     this._activeBrush = activeBrush;
 
-    if (activeBrush.type == 'texture' && this.cursor.isAddMode) {
-      var texture = new activeBrush.texture(new THREE.Vector3());
-      texture.canvasdrawer = activeBrush.canvasdrawer;
-      this.cursor.setGeometry(texture._buildGeometry());
-    } else {
-      this.cursor.shaderMode();
-    }
-    if (activeBrush.type != 'texture') {
+    if (activeBrush.type === 'mechanicalCell') {
       this.cursor.mesh.material.uniforms.image.value = new THREE.Texture(activeBrush.textureIcon);
       this.cursor.mesh.material.uniforms.image.value.needsUpdate = true;
+      this.cursor.shaderMode();
+      return;
+    }
+
+    if (this.cursor.isAddMode) {
+      var voxel = new activeBrush.class(new THREE.Vector3(), {});
+      voxel.canvasdrawer = activeBrush.canvasdrawer;
+      this.cursor.setGeometry(voxel._buildGeometry());
     }
 
   });

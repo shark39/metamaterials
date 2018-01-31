@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>Metamaterials Editor</title>
+	<title>Metamaterial Mechanisms Editor</title>
 	<link rel="icon" href="/favicon.png">
 	<link href="./css/roboto.css" rel="stylesheet">
 	<link href="./css/bootstrap.min.css" rel="stylesheet">
@@ -19,7 +19,7 @@
 					<a data-target="#voxel-mode-collapse" data-toggle="collapse" href="#voxel-mode-collapse">modes</a>
 				</h4>
 			</div>
-			<div class="panel-collapse" id="voxel-mode-collapse">
+			<div class="panel-collapse collapse" id="voxel-mode-collapse">
 				<div class="panel-body">
 					<div class="voxel-btn voxel-mode-btn voxel-tool-btn active" id="voxel-add-tool-btn">
 						<div class="voxel-btn-img">
@@ -63,7 +63,9 @@
 			</div>
 			<div class="panel-collapse" id="voxel-cells-collapse">
 				<div class="panel-body">
-					<span>Mechanics</span>
+					<span>Primitives</span>
+					<div class="voxel-primitives-container"></div><BR>
+					<span>Structures</span>
 					<div class="voxel-cells-container" id="voxel-cells-container-1"></div>
 					<div class="voxel-cells-container" id="voxel-cells-container-2"></div>
 					<div class="voxel-cells-container" id="voxel-cells-container-3"></div>
@@ -79,7 +81,7 @@
 		<div class="panel">
 			<div class="panel-heading">
 				<h4 class="panel-title">
-					<a data-target="#voxel-advanced-collapse" data-toggle="collapse" href="#voxel-advanced-collapse">Mechanical Editor</a>
+					<a data-target="#voxel-advanced-collapse" data-toggle="collapse" href="#voxel-advanced-collapse">advanced</a>
 				</h4>
 			</div>
 			<div class="panel-collapse collapse" id="voxel-advanced-collapse">
@@ -96,10 +98,10 @@
 		<div class="panel">
 			<div class="panel-heading">
 				<h4 class="panel-title">
-					<a data-target="#voxel-textures-collapse" data-toggle="collapse" href="#voxel-textures-collapse">Texture Editor</a>
+					<a data-target="#voxel-textures-collapse" data-toggle="collapse" href="#voxel-textures-collapse">textures</a>
 				</h4>
 			</div>
-			<div class="panel-collapse collapse" id="voxel-textures-collapse">
+			<div class="panel-collapse collapse in" id="voxel-textures-collapse">
 				<div class="panel-body">
 					<div id="canvas-container">
 

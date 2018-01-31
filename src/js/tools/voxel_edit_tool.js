@@ -64,7 +64,7 @@ module.exports = (function() {
     this.cursor.mesh.material.uniforms.rotatedMode.value = this.rotatedMode ? 1 : 0;
   }
 
-  VoxelEditTool.prototype.updateVoxel = function(position, features, stiffness) {
+  VoxelEditTool.prototype.updateVoxel = function(position, {features, stiffness}) {
     var voxel;
     const voxels = [];
 

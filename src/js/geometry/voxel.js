@@ -2,10 +2,14 @@
 const THREE = require('three');
 
 class Voxel {
-    constructor(position = new THREE.Vector3(), {stiffness = 0.01, minThickness = 0.01}) {
+    constructor(position = new THREE.Vector3(), options = {}) {
         this.position = position.clone();
-        this.stiffness = stiffness;
-        this.minThickness = minThickness;
+        options.stiffness = options.stiffness || 0.01;
+        options.minThickness = options.minThickness || 0.01;
+        options.orientation = options.orientation || new THREE.Vector3(0,1,0);
+        options.direction = options.orientation.largestComponent();
+        this.options = options;
+        Object.assign(this, options);
     }
 
     size() {
@@ -17,7 +21,7 @@ class Voxel {
     }
 
     cacheKey() {
-        return this.type() + '|' + this.stiffness + '|' + this.minThickness;
+        return this.type() + '|' + JSON.stringify(this.options);
     }
 
     json() {

@@ -41,11 +41,6 @@ module.exports = (function() {
 
     const featurePromises = [];
     this.features = _.forEach({
-      'box': {
-        src: './img/advanced_box.png',
-        rotated: 'box',
-        mirrored: [ 'box', 'box' ]
-      },
       'top-edge': {
         src: './img/advanced_edge_top.png',
         rotated: 'right-edge',
@@ -120,14 +115,6 @@ module.exports = (function() {
 
     $.when.apply(null, featurePromises).then(function() {
       [
-        {
-          cells: {
-            '0,0': {
-              coords: [0, 0],
-              features: [ 'box' ]
-            }
-          }
-        },
         {
           cells: {
             '0,0': {
@@ -217,6 +204,8 @@ module.exports = (function() {
 
     this.activeBrush = brush;
     this.activeBrush.class = MechanicalCell; 
+    this.activeBrush.type = "mechanicalCell"; 
+    this.activeBrush.options = {features: this.activeBrush.cells["0,0"].features}; 
     brush.domElement.addClass('active');
     
     this.tools.forEach(function(tool) {

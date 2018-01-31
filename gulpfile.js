@@ -3,6 +3,7 @@ var gulp = require('gulp');
 var eslint = require('gulp-eslint');
 var merge = require('merge-stream');
 var source = require('vinyl-source-stream');
+var babelify = require('babelify');
 var browserSync = require('browser-sync').create();
 
 var files = {
@@ -42,6 +43,7 @@ gulp.task('build:static', function() {
 
 gulp.task('build:js', function() {
   return browserify(files.js.entry, { debug: true, detectGlobals: false, extensions: ['es6'] })
+    .transform(babelify, {plugins: ["transform-object-rest-spread"]})
     .bundle()
     .pipe(source(files.js.bundle))
     .pipe(gulp.dest(files.js.dest));

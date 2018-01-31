@@ -37,18 +37,9 @@ module.exports = (function () {
     this.cursor.addMode();
   }
 
-  VoxelAddTool.prototype.updateVoxel = function (position, features, stiffness, relativeExtrusion) {
-    var voxel = undefined;
-    let direction = this.extrusionNormal.largestComponent();
-    let minThickness = this.voxelGrid.minThickness;
-    voxel = new this.activeBrush.class(position, {
-      stiffness,
-      minThickness,
-      features,
-      direction,
-      orientation: this.extrusionNormal,
-      relativeExtrusion
-    });
+  VoxelAddTool.prototype.updateVoxel = function (position, options = {}) {
+    var voxel = undefined;  
+    voxel = new this.activeBrush.class(position, options);
     this.voxelGrid.addVoxel(voxel, position);
     this.activeBrush.used = true;
     return voxel;

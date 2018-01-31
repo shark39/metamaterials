@@ -15,6 +15,7 @@ const VoxelSmoothingTool = require('./tools/voxel_smoothing_tool');
 const AnchorTool         = require('./tools/anchor_tool');
 const ForceTool          = require('./tools/force_tool');
 const TextureEditor      = require('./tools/texture_editor');
+const PrimitivesSelector = require('./tools/primitives_selector');
 
 module.exports = (function() {
 
@@ -70,18 +71,14 @@ module.exports = (function() {
       this.tools['smoothing-tool']
     ]);
 
+    this.primitivesSelector = new PrimitivesSelector([
+      this.tools['add-tool'],
+      this.tools['delete-tool'],
+      this.tools['edit-tool'],
+      this.tools['smoothing-tool']
+    ]);
+
     this.parseGridSettings();
-
-/*
-    //make a texture cell
-    this.tools['add-tool'].activeBrush = {
-      rotated: false,
-      name: 'regular',
-      type: 'texture'
-    };
-    this.tools['add-tool'].updateVoxel(new THREE.Vector3(0.5, 0.5, 0.5), null, 0.01);
-*/
-
   }
 
   Controls.prototype.selectTool = function(evt) {

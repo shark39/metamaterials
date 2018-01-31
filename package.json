@@ -20,6 +20,8 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "browser-sync": "^2.23.3",
     "browserify": "^13.1.1",
     "eslint": "^3.12.0",

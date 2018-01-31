@@ -74,7 +74,7 @@ class Texture extends Voxel {
   }
 
   cacheKey() {
-    return super.cacheKey() + this.textureType() + JSON.stringify(this.options);
+    return super.cacheKey() + this.textureType();
   }
 
   size() {
