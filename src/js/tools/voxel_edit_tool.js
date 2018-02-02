@@ -27,8 +27,9 @@ module.exports = (function() {
     if(intersection.object.isPlane) return;
     let voxel = intersection.object.userData.voxel;
     
-    let startPosition = voxel.position.clone();
-    let endPosition = startPosition.clone().add(new THREE.Vector3(...voxel.size())).addScalar(-1);
+    let startPosition =  intersection.object.position.clone().add(intersection.face.normal);
+    let cursorVoxel = new this.activeBrush.class(undefined, {orientation: intersection.face.normal.clone()});
+    let endPosition = startPosition.clone().add(new THREE.Vector3(...cursorVoxel.size())).addScalar(-1);
     return {
             startPosition,
             endPosition,
@@ -65,10 +66,17 @@ module.exports = (function() {
   }
 
   VoxelEditTool.prototype.updateVoxel = function(position, {features, stiffness}) {
-    var voxel;
     const voxels = [];
+    var voxel = this.voxelGrid.voxelAtPosition(position);
+    if(!voxel) return;
 
-    let prevVoxel = this.voxelGrid.voxelAtPosition(position);
+    if(voxel.type() === "cylinder") {
+      voxel = new this.activeBrush.class(voxel.position, {bent: true, cylinder: voxel});
+      this.voxelGrid.addVoxel(voxel, voxel.position);
+      return voxel;
+    }
+
+    let prevVoxel = voxel;
     while (voxel = this.voxelGrid.voxelAtPosition(position)) {
       if(prevVoxel.type() !== voxel.type() && voxel.type() !== "voxel") break;
       if(prevVoxel.orientation && voxel.orientation && 

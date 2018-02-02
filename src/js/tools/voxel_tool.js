@@ -179,8 +179,8 @@ module.exports = (function() {
 
   VoxelTool.prototype.renderSelectionGeometry = function(start, end) {
     var voxel;
-    const diff = this.endPosition.clone().sub(this.startPosition);
-    let diameter = Math.max(diff.getComponent((this.extrusionComponent+1) % 3), diff.getComponent((this.extrusionComponent+2) % 3)) + 1;
+    const diff = end.clone().sub(start);
+    let diameter = Math.abs(Math.max(diff.getComponent((this.extrusionComponent+1) % 3), diff.getComponent((this.extrusionComponent+2) % 3))) + 1;
     voxel = new this.activeBrush.class(undefined, {orientation: this.extrusionNormal, diameter});
     voxel.canvasdrawer = this.activeBrush.canvasdrawer;
     var cursorGeometry = this.createSelectionGeometry(voxel, end.x - start.x, end.y - start.y, end.z - start.z);
@@ -255,7 +255,7 @@ module.exports = (function() {
     let lc = end.clone().sub(start).largestComponent();
     let ec = this.extrusionComponent;
     let reverseOrder = !start.equals(this.startPosition);
-    let diameter = Math.max(diff.getComponent((ec+1) % 3), diff.getComponent((ec+2) % 3)) + 1;
+    let diameter = Math.abs(Math.max(diff.getComponent((ec+1) % 3), diff.getComponent((ec+2) % 3))) + 1;
     var voxel, size;
     for (var x = start.x; x <= end.x; x+=size[0])
       for (var y = start.y; y <= end.y; y+=size[1])

@@ -20,18 +20,24 @@ const THREE = require('three');
 const ThreeBSP = require('three-js-csg')(THREE);
 const Voxel = require('../voxel');
 const merge = require('./merge');
-const PrismGeometry = require('./prism.js');
+const PrismGeometry = require('./prism');
+const BentTexture = require('./bentTexture');
 
 class Texture extends Voxel {
   constructor (position, options = {}) {
+    super(position, options);
+    
+    if(options.bent) {
+      let derrivedClass = BentTexture(this.constructor);
+      return new derrivedClass(position, options); 
+    }
 
     /* position is just stored not used
     /* texture is an instance that implements a .getGeometry() function
     /* stiffness = [0;1]
     /* orientation is Vector3 with -1, 0, 1 depending on the orientation
     /*options contains parameters like length, hingeThickness ...*/
-    super(position, options);
-
+    
     let defaultOptions = {
       stiffness: 0.1,
       orientation: new THREE.Vector3(0,1,0), //y
