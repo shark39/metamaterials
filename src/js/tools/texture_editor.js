@@ -70,6 +70,60 @@ module.exports = (function() {
       self.activateBrush(); //reactivate brush with new parameter
     });
 
+    //
+    let div = $('<div></div>');
+    $('#canvas-container').append(div);
+    let canvas = $('<canvas height=100 width=200 class="texture-canvas"></canvas>');
+    div.draggable({
+      disabled: false,
+      axis: 'y',
+      //prevent dragging when clicked on line or dot
+      drag: function(event, ui) {
+        return !self.canvasdrawer.movingDot;
+      }
+    });
+    div.append(canvas);
+    let addcellDom = $('<div><button type="button" class="btn btn-secondary" style="width: 100%"">extend cell</button></div>');
+    addcellDom.click(function(event) {
+      self.canvasdrawer.addCell();
+      self.canvasdrawer.cellCount == 1 ? $('#remove-cell').hide() : $('#remove-cell').show();
+    });
+    div.append(addcellDom);
+    let removecellDom = $('<div><button type="button" id="remove-cell" class="btn btn-secondary" style="width: 100%"">reduce cell</button></div>');
+    removecellDom.click(function(event) {
+      self.canvasdrawer.removeCell();
+      //move everything down
+      let offsetTop = Number(self.container[0].style.top.replace("px", ""));
+      self.container[0].style.top = offsetTop + self.canvasdrawer.cellHeight + "px";
+      //hide reduce button
+      self.canvasdrawer.cellCount == 1 ? $(event.target).hide() : $(event.target).show();
+    });
+    removecellDom.hide(); //because cellCount==1
+    div.append(removecellDom);
+    this.canvasdrawer = new TextureCanvasDrawer(canvas);
+    this.container = div;
+
+    div.click(function(event) {
+      let image = self.canvasdrawer.getImage();
+      let cc = Math.random().toString(36).substring(7);
+      let pattern = "custom" + cc;
+      var domElement = getButtonDom(image);
+      var customPath = self.canvasdrawer.getDrawing();
+      domElement.click(function() {
+        self.activateBrush(pattern, customPath);
+      });
+
+      container.append(domElement);
+      self.brushes[pattern] = {
+        name: pattern,
+        domElement: domElement,
+        type: "texture"
+      };
+
+      self.activateBrush(pattern);
+    });
+
+
     this.canvasdrawer = new TextureCanvasDrawer($(canvas)); //, this.activateBrush.bind(this);
 
     //$("#canvas-container").hide();
