@@ -7,14 +7,14 @@ const THREE = require('three');
 const createjs = require('createjs-browserify');
 const bind = require('../misc/bind');
 
-const TextureCanvasDrawer = require('./texture_canvasdrawer');
+const TextureCanvasDrawer = require('./texture_canvasdrawer_canvasstyle');
 const TexturePreview = require('../geometry/textureCell/texturePreviewImageBuilder');
 const TextureBuilder = require('../geometry/textureCell/textureBuilder');
 const TextureCustom = require('../geometry/textureCell/textureCustom');
 
 
 const patterns = ['regular', 'round', 'box', 'zigzag']; //'diamond', 'spiky', 'custom', 'debug'];
-const mapping = TextureBuilder.mapping;
+//const mapping = TextureBuilder.mapping;
 
 module.exports = (function() {
 
@@ -41,8 +41,8 @@ module.exports = (function() {
     var self = this;
     var container = $('#texture-presets');
     patterns.forEach(function(pattern) {
-      var image = TexturePreview(mapping[pattern].drawing());
-      var domElement = getButtonDom(image);
+      //var image = TexturePreview(mapping[pattern].drawing());
+      var domElement = getButtonDom($('<div></div>'));
 
       domElement.click(function() {
         self.activateBrush(pattern);
@@ -60,7 +60,7 @@ module.exports = (function() {
       self.activateBrush(); //reactivate brush with new parameter
     });
 
-    this.canvasdrawer = new TextureCanvasDrawer($('#canvas-container'), this.activateBrush.bind(this));
+    this.canvasdrawer = new TextureCanvasDrawerC($('#canvas-container'), this.activateBrush.bind(this));
 
     //$("#canvas-container").hide();
   }
