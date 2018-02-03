@@ -14,7 +14,7 @@ const TextureCustom = require('../geometry/textureCell/textureCustom');
 
 
 const patterns = ['regular', 'round', 'box', 'zigzag']; //'diamond', 'spiky', 'custom', 'debug'];
-//const mapping = TextureBuilder.mapping;
+const mapping = TextureBuilder.mapping;
 
 module.exports = (function() {
 
@@ -40,7 +40,17 @@ module.exports = (function() {
     this.rotatation = $('#texture_rotate').checked;
     var self = this;
     var container = $('#texture-presets');
+
     patterns.forEach(function(pattern) {
+
+      var width = 80;
+      var height = 60;
+      var canvas = document.createElement("canvas");
+      canvas.setAttribute('width', width);
+      canvas.setAttribute('height', height);
+      //var image = Texture2d.getImageFromCoordsArray(mapping[pattern].getDrawing());
+      //var domElement = getButtonDom(image);
+
       //var image = TexturePreview(mapping[pattern].drawing());
       var domElement = getButtonDom($('<div></div>'));
 
@@ -60,7 +70,7 @@ module.exports = (function() {
       self.activateBrush(); //reactivate brush with new parameter
     });
 
-    this.canvasdrawer = new TextureCanvasDrawerC($('#canvas-container'), this.activateBrush.bind(this));
+    this.canvasdrawer = new TextureCanvasDrawer($(canvas)); //, this.activateBrush.bind(this);
 
     //$("#canvas-container").hide();
   }
