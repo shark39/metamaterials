@@ -71,6 +71,13 @@ module.exports = (function() {
     });
 
     //
+    this.initDrawer();
+    //$("#canvas-container").hide();
+  }
+
+  TextureEditor.prototype.initDrawer = function() {
+
+    var self = this;
     let div = $('<div></div>');
     $('#canvas-container').append(div);
     let canvas = $('<canvas height=100 width=200 class="texture-canvas"></canvas>');
@@ -113,7 +120,8 @@ module.exports = (function() {
         self.activateBrush(pattern, customPath);
       });
 
-      container.append(domElement);
+      var presets = $('#texture-presets');
+      presets.append(domElement);
       self.brushes[pattern] = {
         name: pattern,
         domElement: domElement,
@@ -122,22 +130,20 @@ module.exports = (function() {
 
       self.activateBrush(pattern);
     });
-
-
-    this.canvasdrawer = new TextureCanvasDrawer($(canvas)); //, this.activateBrush.bind(this);
-
-    //$("#canvas-container").hide();
   }
 
 
-  TextureEditor.prototype.activateBrush = function(name) {
+  TextureEditor.prototype.activateBrush = function(name, customPath) {
 
     $('.voxel-cells-btn').removeClass('active');
 
     let texture;
-    if (name.startsWith("custom") &&  this.activeBrush.name != name) {
-      texture = TextureCustom;
-      texture.drawing = () => customPath || this.canvasdrawer.getDrawing();
+    if (name.startsWith("custom") && this.activeBrush.name != name) {
+      texture = Object.assign(TextureCustom, {
+        drawing: () => customPath || this.canvasdrawer.getDrawing(),
+        cells: () => this.canvasdrawer.cellCount,
+        getPoint: (t) => this.canvasdrawer.getPoint.call(this.canvasdrawer, t)
+      });
     } else {
       texture = mapping[name];
     }
@@ -147,7 +153,7 @@ module.exports = (function() {
       $("#canvas-container").show();
     }
     if (texture && !texture.isCustomizable()) {
-      this.canvasdrawer.block();
+      //this.canvasdrawer.block();
       $("#canvas-container").hide();
     }
     if (texture && this.activeBrush && this.activeBrush.name.startsWith('custom')) {

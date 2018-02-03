@@ -5,6 +5,8 @@ const ThreeBSP = require('three-js-csg')(THREE);
 const PrismGeometry = require('./prism.js');
 
 class ZigZagTexture extends Texture {
+
+
   textureType() {
     return "zigzag"
   }
@@ -16,6 +18,10 @@ class ZigZagTexture extends Texture {
       [0.1, 0.1],
       [0.9, 0.9]
     ];
+  }
+
+  cells() {
+    return this.cellCount || 2;
   }
 
   inner() {

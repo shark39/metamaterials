@@ -11,7 +11,11 @@ class CustomTexture extends Texture {
     return true
   }
   static drawing() {
-    return [];
+    return CustomTexture.drawing() || [];
+  }
+
+  cells() {
+    return CustomTexture.cells() || 1;
   }
 
   inner() {
@@ -19,7 +23,7 @@ class CustomTexture extends Texture {
     var height = this.surfaceHeight;
     var gap = 0.05;
     var path = new THREE.Curve();
-    path.getPoint = (t) => this.canvasdrawer.getPoint(t); //this function ist required for extrude geometry
+    path.getPoint = (t) => CustomTexture.getPoint(t); //this function ist required for extrude geometry
 
     var shapePoints2 = [new THREE.Vector2(0, -gap),
       new THREE.Vector2(0.3 * height, -gap),
@@ -53,7 +57,7 @@ class CustomTexture extends Texture {
 
   _buildGeometry() {  //override
     let geo = super._buildGeometry();
-    geo.scale(1, 1, this.canvasdrawer.cellCount);
+    geo.scale(1, 1, this.cellCount);
     return geo;
   }
 }

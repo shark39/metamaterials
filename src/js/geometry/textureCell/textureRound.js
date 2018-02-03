@@ -23,6 +23,10 @@ class RoundTexture extends Texture {
     ];
   }
 
+  cells() {
+    return this.cellCount || 1;
+  }
+
   inner() {
     var textureGeometry = new THREE.Geometry();
 

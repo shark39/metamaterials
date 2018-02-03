@@ -26,10 +26,10 @@ const BentTexture = require('./bentTexture');
 class Texture extends Voxel {
   constructor (position, options = {}) {
     super(position, options);
-    
+
     if(options.bent) {
       let derrivedClass = BentTexture(this.constructor);
-      return new derrivedClass(position, options); 
+      return new derrivedClass(position, options);
     }
 
     /* position is just stored not used
@@ -37,7 +37,7 @@ class Texture extends Voxel {
     /* stiffness = [0;1]
     /* orientation is Vector3 with -1, 0, 1 depending on the orientation
     /*options contains parameters like length, hingeThickness ...*/
-    
+
     let defaultOptions = {
       stiffness: 0.1,
       orientation: new THREE.Vector3(0,1,0), //y
@@ -73,6 +73,10 @@ class Texture extends Voxel {
     this.memberWidth = this.width / 2 - this.wallWidth - this.hingeWidth * 2 - this.middleConnectorWidth / 2;
 
     this.amplitude = Math.sqrt((this.width / 2 - this.wallWidth - this.middleConnectorWidth) ** 2 - this.memberWidth ** 2);
+
+    this.cellCount = options.cellCount || this.cells();
+
+    this.path = options.path;
     /*Note for construction
     left wall starts at x=0, right wall ends at x=this.width=2
     top starts at y=0, bottom ends at y=-1
@@ -85,9 +89,9 @@ class Texture extends Voxel {
 
   size() {
     switch (this.orientation.largestComponent()) {
-      case 0: return [1,1,2];
-      case 1: return [2,1,1];
-      case 2: return [2,1,1];
+      case 0: return [1*this.cellCount,1,2];
+      case 1: return [2,1,1*this.cellCount];
+      case 2: return [2,1,1*this.cellCount];
     }
   }
 
@@ -156,8 +160,8 @@ class Texture extends Voxel {
   wall(side) {
     var wall = new THREE.BoxGeometry(this.wallWidth, this.height, this.length);
     wall.translate(
-      this.wallWidth/2 + (side == "right" ? this.width-this.wallWidth : 0), 
-      -this.height / 2, 
+      this.wallWidth/2 + (side == "right" ? this.width-this.wallWidth : 0),
+      -this.height / 2,
       0);
     return wall;
   }

@@ -16,6 +16,10 @@ class RegularTexture extends Texture {
     ];
   }
 
+  cells() {
+    return this.cellCount || 1;
+  }
+
   inner() {
 
     let geo = new THREE.Geometry();

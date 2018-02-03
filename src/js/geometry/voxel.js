@@ -21,7 +21,7 @@ class Voxel {
     }
 
     cacheKey() {
-        return this.type() + '|' + JSON.stringify(this.options);
+        return this.type() + '|' + '|' + JSON.stringify(this.options);
     }
 
     json() {
@@ -44,7 +44,7 @@ class Voxel {
     getGeometry() {
         let key = this.cacheKey();
         let cache = this.constructor.geometryCache;
-        if (!cache.hasOwnProperty(key)) {
+        if (!cache.hasOwnProperty(key) || false) {
             cache[key] = this._buildGeometry();
         };
         return cache[key].clone();
