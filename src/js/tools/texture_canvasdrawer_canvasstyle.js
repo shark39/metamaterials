@@ -62,41 +62,53 @@ class TextureCanvasDrawerC {
 
   addCell() {
 
-			this.dimensions.y += this.cellHeight;
-      this.cellCount++;
+    this.dimensions.y += this.cellHeight;
+    this.cellCount++;
 
-			this.canvas.attr({height:this.dimensions.y});
-			this.middleLine.scaleY = this.dimensions.y/this.cellHeight;
+    this.canvas.attr({
+      height: this.dimensions.y
+    });
+    this.middleLine.scaleY = this.dimensions.y / this.cellHeight;
 
-			//add a vertical line
-			var verticalLine = new createjs.Shape();
-			this.stage.addChild(verticalLine);
-			//middleLine.graphics.setStrokeDash([2,2]);
-			verticalLine.graphics.setStrokeStyle([2, 2]).beginStroke("rgba(0.5,0.5,0.5,0.1)");
-			verticalLine.graphics.moveTo(0, this.dimensions.y-this.cellHeight);
-			verticalLine.graphics.lineTo(this.dimensions.x, this.dimensions.y-this.cellHeight);
-			verticalLine.graphics.endStroke();
+    //add a vertical line
+    var verticalLine = new createjs.Shape();
+    this.stage.addChild(verticalLine);
+    verticalLine.graphics.setStrokeStyle([2, 2])
+      .beginStroke("rgba(0.5,0.5,0.5,0.1)")
+      .moveTo(0, this.dimensions.y - this.cellHeight)
+      .lineTo(this.dimensions.x, this.dimensions.y - this.cellHeight)
+      .endStroke();
 
-			this.stage.update();
-		}
 
-    removeCell() {
-      this.dimensions.y -= this.cellHeight;
-      this.cellCount--;
-
-      this.canvas.attr({height: this.dimensions.y});
-      this.middleLine.scaleY = this.dimensions.y/this.cellHeight;
-
-      for (var i = 0; i < this.pathCommands.length; i++) {
-        this.pathCommands[i].y = this.pathCommands[i].y/(this.dimensions.y + this.cellHeight) * this.dimensions.y;
-      }
-      for (var i = 0; i < this.points.length; i++) {
-        this.points[i].y = this.points[i].y/(this.dimensions.y + this.cellHeight) * this.dimensions.y;
-      }
-
-      this.drawPath();
-
+    for (var i = 1; i < this.pathCommands.length; i++) {
+      this.pathCommands[i].y = this.pathCommands[i].y / (this.dimensions.y - this.cellHeight) * this.dimensions.y;
     }
+    for (var i = 1; i < this.points.length; i++) {
+      this.points[i].y = this.points[i].y / (this.dimensions.y - this.cellHeight) * this.dimensions.y;
+    }
+    this.drawPath();
+    this.stage.update();
+  }
+
+  removeCell() {
+    this.dimensions.y -= this.cellHeight;
+    this.cellCount--;
+
+    this.canvas.attr({
+      height: this.dimensions.y
+    });
+    this.middleLine.scaleY = this.dimensions.y / this.cellHeight;
+
+    for (var i = 0; i < this.pathCommands.length; i++) {
+      this.pathCommands[i].y = this.pathCommands[i].y / (this.dimensions.y + this.cellHeight) * this.dimensions.y;
+    }
+    for (var i = 0; i < this.points.length; i++) {
+      this.points[i].y = this.points[i].y / (this.dimensions.y + this.cellHeight) * this.dimensions.y;
+    }
+
+    this.drawPath();
+
+  }
 
   load(coordArray) {
 
@@ -115,8 +127,8 @@ class TextureCanvasDrawerC {
     this.drawPath();
     this.pathCommands.forEach((c, i) => {
       var move = (x, y) => [x, y];
-      if (i == 0 || i == this.pathCommands.length-1) {
-        move = (x, y) => [x, Math.min(i, 1)*this.cellCount*this.dimensions.y];
+      if (i == 0 || i == this.pathCommands.length - 1) {
+        move = (x, y) => [x, Math.min(i, 1) * this.dimensions.y];
       }
       this.addPoint(c.x, c.y, move);
       //.cpx, .cpy for quadratic curve
