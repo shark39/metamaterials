@@ -24,17 +24,18 @@ class CustomTexture extends Texture {
 
   inner() {
     //generate a negativ from the canvas path
-    var height = this.surfaceHeight;
+    var height = this.surfaceHeight + this.memberHeight;
     var gap = 0.05;
     var path = new THREE.Curve();
     //path.getPoint = (t) => CustomTexture.getPoint(t); //this function is required for extrude geometry
     path.getPoint = (t) => this.getPoint(t); //this function is required for extrude geometry
 
-    var shapePoints2 = [new THREE.Vector2(0, -gap),
-      new THREE.Vector2(0.3 * height, -gap),
-      new THREE.Vector2(height, -gap * 1.5),
-      new THREE.Vector2(height, gap * 1.5),
-      new THREE.Vector2(0.3 * height, gap),
+    var shapePoints = [
+      new THREE.Vector2(0, -gap),
+      new THREE.Vector2(this.surfaceHeight, -gap),
+      new THREE.Vector2(height, -gap * 2.5),
+      new THREE.Vector2(height, gap * 2.5),
+      new THREE.Vector2(this.surfaceHeight, gap),
       new THREE.Vector2(0, gap),
       new THREE.Vector2(0, -gap)
     ];
@@ -44,13 +45,16 @@ class CustomTexture extends Texture {
       bevelEnabled: false,
       extrudePath: path
     };
-    var shape = new THREE.Shape(shapePoints2);
+    var shape = new THREE.Shape(shapePoints);
     var pathGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
     pathGeometry.translate(-this.width / 2, this.surfaceHeight / 2, -this.length / 2);
 
     var textureGeometry = new THREE.Geometry();
 
-    var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length, 4, 4, 4);
+    var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length);
+    var memberPlane = new THREE.BoxGeometry(this.width - 2 * this.wallWidth - 2 * this.hingeWidth, this.memberHeight, this.length);
+    memberPlane.translate(0, -this.surfaceHeight, 0);
+    topPlane.merge(memberPlane);
     var topPlaneBSP = new ThreeBSP(topPlane);
     var negativBSP = new ThreeBSP(pathGeometry);
     var result = topPlaneBSP.subtract(negativBSP);
@@ -99,12 +103,12 @@ class CustomTexture extends Texture {
     var i = 0;
     for (i; i < parts.length; i++) {
       if (parts[i] == t * length) {
-        return new THREE.Vector3(path[i][0]*2, 0, path[i][1]);
+        return new THREE.Vector3(path[i][0] * 2, 0, path[i][1]);
       }
       if (parts[i] > t * length) {
         //interpolate
-        var start = [path[i - 1][0]*2, path[i - 1][1]];
-        var end = [path[i][0]*2, path[i][1]];
+        var start = [path[i - 1][0] * 2, path[i - 1][1]];
+        var end = [path[i][0] * 2, path[i][1]];
         var point = [t * (end[0] - start[0]) + start[0], t * (end[1] - start[1]) + start[1]];
         return new THREE.Vector3(point[0], 0, point[1]);
       }
