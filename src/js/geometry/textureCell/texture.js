@@ -76,7 +76,6 @@ class Texture extends Voxel {
 
     this.cellCount = options.cellCount || this.cells();
 
-    this.path = options.path;
     /*Note for construction
     left wall starts at x=0, right wall ends at x=this.width=2
     top starts at y=0, bottom ends at y=-1

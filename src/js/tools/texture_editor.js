@@ -142,7 +142,8 @@ module.exports = (function() {
       texture = Object.assign(TextureCustom, {
         drawing: () => customPath || this.canvasdrawer.getDrawing(),
         cells: () => this.canvasdrawer.cellCount,
-        getPoint: (t) => this.canvasdrawer.getPoint.call(this.canvasdrawer, t)
+        getPoint: (t) => this.canvasdrawer.getPoint.call(this.canvasdrawer, t),
+        cacheKey: () => name
       });
     } else {
       texture = mapping[name];
@@ -163,7 +164,6 @@ module.exports = (function() {
     brush.name = name;
     brush.hash = name;
     brush.rotated = this.rotatation;
-    brush.canvasdrawer = this.canvasdrawer;
     brush.domElement.addClass('active');
     brush.texture = texture;
     brush.class = texture;

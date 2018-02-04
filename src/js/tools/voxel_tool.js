@@ -162,7 +162,7 @@ module.exports = (function() {
   }
 
   VoxelTool.prototype.renderSelectionShader = function(start, end) {
-    
+
     this.cursor.mesh.position.copy(start.clone().add(end).divideScalar(2.0));
     let scale = end.clone().sub(start).addScalar(1.0+this.cursor.cursorBorder);
     this.cursor.mesh.scale.copy(scale);
@@ -182,7 +182,6 @@ module.exports = (function() {
     const diff = end.clone().sub(start);
     let diameter = Math.abs(Math.max(diff.getComponent((this.extrusionComponent+1) % 3), diff.getComponent((this.extrusionComponent+2) % 3))) + 1;
     voxel = new this.activeBrush.class(undefined, {orientation: this.extrusionNormal, diameter});
-    voxel.canvasdrawer = this.activeBrush.canvasdrawer;
     var cursorGeometry = this.createSelectionGeometry(voxel, end.x - start.x, end.y - start.y, end.z - start.z);
 
     cursorGeometry.translate(-(end.x - start.x) / 2, -(end.y - start.y) / 2, -(end.z - start.z) / 2);
@@ -277,7 +276,7 @@ module.exports = (function() {
     return this.updateVoxel(position, {
         minThickness: this.voxelGrid.minThickness,
         orientation: this.extrusionNormal,
-        ...options, 
+        ...options,
         ...(this.activeBrush || {}).options});
   }
 
@@ -297,7 +296,6 @@ module.exports = (function() {
 
     if (this.cursor.isAddMode) {
       var voxel = new activeBrush.class(new THREE.Vector3(), {});
-      voxel.canvasdrawer = activeBrush.canvasdrawer;
       this.cursor.setGeometry(voxel._buildGeometry());
     }
 

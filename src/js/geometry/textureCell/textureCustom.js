@@ -18,6 +18,10 @@ class CustomTexture extends Texture {
     return CustomTexture.cells() || 1;
   }
 
+  cacheKey() {
+    return CustomTexture.cacheKey() + super.cacheKey();
+  }
+
   inner() {
     //generate a negativ from the canvas path
     var height = this.surfaceHeight;
