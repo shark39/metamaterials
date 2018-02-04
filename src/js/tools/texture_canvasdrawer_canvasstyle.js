@@ -9,9 +9,9 @@ const createjs = require('createjs-browserify');
 const bind = require('../misc/bind');
 
 
-class TextureCanvasDrawerC {
+class TextureCanvasDrawer {
   constructor(canvas) {
-
+    //if $(canvas).height() is 0, the optional height and width will be used
     this.canvas = canvas;
     this.cellCount = 1;
     this.stage = new createjs.Stage(this.canvas[0]);
@@ -21,8 +21,8 @@ class TextureCanvasDrawerC {
     this.pathCommands = [];
 
     this.dimensions = {
-      x: this.canvas.width(), //200
-      y: this.canvas.height() //100
+      x: this.canvas.width() || this.canvas.attr('width'),
+      y: this.canvas.height() || this.canvas.attr('height')
     };
     this.cellHeight = this.dimensions.y;
     this.cellWidth = this.dimensions.x;
@@ -215,6 +215,15 @@ class TextureCanvasDrawerC {
     return image;
   }
 
+  static getImageFromCoordsArray(coordArray, width = 80, height = 60) {
+    var canvas = document.createElement("canvas");
+    canvas.setAttribute('width', width);
+    canvas.setAttribute('height', height);
+    let drawer = new TextureCanvasDrawer($(canvas));
+    drawer.load(coordArray);
+    return drawer.getImage();
+  }
+
   getPoint(t) {
     //t is in [0;1]
     //1. calculate length of whole path
@@ -266,4 +275,4 @@ class TextureCanvasDrawerC {
 
 */
 
-module.exports = TextureCanvasDrawerC;
+module.exports = TextureCanvasDrawer;

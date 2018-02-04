@@ -13,4 +13,6 @@ class TextureBuilder{
 
 TextureBuilder.mapping = {'regular': Regular, 'round': Round, 'box': Box, 'zigzag': ZigZag};
 
+//TODO add missing: 'diamond', 'spiky' (==zigzag)
+
 module.exports = TextureBuilder;

@@ -13,7 +13,6 @@ const TextureBuilder = require('../geometry/textureCell/textureBuilder');
 const TextureCustom = require('../geometry/textureCell/textureCustom');
 
 
-const patterns = ['regular', 'round', 'box', 'zigzag']; //'diamond', 'spiky', 'custom', 'debug'];
 const mapping = TextureBuilder.mapping;
 
 module.exports = (function() {
@@ -41,36 +40,25 @@ module.exports = (function() {
     var self = this;
     var container = $('#texture-presets');
 
-    patterns.forEach(function(pattern) {
+    Object.keys(mapping).forEach((pattern) => {
 
-      var width = 80;
-      var height = 60;
-      var canvas = document.createElement("canvas");
-      canvas.setAttribute('width', width);
-      canvas.setAttribute('height', height);
-      //var image = Texture2d.getImageFromCoordsArray(mapping[pattern].getDrawing());
-      //var domElement = getButtonDom(image);
+      var image = TextureCanvasDrawer.getImageFromCoordsArray(mapping[pattern].drawing());
+      var domElement = getButtonDom(image);
 
-      //var image = TexturePreview(mapping[pattern].drawing());
-      var domElement = getButtonDom($('<div></div>'));
-
-      domElement.click(function() {
-        self.activateBrush(pattern);
-      });
+      domElement.click(() => this.activateBrush(pattern));
 
       container.append(domElement);
-      self.brushes[pattern] = {
+      this.brushes[pattern] = {
         name: pattern,
         domElement: domElement,
-        type: "texture"
+        type: 'texture'
       };
     });
-    $('#texture_rotate').click(function() {
-      self.rotatation = this.checked;
-      self.activateBrush(); //reactivate brush with new parameter
-    });
+    //$('#texture_rotate').click(function() {
+    //  self.rotatation = this.checked;
+    //  self.activateBrush(); //reactivate brush with new parameter
+    //});
 
-    //
     this.initDrawer();
     //$("#canvas-container").hide();
   }
@@ -125,7 +113,7 @@ module.exports = (function() {
       self.brushes[pattern] = {
         name: pattern,
         domElement: domElement,
-        type: "texture"
+        type: 'texture'
       };
 
       self.activateBrush(pattern);
@@ -138,7 +126,7 @@ module.exports = (function() {
     $('.voxel-cells-btn').removeClass('active');
 
     let texture;
-    if (name.startsWith("custom") && this.activeBrush.name != name) {
+    if (name.startsWith('custom') && this.activeBrush.name != name) {
       texture = Object.assign(TextureCustom, {
         drawing: () => customPath || this.canvasdrawer.getDrawing(),
         cells: () => this.canvasdrawer.cellCount,
@@ -151,11 +139,11 @@ module.exports = (function() {
 
     if ((this.activeBrush == undefined || this.activeBrush.name != name) && texture && texture.isCustomizable()) {
       this.canvasdrawer.load(texture.drawing());
-      $("#canvas-container").show();
+      $('#canvas-container').show();
     }
     if (texture && !texture.isCustomizable()) {
       //this.canvasdrawer.block();
-      $("#canvas-container").hide();
+      $('#canvas-container').hide();
     }
     if (texture && this.activeBrush && this.activeBrush.name.startsWith('custom')) {
       this.removeUnusedBrush();
