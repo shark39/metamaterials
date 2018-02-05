@@ -9,7 +9,9 @@ const saveAs         = require('file-saver').saveAs;
 
 const STLExporter    = require('../misc/STLExporter');
 const OBJExporter    = require('../misc/OBJExporter');
-const OBJLoader2      = require('../misc/OBJLoader');
+const OBJLoader2     = require('../misc/OBJLoader');
+
+const VoxelBuilder   = require("./voxelBuilder");
 
 module.exports = (function() {
 
@@ -28,9 +30,11 @@ module.exports = (function() {
 
     this.anchorParent = new THREE.Object3D();
     this.anchorParent.visible = false;
-
     this.scene.add(this.anchorParent);
 
+    this.voxelGroup = new THREE.Object3D();
+    this.scene.add(this.voxelGroup);
+    
     this.reset();
   }
 
@@ -42,6 +46,10 @@ module.exports = (function() {
 
     this.intersectionVoxels = {};
     this.intersectionVoxels.plane = this.intersectionPlane();
+
+    this.scene.remove(this.voxelGroup);
+    this.voxelGroup = new THREE.Object3D();
+    this.scene.add(this.voxelGroup);
 
     this.anchorParent.children.forEach(function(child) {
       this.anchorParent.remove(child);
@@ -92,15 +100,21 @@ module.exports = (function() {
   VoxelGrid.prototype.exportJson = function() {
     var voxels = _.uniq(Object.values(this.voxels));
     var voxelJsons = voxels.map((voxel) => voxel.json());
-    var blob = new Blob(JSON.stringify(voxelJsons), {type: 'text/plain'});
+    var blob = new Blob([JSON.stringify(voxelJsons, null, 2)], {type: 'text/plain'});
     return blob
   };
 
   VoxelGrid.prototype.importJson = function(json) {
-    var voxels = JSON.parse(json);
+    let voxels = JSON.parse(json);
+    this.reset();
     for (var voxel of voxels) {
-      this.reset();
-      //TODO: this.addVoxel();
+      voxel.options.orientation = toVector(voxel.options.orientation);
+      voxel.position = toVector(voxel.position);
+      this.addVoxel(new VoxelBuilder(voxel.position, voxel.type, voxel.options), voxel.position);
+    }
+
+    function toVector(obj) {
+      return new THREE.Vector3(obj.x, obj.y, obj.z);
     }
   };
 
@@ -135,7 +149,7 @@ module.exports = (function() {
     mesh.position.copy(position);
     //mesh.matrixAutoUpdate  = false;
     //mesh.updateMatrix();
-    this.scene.add(mesh);
+    this.voxelGroup.add(mesh);
     return voxel;
   };
 
@@ -155,7 +169,7 @@ module.exports = (function() {
           if(!this.voxels[pos]) return;
           this.removeIntersectionVoxel(pos);
           if(!this.voxels[pos].meshRemoved){
-            this.scene.remove(this.voxels[pos].mesh);
+            this.voxelGroup.remove(this.voxels[pos].mesh);
             this.voxels[pos].meshRemoved = true;
           }
           delete this.voxels[pos];
@@ -226,8 +240,8 @@ module.exports = (function() {
       voxel.setMinThickness(minThickness);
       if(mesh !== voxel.mesh) {
         voxel.mesh.position.copy(voxel.position);
-        this.scene.add(voxel.mesh);
-        this.scene.remove(mesh);
+        this.voxelGroup.add(voxel.mesh);
+        this.voxelGroup.remove(mesh);
       }
     }
   }

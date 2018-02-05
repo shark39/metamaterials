@@ -28,8 +28,8 @@ module.exports = (function() {
 
     this.pressedKeys = {};
 
-    $('#voxel-import-btn').click(this.import);
-    $('#voxel-export-btn').click(this.export);
+    $('#voxel-import-json-btn').click(this.importJson);
+    $('#voxel-export-json-btn').click(this.exportJson);
     $('#voxel-export-obj-btn').click(this.exportObj);
 
     this.tools = {
@@ -162,31 +162,29 @@ module.exports = (function() {
     this.tools['edit-tool'].stiffness.pattern = pattern;
   }
 
-  Controls.prototype.import = function() {
+  Controls.prototype.importJson = function() {
     $('<input type="file" >').on('change', function(event) {
       var file = event.target.files[0];
       if (file) {
         var reader = new FileReader();
         reader.onload = function() {
-          this.voxelGrid.import(reader.result);
+          this.voxelGrid.importJson(reader.result);
         }.bind(this);
-        reader.readAsArrayBuffer(file);
+        reader.readAsText(file);
       }
     }.bind(this)).click();
   }
 
-  Controls.prototype.export = function() {
-    //var stlBinary = this.voxelGrid.export().toStlBinary();
-    //FileSaver.saveAs(stlBinary, 'export.stl');
-    this.voxelGrid.exportTexture();
-
+  Controls.prototype.exportJson = function() {
+    var name = "exportJson";
+    var blob = this.voxelGrid.exportJson();
+    FileSaver.saveAs(blob, name + '.json');
   }
 
   Controls.prototype.exportObj = function() {
     var name = "export";
     var blob = this.voxelGrid.exportObj();
     FileSaver.saveAs(blob, name + '.obj');
-
   }
 
   Controls.prototype.onKeyDown = function(evt) {
