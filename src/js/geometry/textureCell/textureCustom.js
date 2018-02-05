@@ -71,9 +71,17 @@ class CustomTexture extends Texture {
     var topPlaneBSP = new ThreeBSP(topPlane);
     var negativBSP = new ThreeBSP(pathGeometry);
     var result = topPlaneBSP.subtract(negativBSP);
-    topPlane = result.toMesh().geometry;
+    var height = this.height - this.surfaceHeight;
+    var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, height, this.length);
+    pathGeometry.translate(0, 0.5,0);
+    negativBSP = new ThreeBSP(pathGeometry);
+    var middleBSP = new ThreeBSP(middleConnector).subtract(negativBSP);
+    var middle = middleBSP.toMesh().geometry;
+    middle.translate(0.5, -height / 2 + 0.5, 0);
 
+    topPlane = result.toMesh().geometry;
     topPlane.translate(0.5, 0.5, 0);
+    topPlane = merge(topPlane, middle);
     return topPlane;
   }
 
@@ -84,6 +92,7 @@ class CustomTexture extends Texture {
     geo.translate(0, 0, -0.5 + 0.5 * this.cellCount);
     return geo;
   }
+
 
   static getPointForPart(point, index, array, t) {
     const scaleToSize = (x, y) => new THREE.Vector2(x * 2, y * this.cells());
