@@ -16,7 +16,8 @@ class ZigZagTexture extends Texture {
   static drawing() {
     return [
       [0.1, 0.1],
-      [0.9, 0.9]
+      [0.9, 0.5],
+      [0.1, 0.9]
     ];
   }
 

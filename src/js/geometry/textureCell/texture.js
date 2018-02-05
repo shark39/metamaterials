@@ -156,6 +156,7 @@ class Texture extends Voxel {
         geo.rotateX(Math.PI / 2 + neg * Math.PI);
         break;
     }
+
     return geo;
   }
 
