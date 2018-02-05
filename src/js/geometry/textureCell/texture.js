@@ -105,6 +105,12 @@ class Texture extends Voxel {
     throw "abstract method";
   }
 
+  json() {
+    let json = super.json();
+    json.type = this.type + '|' + this.textureType();
+    return json;
+  }
+
   inner() {
     throw "abstract method";
   }

@@ -16,11 +16,18 @@ body {
   position: fixed;
   right: 0;
   width: 350px;
-  padding: 10px;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
+  flex-direction: column;
+  display: flex;
   /*scroll if needed */
   background: rgba(0, 0, 0, 0.4);
+}
+
+#panels {
+  padding: 10px;
+  overflow-y: auto;
+  flex:1;
 }
 
 
@@ -38,7 +45,6 @@ body {
 
 .panel-body {
   padding: 0 15px 10px 15px;
-  text-align: center;
 }
 
 .panel-heading {

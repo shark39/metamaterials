@@ -28,7 +28,7 @@ class Voxel {
         return {
             position: this.position,
             type: this.type(),
-            stiffness: this.stiffness
+            options: this.options
         }
     }
 
