@@ -46,12 +46,21 @@ class CustomTexture extends Texture {
     ];
 
     var extrudeSettings = {
-      steps: 100,
+      steps: 50,
       bevelEnabled: false,
       extrudePath: path
     };
     var shape = new THREE.Shape(shapePoints);
-    var pathGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    //var pathGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+
+
+    var pathGeometry = CustomTexture.drawing().reduce(
+      (accumulator, currentValue, currentIndex, array) => {
+        if (currentIndex == 0) return accumulator;
+        extrudeSettings.extrudePath.getPoint = (t) => CustomTexture.getPointForPart(currentValue, currentIndex, array, t);
+        return merge(accumulator, new THREE.ExtrudeGeometry(shape, extrudeSettings));
+      }, new THREE.Geometry());
+
     pathGeometry.translate(-this.width / 2, this.surfaceHeight / 2, -this.length / 2 * this.cellCount);
 
     var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length);
@@ -74,6 +83,15 @@ class CustomTexture extends Texture {
     geo = merge(geo, this.customInner());
     geo.translate(0, 0, -0.5 + 0.5 * this.cellCount);
     return geo;
+  }
+
+  static getPointForPart(point, index, array, t) {
+    const scaleToSize = (x, y) => new THREE.Vector2(x * 2, y * this.cells());
+    var start = scaleToSize(...array[Math.max(index - 1, 0)]);
+    var end = scaleToSize(...point);
+    var direction = end.clone().sub(start);
+    var point = start.clone().add(direction.clone().multiplyScalar(t));
+    return new THREE.Vector3(point.x, 0, point.y);
   }
 
   pathPartLengthArray() {
