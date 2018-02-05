@@ -57,7 +57,7 @@ class Voxel {
     getMesh() {
         let material = new THREE.MeshPhongMaterial({
             color: this.color(),
-            flatShading: false,
+            flatShading: false
         });
         this.mesh = new THREE.Mesh(this.getGeometry(), material);
         return this.mesh;
