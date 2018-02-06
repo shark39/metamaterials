@@ -158,7 +158,9 @@ module.exports = (function() {
     if (texture && this.activeBrush && this.activeBrush.class.isCustom()) {
       this.removeUnusedBrush();
     }
-    //brush.rotated = this.rotatation;
+    brush.options = {};
+    brush.options.rotatation = true;
+    brush.options.amplitude = 0.5;
     this.activeBrush = brush;
     this.tools.forEach(function(tool) {
       tool.activeBrush = brush;

@@ -5,9 +5,6 @@ This file contains the geometry construction for the texture voxels
 
 Usage:
 
-var texture = new Texture(options);
-texture.getGeometry(type);
-
 supported types:
 - regular
 - zigzag
@@ -72,7 +69,16 @@ class Texture extends Voxel {
     //calculate width of member
     this.memberWidth = this.width / 2 - this.wallWidth - this.hingeWidth * 2 - this.middleConnectorWidth / 2;
 
-    this.amplitude = Math.sqrt((this.width / 2 - this.wallWidth - this.middleConnectorWidth) ** 2 - this.memberWidth ** 2);
+    if (this.amplitude) {
+      //calculate wallWidth
+      //amplitude = 0 --> (this.width / 2 - this.wallWidth - this.middleConnectorWidth) = this.memberWidth
+      //                  this.wallWidth = - this.memberWidth + this.width/2 - this.middleConnectorWidth
+      var maxWallWidth = this.width/2 - this.memberWidth - this.middleConnectorWidth;
+      //amplitude = 1 --> this.wallWidth = 0.01 (minThickness)
+      var minWallWidth = this.minThickness;
+      this.wallWidth = minWallWidth + this.amplitude * (maxWallWidth - minWallWidth);
+    }
+    this.amplitudeAbsolut = Math.sqrt((this.width / 2 - this.wallWidth - this.middleConnectorWidth) ** 2 - this.memberWidth ** 2);
 
     //this.cellCount = options.cellCount || this.cells();
     this.cellCount = this.cells();
