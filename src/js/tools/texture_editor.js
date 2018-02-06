@@ -53,7 +53,8 @@ module.exports = (function() {
         hash: pattern,
         domElement: domElement,
         type: 'texture',
-        class: mapping[pattern]
+        class: mapping[pattern],
+        texture: mapping[pattern]
       };
     });
     //$('#texture_rotate').click(function() {
@@ -118,7 +119,8 @@ module.exports = (function() {
         hash: pattern,
         domElement: domElement,
         type: 'texture',
-        class: TextureCustom
+        class: TextureCustom,
+        texture: TextureCustom
       };
 
       self.activateBrush(pattern);
@@ -134,7 +136,7 @@ module.exports = (function() {
     brush.domElement.addClass('active');
 
     let texture;
-    if (name.startsWith('custom') && this.activeBrush.name != name) {
+    if (brush.class.isCustom() && this.activeBrush.name != name) {
       texture = Object.assign(TextureCustom, {
         drawing: () => customPath || this.canvasdrawer.getDrawing(),
         cells: () => cells || this.canvasdrawer.cellCount,
@@ -153,16 +155,10 @@ module.exports = (function() {
       //this.canvasdrawer.block();
       $('#canvas-container').hide();
     }
-    if (texture && this.activeBrush && this.activeBrush.name.startsWith('custom')) {
+    if (texture && this.activeBrush && this.activeBrush.class.isCustom()) {
       this.removeUnusedBrush();
     }
-    var brush = this.brushes[name];
-    brush.name = name;
-    brush.hash = name;
-    brush.rotated = this.rotatation;
-    brush.domElement.addClass('active');
-    brush.texture = texture;
-    brush.class = texture;
+    //brush.rotated = this.rotatation;
     this.activeBrush = brush;
     this.tools.forEach(function(tool) {
       tool.activeBrush = brush;
