@@ -8,7 +8,6 @@ const createjs = require('createjs-browserify');
 const bind = require('../misc/bind');
 
 const TextureCanvasDrawer = require('./texture_canvasdrawer_canvasstyle');
-const TexturePreview = require('../geometry/textureCell/texturePreviewImageBuilder');
 const TextureBuilder = require('../geometry/textureCell/textureBuilder');
 const TextureCustom = require('../geometry/textureCell/textureCustom');
 const Texture = require('../geometry/textureCell/texture');
@@ -195,12 +194,6 @@ module.exports = (function() {
       this.removeUnusedBrush();
     }
     var brush = this.brushes[name];
-    brush.name = name;
-    brush.hash = name;
-    brush.rotated = this.rotatation;
-    brush.domElement.addClass('active');
-    brush.texture = texture;
-    brush.class = texture;
     brush.size = (orientation) => (new texture(undefined, {orientation}).size());
 
     brush.options = {};

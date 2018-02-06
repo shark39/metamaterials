@@ -307,8 +307,8 @@ body {
 #canvas-div {
   background-image: url(../img/advanced_grid_borderless.png);
   background-repeat: repeat;
-  background-size: 99px 99px;
-  background-position: -30% -15%;
+  background-size: 100px 100px;
+  background-position: -38% 6%;
 }
 
 .texture-canvas {
@@ -316,7 +316,6 @@ body {
   margin-top: 5px;
   width: auto;
   height: auto;
-  padding: 10px;
   background-color: white;
   z-index: 1;
   border: solid;
