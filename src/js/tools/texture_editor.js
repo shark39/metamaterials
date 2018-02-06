@@ -11,6 +11,7 @@ const TextureCanvasDrawer = require('./texture_canvasdrawer_canvasstyle');
 const TexturePreview = require('../geometry/textureCell/texturePreviewImageBuilder');
 const TextureBuilder = require('../geometry/textureCell/textureBuilder');
 const TextureCustom = require('../geometry/textureCell/textureCustom');
+const Texture = require('../geometry/textureCell/texture');
 
 
 const mapping = TextureBuilder.mapping;
@@ -74,8 +75,12 @@ module.exports = (function() {
 
   TextureEditor.prototype.changeAmplitudeValue = function(evt) {
     var slider =  $('#texture-amplitude-slider');
-    const value = slider.val();
+    const value = Number(slider.val());
     $('#texture-amplitude-value').text(value);
+    if (this.canvasdrawer) {
+      var wallRelative = Texture.getWallWidthFromAmplitudeRelativeToWidth(value/100, 2);
+      this.canvasdrawer.updateWalls(wallRelative);
+    }
   }
 
   TextureEditor.prototype.changeSmoothnessValue = function(evt) {
@@ -180,6 +185,7 @@ module.exports = (function() {
     if ((this.activeBrush == undefined || this.activeBrush.name != name) && texture && texture.isCustomizable()) {
       this.canvasdrawer.setCellCount(texture.cells());
       this.canvasdrawer.load(texture.drawing());
+      this.changeAmplitudeValue();
       $('#canvas-container').show();
     }
     if (texture && !texture.isCustomizable()) {

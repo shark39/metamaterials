@@ -76,7 +76,7 @@ class Texture extends Voxel {
       this.memberWidth = memberMinWidth + this.amplitude * (memberMaxWidth - memberMinWidth);
       this.wallWidth = this.width/2 - this.hingeWidth - this.memberWidth - this.hingeWidth - this.middleConnectorWidth /2;
     }
-    
+
     this.amplitudeAbsolut = Math.sqrt((this.width / 2 - this.wallWidth - this.middleConnectorWidth) ** 2 - this.memberWidth ** 2);
 
     //this.cellCount = options.cellCount || this.cells();
@@ -86,6 +86,16 @@ class Texture extends Voxel {
     left wall starts at x=0, right wall ends at x=this.width=2
     top starts at y=0, bottom ends at y=-1
     */
+  }
+
+  static getWallWidthFromAmplitudeRelativeToWidth(amplitude, width = 2, hingeWidth = 0.08, minThickness = 0.01, middleConnectorWidth = 0.2) {
+    var memberMinWidth = 0.05;
+    var memberMaxWidth = width / 2 - minThickness - hingeWidth * 2 - middleConnectorWidth / 2;
+    var memberWidth = memberMinWidth + amplitude * (memberMaxWidth - memberMinWidth);
+    var wallWidth = width/2 - hingeWidth - memberWidth - hingeWidth - middleConnectorWidth /2;
+    return wallWidth/width;
+
+
   }
 
   cacheKey() {

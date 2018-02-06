@@ -8,7 +8,6 @@ const THREE = require('three');
 const createjs = require('createjs-browserify');
 const bind = require('../misc/bind');
 
-
 class TextureCanvasDrawer {
   constructor(canvas) {
     //if $(canvas).height() is 0, the optional height and width will be used
@@ -54,7 +53,7 @@ class TextureCanvasDrawer {
     var wallRelative = 0.2;
     var wall = new createjs.Shape();
     this.background.addChild(wall);
-    // wall.graphics.beginFill("#aaaaaa")
+    wall.name = 'wall';
     wall.graphics.beginFill("#E6E7E8")
       .drawRect(0, 0, width * wallRelative, height)
       .drawRect(width - width * wallRelative, 0, width, height);
@@ -128,6 +127,50 @@ class TextureCanvasDrawer {
     }
     for (var i = 0; i < this.points.length; i++) {
       this.points[i].y = this.points[i].y / (this.dimensions.y + this.cellHeight) * this.dimensions.y;
+    }
+
+    this.drawPath();
+
+  }
+
+  updateWalls(relativeWidth) {
+    this.background.children.forEach((child) => {
+      if (child.name == 'wall') {
+        this.background.removeChild(child);
+      }
+    });
+
+    var width = this.dimensions.x;
+    var height = this.dimensions.y;
+
+    var wallRelative = relativeWidth;
+    var wall = new createjs.Shape();
+    this.background.addChild(wall);
+    wall.name = 'wall';
+    wall.graphics.beginFill("#E6E7E8")
+      .drawRect(0, 0, width * wallRelative, height)
+      .drawRect(width - width * wallRelative, 0, width, height);
+
+    this.stage.update();
+
+    //update points
+    this.applyToCoordinates((p) => {
+      if (p.x < width / 2 && p.x < width * wallRelative) {
+        p.x = width * wallRelative;
+      } else if (p.x > width / 2 && p.x > width - width * wallRelative) {
+        p.x = width - width * wallRelative;
+      }
+      return p;
+    });
+
+  }
+
+  applyToCoordinates(func) {
+    for (var i = 0; i < this.pathCommands.length; i++) {
+      this.pathCommands[i] = func(this.pathCommands[i]);
+    }
+    for (var i = 0; i < this.points.length; i++) {
+      this.points[i] = func(this.points[i]);
     }
 
     this.drawPath();
