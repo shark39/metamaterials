@@ -21,7 +21,11 @@ class BoxTexture extends Texture {
   }
 
   cells() {
-    return this.cellCount || 1;
+    return this.cellCount || BoxTexture.cells();
+  }
+
+  static cells() {
+    return 1;
   }
 
   inner() {

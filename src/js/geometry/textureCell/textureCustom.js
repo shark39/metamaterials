@@ -12,11 +12,19 @@ class CustomTexture extends Texture {
     return true
   }
   static drawing() {
-    return CustomTexture.drawing() || [];
+    return [];
   }
 
   cells() {
     return CustomTexture.cells() || 1;
+  }
+
+  static cells() {
+    return 1; //should be overwritten by mixin
+  }
+
+  static isCustom() {
+    return true;
   }
 
   cacheKey() {

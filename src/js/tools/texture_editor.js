@@ -50,8 +50,10 @@ module.exports = (function() {
       container.append(domElement);
       this.brushes[pattern] = {
         name: pattern,
+        hash: pattern,
         domElement: domElement,
-        type: 'texture'
+        type: 'texture',
+        class: mapping[pattern]
       };
     });
     //$('#texture_rotate').click(function() {
@@ -104,16 +106,19 @@ module.exports = (function() {
       let pattern = "custom" + cc;
       var domElement = getButtonDom(image);
       var customPath = self.canvasdrawer.getDrawing();
+      var cells = self.canvasdrawer.cellCount;
       domElement.click(function() {
-        self.activateBrush(pattern, customPath);
+        self.activateBrush(pattern, customPath, cells);
       });
 
       var presets = $('#texture-presets');
       presets.append(domElement);
       self.brushes[pattern] = {
         name: pattern,
+        hash: pattern,
         domElement: domElement,
-        type: 'texture'
+        type: 'texture',
+        class: TextureCustom
       };
 
       self.activateBrush(pattern);
@@ -121,16 +126,18 @@ module.exports = (function() {
   }
 
 
-  TextureEditor.prototype.activateBrush = function(name, customPath) {
+  TextureEditor.prototype.activateBrush = function(name, customPath, cells) {
 
     $('.voxel-cells-btn').removeClass('active');
+
+    var brush = this.brushes[name];
+    brush.domElement.addClass('active');
 
     let texture;
     if (name.startsWith('custom') && this.activeBrush.name != name) {
       texture = Object.assign(TextureCustom, {
         drawing: () => customPath || this.canvasdrawer.getDrawing(),
-        cells: () => this.canvasdrawer.cellCount,
-        getPoint: (t) => this.canvasdrawer.getPoint.call(this.canvasdrawer, t),
+        cells: () => cells || this.canvasdrawer.cellCount,
         cacheKey: () => name
       });
     } else {
@@ -138,6 +145,7 @@ module.exports = (function() {
     }
 
     if ((this.activeBrush == undefined || this.activeBrush.name != name) && texture && texture.isCustomizable()) {
+      this.canvasdrawer.setCellCount(texture.cells());
       this.canvasdrawer.load(texture.drawing());
       $('#canvas-container').show();
     }

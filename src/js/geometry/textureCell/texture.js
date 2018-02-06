@@ -74,7 +74,8 @@ class Texture extends Voxel {
 
     this.amplitude = Math.sqrt((this.width / 2 - this.wallWidth - this.middleConnectorWidth) ** 2 - this.memberWidth ** 2);
 
-    this.cellCount = options.cellCount || this.cells();
+    //this.cellCount = options.cellCount || this.cells();
+    this.cellCount = this.cells();
 
     /*Note for construction
     left wall starts at x=0, right wall ends at x=this.width=2
@@ -97,8 +98,12 @@ class Texture extends Voxel {
     }
   }
 
+  static isCustom() {
+    return false;
+  }
+
   type() {
-    return "texture"
+    return "texture";
   }
 
   textureType() {

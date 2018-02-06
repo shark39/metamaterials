@@ -25,6 +25,10 @@ class ZigZagTexture extends Texture {
     return this.cellCount || 2;
   }
 
+  static cells() {
+    return 2;
+  }
+
   inner() {
     //diagonal gap, thinner surface on top
 

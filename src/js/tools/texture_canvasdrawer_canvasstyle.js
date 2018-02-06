@@ -27,6 +27,8 @@ class TextureCanvasDrawer {
     this.cellHeight = this.dimensions.y;
     this.cellWidth = this.dimensions.x;
 
+    this.initCanvas();
+
   }
 
   initCanvas() {
@@ -58,6 +60,12 @@ class TextureCanvasDrawer {
     }
     this.points = [];
     this.pathCommands = [];
+  }
+
+  setCellCount(count) {
+    while (this.cellCount != count) {
+      this.cellCount < count ? this.addCell() : this.removeCell();
+    }
   }
 
   addCell() {
@@ -259,20 +267,6 @@ class TextureCanvasDrawer {
 
 
 }
-/*
 
-  TextureCanvasDrawer.prototype.block = function() {
-    //this.canvas.hide();
-  }
-
-  TextureCanvasDrawer.prototype.setCellCount = function(count) {
-    this.cellCount = count;
-    this.dimensions.y = this.cellHeight * count;
-    this.canvas.attr({height:this.dimensions.y});
-    this.middleLine.scaleY = this.dimensions.y/this.cellHeight;
-  }
-
-
-*/
 
 module.exports = TextureCanvasDrawer;
