@@ -318,4 +318,8 @@ body {
   padding: 0.5em;
   background-color: white;
   z-index: 1;
+  border: solid;
+  border-width: thick;
+  border-color: black;
+  border-style: solid;
 }

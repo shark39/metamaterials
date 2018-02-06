@@ -80,7 +80,7 @@ class CustomTexture extends Texture {
     var negativBSP = new ThreeBSP(pathGeometry);
     var result = topPlaneBSP.subtract(negativBSP);
     var height = this.height - this.surfaceHeight;
-    var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, height, this.length);
+    var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, height, this.length * this.cellCount);
     pathGeometry.translate(0, 0.5,0);
     negativBSP = new ThreeBSP(pathGeometry);
     var middleBSP = new ThreeBSP(middleConnector).subtract(negativBSP);
