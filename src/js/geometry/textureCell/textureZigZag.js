@@ -35,8 +35,8 @@ class ZigZagTexture extends CustomTexture {
     return false;
   }
 
-  cacheKey() {
-    return 'zigzag' + super.cacheKey();
+  static cacheKey() {
+    return 'zigzag';
   }
 
   customInner() { //workarond

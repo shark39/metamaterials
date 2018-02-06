@@ -310,7 +310,7 @@ module.exports = (function() {
     }
 
     if (this.cursor.isAddMode) {
-      var voxel = new activeBrush.class(new THREE.Vector3(), (this.activeBrush || {}).options);
+      var voxel = new activeBrush.class(new THREE.Vector3(), {...(this.activeBrush || {}).options});
       this.cursor.setGeometry(voxel._buildGeometry());
     }
 

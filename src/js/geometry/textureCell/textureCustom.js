@@ -29,7 +29,7 @@ class CustomTexture extends Texture {
   }
 
   cacheKey() {
-    return CustomTexture.cacheKey() + super.cacheKey();
+    return this.constructor.cacheKey() + super.cacheKey();
   }
 
   inner() {
