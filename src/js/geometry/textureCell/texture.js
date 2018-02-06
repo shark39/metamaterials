@@ -192,10 +192,10 @@ class Texture extends Voxel {
     return middleConnector;
   }
 
-  member(orientation, doTranslate, options) {
+  member(orientation, doTranslate, options = {}) {
     //return prism geometry
-    var memberHeight = !!options ? options.memberHeight || this.memberHeight : this.memberHeight;
-    var memberWidth = !!options ? options.memberWidth || this.memberWidth : this.memberWidth;
+    var memberHeight = options.memberHeight || this.memberHeight;
+    var memberWidth = options.memberWidth || this.memberWidth;
     orientation = orientation / Math.abs(orientation) || 1;
     var A = new THREE.Vector2(0, 0);
     var B = new THREE.Vector2(orientation * memberWidth, memberHeight);
@@ -222,7 +222,7 @@ class Texture extends Voxel {
     // x   #  #  #   x
     // x  #        # x
     // x#           #x
-    var memberHeight = this.amplitude - this.surfaceHeight;
+    var memberHeight = this.amplitudeAbsolut - this.surfaceHeight;
     var tempGeo = new THREE.Geometry();
     var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length);
     topPlane.translate(this.width / 2, memberHeight + this.surfaceHeight / 2, this.length / 2);
