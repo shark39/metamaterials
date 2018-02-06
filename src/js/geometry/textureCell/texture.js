@@ -21,16 +21,10 @@ const ThreeBSP = require('three-js-csg')(THREE);
 const Voxel = require('../voxel');
 const merge = require('./merge');
 const PrismGeometry = require('./prism');
-const BentTexture = require('./bentTexture');
 
 class Texture extends Voxel {
   constructor(position, options = {}) {
     super(position, options);
-
-    if (options.bent) {
-      let derrivedClass = BentTexture(this.constructor);
-      return new derrivedClass(position, options);
-    }
 
     /* position is just stored not used
     /* texture is an instance that implements a .getGeometry() function
@@ -74,7 +68,7 @@ class Texture extends Voxel {
 
     this.amplitude = Math.sqrt((this.width / 2 - this.wallWidth - this.middleConnectorWidth) ** 2 - this.memberWidth ** 2);
 
-    this.cellCount = options.cellCount || this.cells();
+    this.cellCount = options.cellCount || this.cells() || 1;
 
     /*Note for construction
     left wall starts at x=0, right wall ends at x=this.width=2

@@ -11,6 +11,7 @@ const TextureCanvasDrawer = require('./texture_canvasdrawer_canvasstyle');
 const TexturePreview = require('../geometry/textureCell/texturePreviewImageBuilder');
 const TextureBuilder = require('../geometry/textureCell/textureBuilder');
 const TextureCustom = require('../geometry/textureCell/textureCustom');
+const TextureBent = require('../geometry/textureCell/bentTexture');
 
 
 const mapping = TextureBuilder.mapping;
@@ -155,6 +156,8 @@ module.exports = (function() {
     brush.domElement.addClass('active');
     brush.texture = texture;
     brush.class = texture;
+    brush.options = {};
+    brush.size = (orientation) => (new texture(undefined, {orientation}).size());
     this.activeBrush = brush;
     this.tools.forEach(function(tool) {
       tool.activeBrush = brush;

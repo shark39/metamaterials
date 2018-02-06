@@ -206,6 +206,7 @@ module.exports = (function() {
     this.activeBrush.class = MechanicalCell; 
     this.activeBrush.type = "mechanicalCell"; 
     this.activeBrush.options = {features: this.activeBrush.cells["0,0"].features}; 
+    this.activeBrush.size = (orientation) => [1,1,1];
     brush.domElement.addClass('active');
     
     this.tools.forEach(function(tool) {

@@ -52,6 +52,7 @@ module.exports = (function (tools) {
             this.tools.forEach(function (tool) {
                 tool.activeBrush = {
                     class: constructor,
+                    size: () => [1,1,1],
                     type
                 };
             });

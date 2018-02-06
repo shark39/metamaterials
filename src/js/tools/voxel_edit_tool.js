@@ -4,6 +4,7 @@ const bind  = require('../misc/bind');
 const VoxelTool  = require('./voxel_tool');
 const MechanicalCell = require('../geometry/mechanicalCell/mechanicalCell');
 const TextureCell = require('../geometry/textureCell/texture');
+const BentTexture = require('../geometry/textureCell/bentTexture');
 
 const THREE = require('three');
 
@@ -27,42 +28,23 @@ module.exports = (function() {
     if(intersection.object.isPlane) return;
     let voxel = intersection.object.userData.voxel;
     
-    let startPosition =  intersection.object.position.clone().add(intersection.face.normal);
-    let cursorVoxel = new this.activeBrush.class(undefined, {orientation: intersection.face.normal.clone()});
-    let endPosition = startPosition.clone().add(new THREE.Vector3(...cursorVoxel.size())).addScalar(-1);
+    let startPosition =  intersection.object.position.clone();
+    let orientation = intersection.face.normal.clone();
     return {
             startPosition,
-            endPosition,
             extrusionNormal: intersection.face.normal.clone()
           }
   }
 
-  VoxelEditTool.prototype.processRect = function() {
-    if (!this.startPosition) { return };
-
-    const intersectionVoxels = Object.values(this.voxelGrid.intersectionVoxels);
-    const intersection = this.extrusionParametersFromIntersection(this.raycaster.intersectObjects(intersectionVoxels)[0]);
-    if (!intersection) { return };
-
-    let ifStartArea = intersection.startPosition.clone().sub(this.startRect.end).lengthSq();
-    let ifEndArea = this.startRect.start.clone().sub(intersection.endPosition).lengthSq();
-
-    if(ifStartArea > ifEndArea) {
-      this.startPosition = intersection.startPosition.clone();
-      this.endPosition = this.startRect.end.clone();
-    } else {
-      this.startPosition = this.startRect.start.clone();
-      this.endPosition = intersection.endPosition.clone();
-    }
-
-    this.updateSelection();
-  }
-
   VoxelEditTool.prototype.updateCursor = function() {
-    this.cursor.mesh.scale.setComponent(this.extrusionComponent, 0.1);
-    this.cursor.mesh.position.add(this.extrusionNormal.clone().multiplyScalar(0.7));
+
+    let scale = this.endPosition.clone().sub(this.startPosition).addScalar(1);
+    scale.setComponent(this.extrusionComponent, 0.2);
+    let scaleCorrection = scale.clone().divideScalar(2);
+
+    this.cursor.mesh.scale.copy(scale);
+    this.cursor.mesh.position.copy(this.startPosition).subScalar(0.5).add(scaleCorrection).add(this.extrusionNormal);
     this.cursor.mesh.material.uniforms.scale.value = this.cursor.mesh.scale;
-    this.cursor.mesh.material.uniforms.rotatedMode.value = this.rotatedMode ? 1 : 0;
   }
 
   VoxelEditTool.prototype.updateVoxel = function(position, {features, stiffness}) {
@@ -71,7 +53,12 @@ module.exports = (function() {
     if(!voxel) return;
 
     if(voxel.type() === "cylinder") {
-      voxel = new this.activeBrush.class(voxel.position, {bent: true, cylinder: voxel});
+      voxel = new BentTexture(voxel.position, {
+        ...this.activeBrush.options,
+        orientation: voxel.orientation,
+        diameter: voxel.diameter,
+        texture: this.activeBrush.class
+      });
       this.voxelGrid.addVoxel(voxel, voxel.position);
       return voxel;
     }
@@ -92,13 +79,13 @@ module.exports = (function() {
     let direction = this.extrusionNormal.largestComponent();
     let minThickness = this.voxelGrid.minThickness;
 
-    if(!prevVoxel.orientation || prevVoxel.orientation.equals(this.extrusionNormal)) {
-      createVoxels.bind(this)(voxels, this.extrusionNormal);
-    } else {
+    if(prevVoxel.orientation && prevVoxel.orientation.equals(this.extrusionNormal.clone().negate())) {
       let center = Math.ceil(voxels.length/2);
       createVoxels.bind(this)(voxels.slice(0,center), this.extrusionNormal);
       createVoxels.bind(this)(voxels.slice(center, voxels.length).reverse(), this.extrusionNormal.clone().negate());
-    }
+    } else {
+      createVoxels.bind(this)(voxels, this.extrusionNormal);
+    } 
 
     this.activeBrush.used = true;
     return voxels[0];
@@ -106,6 +93,7 @@ module.exports = (function() {
     function createVoxels(voxels, orientation) {
       for(var i = 0; i < voxels.length; i++) {
         let relativeExtrusion = 1-i/(voxels.length-1);
+        relativeExtrusion = isNaN(relativeExtrusion) ? undefined : relativeExtrusion;
         let voxel = voxels[i];
         voxel = new this.activeBrush.class(voxel.position, {
           stiffness,
