@@ -21,7 +21,11 @@ class BoxTexture extends Texture {
   }
 
   cells() {
-    return this.cellCount || 1;
+    return this.cellCount || BoxTexture.cells();
+  }
+
+  static cells() {
+    return 1;
   }
 
   inner() {
@@ -38,11 +42,14 @@ class BoxTexture extends Texture {
   }
 
   middleBox(widthTop, widthBottom) {
-    var A = new THREE.Vector2(-widthBottom / 2, 0);
-    var B = new THREE.Vector2(-widthTop / 2, -(this.height) / 2);
-    var C = new THREE.Vector2(widthTop / 2, -(this.height) / 2);
-    var D = new THREE.Vector2(widthBottom / 2, 0);
-    var m = new PrismGeometry([A, B, C, D], this.length);
+    let height = this.fullMiddleConnector ? this.height : this.height - this.surfaceHeight;
+    var points = [
+      new THREE.Vector2(-widthBottom / 2, 0),
+      new THREE.Vector2(-widthTop / 2, -height),
+      new THREE.Vector2(widthTop / 2, -height),
+      new THREE.Vector2(widthBottom / 2, 0)
+    ];
+    var m = new PrismGeometry(points, this.length);
     return m;
   }
 

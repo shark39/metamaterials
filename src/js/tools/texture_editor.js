@@ -11,8 +11,7 @@ const TextureCanvasDrawer = require('./texture_canvasdrawer_canvasstyle');
 const TexturePreview = require('../geometry/textureCell/texturePreviewImageBuilder');
 const TextureBuilder = require('../geometry/textureCell/textureBuilder');
 const TextureCustom = require('../geometry/textureCell/textureCustom');
-const TextureBent = require('../geometry/textureCell/bentTexture');
-
+const Texture = require('../geometry/textureCell/texture');
 
 const mapping = TextureBuilder.mapping;
 
@@ -51,8 +50,11 @@ module.exports = (function() {
       container.append(domElement);
       this.brushes[pattern] = {
         name: pattern,
+        hash: pattern,
         domElement: domElement,
-        type: 'texture'
+        type: 'texture',
+        class: mapping[pattern],
+        texture: mapping[pattern]
       };
     });
     //$('#texture_rotate').click(function() {
@@ -60,15 +62,47 @@ module.exports = (function() {
     //  self.activateBrush(); //reactivate brush with new parameter
     //});
 
+    this.changeAmplitudeValue();
+    $("#texture-amplitude-slider").on("input change", this.changeAmplitudeValue);
+
+    this.changeSmoothnessValue();
+    $("#texture-smoothness-slider").on("input change", this.changeSmoothnessValue);
+
     this.initDrawer();
     //$("#canvas-container").hide();
+  }
+
+  TextureEditor.prototype.changeAmplitudeValue = function(evt) {
+    var slider =  $('#texture-amplitude-slider');
+    const value = Number(slider.val());
+    $('#texture-amplitude-value').text(value);
+    if (this.canvasdrawer) {
+      var wallRelative = Texture.getWallWidthFromAmplitudeRelativeToWidth(value/100, 2);
+      this.canvasdrawer.updateWalls(wallRelative);
+    }
+  }
+
+  TextureEditor.prototype.changeSmoothnessValue = function(evt) {
+    var slider =  $('#texture-smoothness-slider');
+    const value = slider.val();
+    $('#texture-smoothness-value').text(value);
+  }
+
+  TextureEditor.prototype.getAmplitude = function() {
+    return $('#texture-amplitude-slider').val()/100;
+  }
+
+  TextureEditor.prototype.getSmoothness = function() {
+    return $('#texture-smoothness-slider').val()/100;
   }
 
   TextureEditor.prototype.initDrawer = function() {
 
     var self = this;
+
     let div = $('<div></div>');
     $('#canvas-container').append(div);
+
     let canvas = $('<canvas height=100 width=200 class="texture-canvas"></canvas>');
     div.draggable({
       disabled: false,
@@ -79,12 +113,14 @@ module.exports = (function() {
       }
     });
     div.append(canvas);
+
     let addcellDom = $('<div><button type="button" class="btn btn-secondary" style="width: 100%"">extend cell</button></div>');
     addcellDom.click(function(event) {
       self.canvasdrawer.addCell();
       self.canvasdrawer.cellCount == 1 ? $('#remove-cell').hide() : $('#remove-cell').show();
     });
     div.append(addcellDom);
+
     let removecellDom = $('<div><button type="button" id="remove-cell" class="btn btn-secondary" style="width: 100%"">reduce cell</button></div>');
     removecellDom.click(function(event) {
       self.canvasdrawer.removeCell();
@@ -96,6 +132,7 @@ module.exports = (function() {
     });
     $('#remove-cell').hide(); //because cellCount==1
     div.append(removecellDom);
+
     this.canvasdrawer = new TextureCanvasDrawer(canvas);
     this.container = div;
 
@@ -105,16 +142,20 @@ module.exports = (function() {
       let pattern = "custom" + cc;
       var domElement = getButtonDom(image);
       var customPath = self.canvasdrawer.getDrawing();
+      var cells = self.canvasdrawer.cellCount;
       domElement.click(function() {
-        self.activateBrush(pattern, customPath);
+        self.activateBrush(pattern, customPath, cells);
       });
 
       var presets = $('#texture-presets');
       presets.append(domElement);
       self.brushes[pattern] = {
         name: pattern,
+        hash: pattern,
         domElement: domElement,
-        type: 'texture'
+        type: 'texture',
+        class: TextureCustom,
+        texture: TextureCustom
       };
 
       self.activateBrush(pattern);
@@ -122,16 +163,18 @@ module.exports = (function() {
   }
 
 
-  TextureEditor.prototype.activateBrush = function(name, customPath) {
+  TextureEditor.prototype.activateBrush = function(name, customPath, cells) {
 
     $('.voxel-cells-btn').removeClass('active');
 
+    var brush = this.brushes[name];
+    brush.domElement.addClass('active');
+
     let texture;
-    if (name.startsWith('custom') && this.activeBrush.name != name) {
+    if (brush.class.isCustom() && this.activeBrush.name != name) {
       texture = Object.assign(TextureCustom, {
         drawing: () => customPath || this.canvasdrawer.getDrawing(),
-        cells: () => this.canvasdrawer.cellCount,
-        getPoint: (t) => this.canvasdrawer.getPoint.call(this.canvasdrawer, t),
+        cells: () => cells || this.canvasdrawer.cellCount,
         cacheKey: () => name
       });
     } else {
@@ -139,14 +182,16 @@ module.exports = (function() {
     }
 
     if ((this.activeBrush == undefined || this.activeBrush.name != name) && texture && texture.isCustomizable()) {
+      this.canvasdrawer.setCellCount(texture.cells());
       this.canvasdrawer.load(texture.drawing());
+      this.changeAmplitudeValue();
       $('#canvas-container').show();
     }
     if (texture && !texture.isCustomizable()) {
       //this.canvasdrawer.block();
       $('#canvas-container').hide();
     }
-    if (texture && this.activeBrush && this.activeBrush.name.startsWith('custom')) {
+    if (texture && this.activeBrush && this.activeBrush.class.isCustom()) {
       this.removeUnusedBrush();
     }
     var brush = this.brushes[name];
@@ -156,8 +201,11 @@ module.exports = (function() {
     brush.domElement.addClass('active');
     brush.texture = texture;
     brush.class = texture;
-    brush.options = {};
     brush.size = (orientation) => (new texture(undefined, {orientation}).size());
+
+    brush.options = {};
+    brush.options.rotatation = true;
+    brush.options.amplitude = this.getAmplitude();
     this.activeBrush = brush;
     this.tools.forEach(function(tool) {
       tool.activeBrush = brush;

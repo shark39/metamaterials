@@ -38,10 +38,11 @@ module.exports = (function () {
   }
 
   VoxelAddTool.prototype.updateVoxel = function (position, options = {}) {
-    var voxel = undefined;  
+    var voxel = undefined;
     voxel = new this.activeBrush.class(position, options);
     this.voxelGrid.addVoxel(voxel, position);
     this.activeBrush.used = true;
+    // /this.activeBrush.usedWith
     return voxel;
   }
 

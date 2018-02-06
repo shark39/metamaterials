@@ -5,9 +5,6 @@ This file contains the geometry construction for the texture voxels
 
 Usage:
 
-var texture = new Texture(options);
-texture.getGeometry(type);
-
 supported types:
 - regular
 - zigzag
@@ -35,6 +32,7 @@ class Texture extends Voxel {
     let defaultOptions = {
       stiffness: 0.1,
       orientation: new THREE.Vector3(0, 1, 0), //y
+      //amplitude: 0.5,
       length: 1,
       height: 1,
       width: 2,
@@ -66,14 +64,31 @@ class Texture extends Voxel {
     //calculate width of member
     this.memberWidth = this.width / 2 - this.wallWidth - this.hingeWidth * 2 - this.middleConnectorWidth / 2;
 
-    this.amplitude = Math.sqrt((this.width / 2 - this.wallWidth - this.middleConnectorWidth) ** 2 - this.memberWidth ** 2);
+    if (this.amplitude) {
+      var memberMinWidth = 0.05;
+      var memberMaxWidth = this.width / 2 - this.minThickness - this.hingeWidth * 2 - this.middleConnectorWidth / 2;
+      this.memberWidth = memberMinWidth + this.amplitude * (memberMaxWidth - memberMinWidth);
+      this.wallWidth = this.width/2 - this.hingeWidth - this.memberWidth - this.hingeWidth - this.middleConnectorWidth /2;
+    }
 
-    this.cellCount = options.cellCount || this.cells() || 1;
+    this.amplitudeAbsolut = Math.sqrt((this.width / 2 - this.wallWidth - this.middleConnectorWidth) ** 2 - this.memberWidth ** 2);
+
+    this.cellCount = this.cells();
 
     /*Note for construction
     left wall starts at x=0, right wall ends at x=this.width=2
     top starts at y=0, bottom ends at y=-1
     */
+  }
+
+  static getWallWidthFromAmplitudeRelativeToWidth(amplitude, width = 2, hingeWidth = 0.08, minThickness = 0.01, middleConnectorWidth = 0.2) {
+    var memberMinWidth = 0.05;
+    var memberMaxWidth = width / 2 - minThickness - hingeWidth * 2 - middleConnectorWidth / 2;
+    var memberWidth = memberMinWidth + amplitude * (memberMaxWidth - memberMinWidth);
+    var wallWidth = width/2 - hingeWidth - memberWidth - hingeWidth - middleConnectorWidth /2;
+    return wallWidth/width;
+
+
   }
 
   cacheKey() {
@@ -91,8 +106,12 @@ class Texture extends Voxel {
     }
   }
 
+  static isCustom() {
+    return false;
+  }
+
   type() {
-    return "texture"
+    return "texture";
   }
 
   textureType() {
@@ -175,10 +194,10 @@ class Texture extends Voxel {
     return middleConnector;
   }
 
-  member(orientation, doTranslate, options) {
+  member(orientation, doTranslate, options = {}) {
     //return prism geometry
-    var memberHeight = !!options ? options.memberHeight || this.memberHeight : this.memberHeight;
-    var memberWidth = !!options ? options.memberWidth || this.memberWidth : this.memberWidth;
+    var memberHeight = options.memberHeight || this.memberHeight;
+    var memberWidth = options.memberWidth || this.memberWidth;
     orientation = orientation / Math.abs(orientation) || 1;
     var A = new THREE.Vector2(0, 0);
     var B = new THREE.Vector2(orientation * memberWidth, memberHeight);
@@ -205,7 +224,7 @@ class Texture extends Voxel {
     // x   #  #  #   x
     // x  #        # x
     // x#           #x
-    var memberHeight = this.amplitude - this.surfaceHeight;
+    var memberHeight = this.amplitudeAbsolut - this.surfaceHeight;
     var tempGeo = new THREE.Geometry();
     var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length);
     topPlane.translate(this.width / 2, memberHeight + this.surfaceHeight / 2, this.length / 2);
@@ -220,7 +239,8 @@ class Texture extends Voxel {
     var lowerMember2 = this.member(-1, false, {
       memberHeight: memberHeight
     });
-    lowerMember2.translate(this.width / 2 + this.middleConnectorWidth / 2 + this.hingeWidth + this.memberWidth, 0, 0);
+    //lowerMember2.translate(this.width / 2 + this.middleConnectorWidth / 2 + this.hingeWidth + this.memberWidth, 0, 0);
+    lowerMember2.translate(this.width - this.hingeWidth - this.wallWidth, 0, 0);
     tempGeo = this.merge(tempGeo, lowerMember2);
     tempGeo.translate(0, -this.height, -this.length / 2);
 

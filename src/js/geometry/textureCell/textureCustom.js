@@ -1,5 +1,6 @@
 'use strict';
 const Texture = require('./texture');
+const PrismGeometry = require('./prism.js');
 const THREE = require('three');
 const ThreeBSP = require('three-js-csg')(THREE);
 const merge = require('./merge');
@@ -12,11 +13,19 @@ class CustomTexture extends Texture {
     return true
   }
   static drawing() {
-    return CustomTexture.drawing() || [];
+    return [];
   }
 
   cells() {
     return CustomTexture.cells() || 1;
+  }
+
+  static cells() {
+    return 1; //should be overwritten by mixin
+  }
+
+  static isCustom() {
+    return true;
   }
 
   cacheKey() {
@@ -71,9 +80,33 @@ class CustomTexture extends Texture {
     var topPlaneBSP = new ThreeBSP(topPlane);
     var negativBSP = new ThreeBSP(pathGeometry);
     var result = topPlaneBSP.subtract(negativBSP);
-    topPlane = result.toMesh().geometry;
+    var height = this.height - this.surfaceHeight;
+    var points = [new THREE.Vector2(0, 0),
+                new THREE.Vector2(0, height/4),
+                //new THREE.Vector2(this.middleConnectorWidth/2 - this.minThickness/2, height),
+                //new THREE.Vector2(this.middleConnectorWidth/2 - this.minThickness/2, height),
+                new THREE.Vector2(this.middleConnectorWidth/2, height),
+                new THREE.Vector2(this.middleConnectorWidth, height/4),
+                new THREE.Vector2(this.middleConnectorWidth, 0)
+              ];
 
+    var middleConnector = new PrismGeometry(points, this.length * this.cellCount);
+    middleConnector.translate(-this.middleConnectorWidth/2, -height/2, -this.length * this.cellCount / 2);
+    //var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, height, this.length * this.cellCount);
+    pathGeometry.translate(0, 0.5,0);
+    negativBSP = new ThreeBSP(pathGeometry);
+    var middleBSP = new ThreeBSP(middleConnector).subtract(negativBSP);
+    var middle = middleBSP.toMesh().geometry;
+    middle.translate(0.5, -height / 2 + 0.5, 0);
+
+    topPlane = result.toMesh().geometry;
+    //verbindungsstrebe oben
+    var topMiddleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, this.surfaceHeight, this.length * this.cellCount);
+    //topMiddleConnector.translate()
+    topPlane = merge(topPlane, topMiddleConnector);
     topPlane.translate(0.5, 0.5, 0);
+    topPlane = merge(topPlane, middle);
+
     return topPlane;
   }
 
@@ -84,6 +117,7 @@ class CustomTexture extends Texture {
     geo.translate(0, 0, -0.5 + 0.5 * this.cellCount);
     return geo;
   }
+
 
   static getPointForPart(point, index, array, t) {
     const scaleToSize = (x, y) => new THREE.Vector2(x * 2, y * this.cells());

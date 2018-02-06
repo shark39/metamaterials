@@ -27,11 +27,14 @@ class RoundTexture extends Texture {
     return this.cellCount || 1;
   }
 
+  static cells() {
+    return 1;
+  }
+
   inner() {
     var textureGeometry = new THREE.Geometry();
 
-    var middleConnector = new THREE.BoxGeometry(this.middleConnectorWidth, this.amplitude, this.length);
-    middleConnector.translate(this.width / 2, -this.amplitude / 2, 0);
+    var middleConnector = this.middleConnector();
     textureGeometry.merge(middleConnector);
 
     var memberWidth = this.memberWidth - 0.3 / 2;

@@ -8,13 +8,14 @@ const THREE = require('three');
 const createjs = require('createjs-browserify');
 const bind = require('../misc/bind');
 
-
 class TextureCanvasDrawer {
   constructor(canvas) {
     //if $(canvas).height() is 0, the optional height and width will be used
     this.canvas = canvas;
     this.cellCount = 1;
     this.stage = new createjs.Stage(this.canvas[0]);
+    this.background = new createjs.Container();
+    this.stage.addChild(this.background);
 
     this.lines = [];
     this.points = [];
@@ -27,24 +28,48 @@ class TextureCanvasDrawer {
     this.cellHeight = this.dimensions.y;
     this.cellWidth = this.dimensions.x;
 
+
+    this.initCanvas();
+
   }
 
   initCanvas() {
 
     var width = this.dimensions.x;
     var height = this.dimensions.y;
-    //this.cellCount++;
 
+    this.background.removeAllChildren();
     //middle
     var middleLine = new createjs.Shape();
-    this.stage.addChild(middleLine);
+    this.background.addChild(middleLine);
     middleLine.graphics.setStrokeDash([7, 8])
       .setStrokeStyle(2)
       .beginStroke("rgba(0.5,0.5,0.5,0.1)")
       .moveTo(width / 2, 0)
       .lineTo(width / 2, height)
       .endStroke();
-    this.middleLine = middleLine; //needed for addCell
+
+    //walls
+    var wallRelative = 0.2;
+    var wall = new createjs.Shape();
+    this.background.addChild(wall);
+    wall.name = 'wall';
+    wall.graphics.beginFill("#E6E7E8")
+      .drawRect(0, 0, width * wallRelative, height)
+      .drawRect(width - width * wallRelative, 0, width, height);
+
+    //horizontal deviders
+    var deviderLine = new createjs.Shape();
+    this.background.addChild(deviderLine);
+    deviderLine.graphics.setStrokeStyle([2, 2])
+      .beginStroke("rgba(0.5,0.5,0.5,0.1)");
+
+    _.range(0, height, this.cellHeight).forEach(function(c) {
+      deviderLine.graphics.moveTo(0, c)
+        .lineTo(width, c);
+    });
+
+    deviderLine.graphics.endStroke();
 
     this.stage.update();
 
@@ -60,6 +85,12 @@ class TextureCanvasDrawer {
     this.pathCommands = [];
   }
 
+  setCellCount(count) {
+    while (this.cellCount != count) {
+      this.cellCount < count ? this.addCell() : this.removeCell();
+    }
+  }
+
   addCell() {
 
     this.dimensions.y += this.cellHeight;
@@ -68,16 +99,7 @@ class TextureCanvasDrawer {
     this.canvas.attr({
       height: this.dimensions.y
     });
-    this.middleLine.scaleY = this.dimensions.y / this.cellHeight;
 
-    //add a vertical line
-    var verticalLine = new createjs.Shape();
-    this.stage.addChild(verticalLine);
-    verticalLine.graphics.setStrokeStyle([2, 2])
-      .beginStroke("rgba(0.5,0.5,0.5,0.1)")
-      .moveTo(0, this.dimensions.y - this.cellHeight)
-      .lineTo(this.dimensions.x, this.dimensions.y - this.cellHeight)
-      .endStroke();
 
 
     for (var i = 1; i < this.pathCommands.length; i++) {
@@ -97,13 +119,58 @@ class TextureCanvasDrawer {
     this.canvas.attr({
       height: this.dimensions.y
     });
-    this.middleLine.scaleY = this.dimensions.y / this.cellHeight;
+
+    this.initCanvas();
 
     for (var i = 0; i < this.pathCommands.length; i++) {
       this.pathCommands[i].y = this.pathCommands[i].y / (this.dimensions.y + this.cellHeight) * this.dimensions.y;
     }
     for (var i = 0; i < this.points.length; i++) {
       this.points[i].y = this.points[i].y / (this.dimensions.y + this.cellHeight) * this.dimensions.y;
+    }
+
+    this.drawPath();
+
+  }
+
+  updateWalls(relativeWidth) {
+    this.background.children.forEach((child) => {
+      if (child.name == 'wall') {
+        this.background.removeChild(child);
+      }
+    });
+
+    var width = this.dimensions.x;
+    var height = this.dimensions.y;
+
+    var wallRelative = relativeWidth;
+    var wall = new createjs.Shape();
+    this.background.addChild(wall);
+    wall.name = 'wall';
+    wall.graphics.beginFill("#E6E7E8")
+      .drawRect(0, 0, width * wallRelative, height)
+      .drawRect(width - width * wallRelative, 0, width, height);
+
+    this.stage.update();
+
+    //update points
+    this.applyToCoordinates((p) => {
+      if (p.x < width / 2 && p.x < width * wallRelative) {
+        p.x = width * wallRelative;
+      } else if (p.x > width / 2 && p.x > width - width * wallRelative) {
+        p.x = width - width * wallRelative;
+      }
+      return p;
+    });
+
+  }
+
+  applyToCoordinates(func) {
+    for (var i = 0; i < this.pathCommands.length; i++) {
+      this.pathCommands[i] = func(this.pathCommands[i]);
+    }
+    for (var i = 0; i < this.points.length; i++) {
+      this.points[i] = func(this.points[i]);
     }
 
     this.drawPath();
@@ -259,20 +326,6 @@ class TextureCanvasDrawer {
 
 
 }
-/*
 
-  TextureCanvasDrawer.prototype.block = function() {
-    //this.canvas.hide();
-  }
-
-  TextureCanvasDrawer.prototype.setCellCount = function(count) {
-    this.cellCount = count;
-    this.dimensions.y = this.cellHeight * count;
-    this.canvas.attr({height:this.dimensions.y});
-    this.middleLine.scaleY = this.dimensions.y/this.cellHeight;
-  }
-
-
-*/
 
 module.exports = TextureCanvasDrawer;
