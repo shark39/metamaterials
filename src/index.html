@@ -16,7 +16,7 @@
 		<div class="panel">
 			<div class="panel-heading">
 				<h4 class="panel-title">
-					Modes
+					modes
 				</h4>
 			</div>
 			<div class="panel-body">
@@ -43,7 +43,7 @@
 				</div>
 			</div>
 			<div class="panel-body">
-				<h4 class="panel-title">Primitives</h4>
+				<h4 class="panel-title">primitives</h4>
 				<div class="voxel-primitives-container"></div>
 			</div>
 		</div>
@@ -56,14 +56,15 @@
 						<a data-target="#voxel-cells-collapse" data-toggle="collapse" href="#voxel-cells-collapse">cells</a>
 					</h4>
 				</div>
-				<div class="panel-collapse" id="voxel-cells-collapse">
+				<div class="panel-collapse collapse" id="voxel-cells-collapse">
 					<div class="panel-body">
 
-						<span>Structures</span>
+						<span>mechanisms</span>
 						<div class="voxel-cells-container" id="voxel-cells-container-1"></div>
 						<div class="voxel-cells-container" id="voxel-cells-container-2"></div>
 						<div class="voxel-cells-container" id="voxel-cells-container-3"></div>
-						<span>Textures</span>
+
+						<span>textures</span>
 						<div id="texture-presets">
 							<!--this is filled textureEditor -->
 						</div>
@@ -75,7 +76,7 @@
 			<div class="panel">
 				<div class="panel-heading">
 					<h4 class="panel-title">
-						<a data-target="#voxel-advanced-collapse" data-toggle="collapse" href="#voxel-advanced-collapse">advanced</a>
+						<a data-target="#voxel-advanced-collapse" data-toggle="collapse" href="#voxel-advanced-collapse">mechanism cell editor</a>
 					</h4>
 				</div>
 				<div class="panel-collapse collapse" id="voxel-advanced-collapse">
@@ -92,12 +93,25 @@
 			<div class="panel">
 				<div class="panel-heading">
 					<h4 class="panel-title">
-						<a data-target="#voxel-textures-collapse" data-toggle="collapse" href="#voxel-textures-collapse">Texture Editor</a>
+						<a data-target="#voxel-textures-collapse" data-toggle="collapse" href="#voxel-textures-collapse">texture cell editor</a>
 					</h4>
 				</div>
 				<div class="panel-collapse collapse in" id="voxel-textures-collapse">
 					<div class="panel-body">
-						<div id="canvas-container">
+						<div class="labeled-slider-component" >
+							<div>
+								amplitude: <span id="texture-amplitude-value">0</span>&#37;
+							</div>
+							<input id="texture-amplitude-slider" class="slider" value="90" type="range" min="1" max="100" step="1">
+						</div>
+						<div class="labeled-slider-component" >
+							<div>
+								smoothness: <span id="texture-smoothness-value">0</span>&#37;
+							</div>
+							<input id="texture-smoothness-slider" class="slider" value="10" type="range" min="1" max="100" step="1">
+						</div>
+
+						<div id="canvas-container" style="background:red;">
 
 						</div>
 

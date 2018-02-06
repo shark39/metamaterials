@@ -62,15 +62,35 @@ module.exports = (function() {
     //  self.activateBrush(); //reactivate brush with new parameter
     //});
 
+    this.changeAmplitudeValue();
+    $("#texture-amplitude-slider").on("input change", this.changeAmplitudeValue);
+
+    this.changeSmoothnessValue();
+    $("#texture-smoothness-slider").on("input change", this.changeSmoothnessValue);
+
     this.initDrawer();
     //$("#canvas-container").hide();
+  }
+
+  TextureEditor.prototype.changeAmplitudeValue = function(evt) {
+    var slider =  $('#texture-amplitude-slider');
+    const value = slider.val();
+    $('#texture-amplitude-value').text(value);
+  }
+
+  TextureEditor.prototype.changeSmoothnessValue = function(evt) {
+    var slider =  $('#texture-smoothness-slider');
+    const value = slider.val();
+    $('#texture-smoothness-value').text(value);
   }
 
   TextureEditor.prototype.initDrawer = function() {
 
     var self = this;
+
     let div = $('<div></div>');
     $('#canvas-container').append(div);
+
     let canvas = $('<canvas height=100 width=200 class="texture-canvas"></canvas>');
     div.draggable({
       disabled: false,
@@ -81,12 +101,14 @@ module.exports = (function() {
       }
     });
     div.append(canvas);
+
     let addcellDom = $('<div><button type="button" class="btn btn-secondary" style="width: 100%"">extend cell</button></div>');
     addcellDom.click(function(event) {
       self.canvasdrawer.addCell();
       self.canvasdrawer.cellCount == 1 ? $('#remove-cell').hide() : $('#remove-cell').show();
     });
     div.append(addcellDom);
+
     let removecellDom = $('<div><button type="button" id="remove-cell" class="btn btn-secondary" style="width: 100%"">reduce cell</button></div>');
     removecellDom.click(function(event) {
       self.canvasdrawer.removeCell();
@@ -98,6 +120,7 @@ module.exports = (function() {
     });
     $('#remove-cell').hide(); //because cellCount==1
     div.append(removecellDom);
+
     this.canvasdrawer = new TextureCanvasDrawer(canvas);
     this.container = div;
 
