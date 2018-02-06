@@ -10,11 +10,11 @@ module.exports = (function (tools) {
     function PrimitivesSelector(tools) {
         let primitives = {
             box: {
-                img: "./img/advanced_box.png",
+                img: "./img/primitive_cube.png",
                 constructor: Box
             },
             cylinder: {
-                img: "./img/advanced_cylinder.png",
+                img: "./img/primitive_cylinder.png",
                 constructor: Cylinder
             }
         }
