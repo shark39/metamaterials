@@ -96,7 +96,7 @@ module.exports = (function() {
     }
 
     let params = this.extrusionParametersFromIntersection(intersection);
-    if(!params) {
+    if (!params) {
       this.startPosition = undefined;
       return this.updateSelection();
     }
@@ -104,7 +104,10 @@ module.exports = (function() {
     this.extrusionNormal = params.extrusionNormal;
     this.startPosition = params.startPosition;
     this.endPosition = params.endPosition || this.startPosition.clone();
-    this.startRect = {start: params.startPosition, end: params.endPosition};
+    this.startRect = {
+      start: params.startPosition,
+      end: params.endPosition
+    };
 
     this.updateSelection();
   }
@@ -157,14 +160,17 @@ module.exports = (function() {
 
     if (!this.lastPosition.start.equals(start) || !this.lastPosition.end.equals(end)) {
       this.cursor.isShader ? this.renderSelectionShader(start, end) : this.renderSelectionGeometry(start, end);
-      this.lastPosition = {start, end};
+      this.lastPosition = {
+        start,
+        end
+      };
     }
   }
 
   VoxelTool.prototype.renderSelectionShader = function(start, end) {
 
     this.cursor.mesh.position.copy(start.clone().add(end).divideScalar(2.0));
-    let scale = end.clone().sub(start).addScalar(1.0+this.cursor.cursorBorder);
+    let scale = end.clone().sub(start).addScalar(1.0 + this.cursor.cursorBorder);
     this.cursor.mesh.scale.copy(scale);
     this.cursor.mesh.rotation.fromArray([0.0, 0.0, 0.0]);
 
@@ -180,8 +186,12 @@ module.exports = (function() {
   VoxelTool.prototype.renderSelectionGeometry = function(start, end) {
     var voxel;
     const diff = end.clone().sub(start);
-    let diameter = Math.abs(Math.max(diff.getComponent((this.extrusionComponent+1) % 3), diff.getComponent((this.extrusionComponent+2) % 3))) + 1;
-    voxel = new this.activeBrush.class(undefined, {orientation: this.extrusionNormal, diameter});
+    let diameter = Math.abs(Math.max(diff.getComponent((this.extrusionComponent + 1) % 3), diff.getComponent((this.extrusionComponent + 2) % 3))) + 1;
+    voxel = new this.activeBrush.class(undefined, {
+      orientation: this.extrusionNormal,
+      diameter,
+      ...(this.activeBrush || {}).options
+    });
     var cursorGeometry = this.createSelectionGeometry(voxel, end.x - start.x, end.y - start.y, end.z - start.z);
 
     cursorGeometry.translate(-(end.x - start.x) / 2, -(end.y - start.y) / 2, -(end.z - start.z) / 2);
@@ -189,7 +199,7 @@ module.exports = (function() {
     this.cursor.mesh.position.copy(start.clone().add(end).divideScalar(2.0));
   }
 
-  VoxelTool.prototype.createSelectionGeometry = function (voxel, sx, sy, sz) {
+  VoxelTool.prototype.createSelectionGeometry = function(voxel, sx, sy, sz) {
     var geo = voxel.getGeometry().clone();
     var size = voxel.size();
 
@@ -254,17 +264,21 @@ module.exports = (function() {
     let lc = end.clone().sub(start).largestComponent();
     let ec = this.extrusionComponent;
     let reverseOrder = !start.equals(this.startPosition);
-    let diameter = Math.abs(Math.max(diff.getComponent((ec+1) % 3), diff.getComponent((ec+2) % 3))) + 1;
+    let diameter = Math.abs(Math.max(diff.getComponent((ec + 1) % 3), diff.getComponent((ec + 2) % 3))) + 1;
     var voxel, size;
-    for (var x = start.x; x <= end.x; x+=size[0])
-      for (var y = start.y; y <= end.y; y+=size[1])
-        for (var z = start.z; z <= end.z; z+=size[2]) {
-          let stiffness = this.calculateStiffness([x,y,z][lc], start.getComponent(lc), end.getComponent(lc));
-          let relativeExtrusion = ([x,y,z][ec]-start.getComponent(ec)) / diff.getComponent(ec);
-          if(reverseOrder) relativeExtrusion = 1 - relativeExtrusion;
+    for (var x = start.x; x <= end.x; x += size[0])
+      for (var y = start.y; y <= end.y; y += size[1])
+        for (var z = start.z; z <= end.z; z += size[2]) {
+          let stiffness = this.calculateStiffness([x, y, z][lc], start.getComponent(lc), end.getComponent(lc));
+          let relativeExtrusion = ([x, y, z][ec] - start.getComponent(ec)) / diff.getComponent(ec);
+          if (reverseOrder) relativeExtrusion = 1 - relativeExtrusion;
           relativeExtrusion = isNaN(relativeExtrusion) ? undefined : relativeExtrusion;
-          voxel = this.updateSingleVoxel(new THREE.Vector3(x, y, z), {stiffness, relativeExtrusion, diameter})
-          size = voxel && voxel.size() || [1,1,1];
+          voxel = this.updateSingleVoxel(new THREE.Vector3(x, y, z), {
+            stiffness,
+            relativeExtrusion,
+            diameter
+          })
+          size = voxel && voxel.size() || [1, 1, 1];
         }
 
     this.voxelGrid.update();
@@ -274,10 +288,11 @@ module.exports = (function() {
 
   VoxelTool.prototype.updateSingleVoxel = function(position, options) {
     return this.updateVoxel(position, {
-        minThickness: this.voxelGrid.minThickness,
-        orientation: this.extrusionNormal,
-        ...options,
-        ...(this.activeBrush || {}).options});
+      minThickness: this.voxelGrid.minThickness,
+      orientation: this.extrusionNormal,
+      ...options,
+      ...(this.activeBrush || {}).options
+    });
   }
 
   VoxelTool.prototype.__defineGetter__('activeBrush', function() {
@@ -295,7 +310,7 @@ module.exports = (function() {
     }
 
     if (this.cursor.isAddMode) {
-      var voxel = new activeBrush.class(new THREE.Vector3(), {});
+      var voxel = new activeBrush.class(new THREE.Vector3(), (this.activeBrush || {}).options);
       this.cursor.setGeometry(voxel._buildGeometry());
     }
 

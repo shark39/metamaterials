@@ -84,6 +84,14 @@ module.exports = (function() {
     $('#texture-smoothness-value').text(value);
   }
 
+  TextureEditor.prototype.getAmplitude = function() {
+    return $('#texture-amplitude-slider').val()/100;
+  }
+
+  TextureEditor.prototype.getSmoothness = function() {
+    return $('#texture-smoothness-slider').val()/100;
+  }
+
   TextureEditor.prototype.initDrawer = function() {
 
     var self = this;
@@ -183,7 +191,7 @@ module.exports = (function() {
     }
     brush.options = {};
     brush.options.rotatation = true;
-    brush.options.amplitude = 0.5;
+    brush.options.amplitude = this.getAmplitude();
     this.activeBrush = brush;
     this.tools.forEach(function(tool) {
       tool.activeBrush = brush;

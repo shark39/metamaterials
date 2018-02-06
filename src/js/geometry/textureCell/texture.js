@@ -38,6 +38,7 @@ class Texture extends Voxel {
     let defaultOptions = {
       stiffness: 0.1,
       orientation: new THREE.Vector3(0, 1, 0), //y
+      //amplitude: 0.5,
       length: 1,
       height: 1,
       width: 2,
@@ -70,14 +71,12 @@ class Texture extends Voxel {
     this.memberWidth = this.width / 2 - this.wallWidth - this.hingeWidth * 2 - this.middleConnectorWidth / 2;
 
     if (this.amplitude) {
-      //calculate wallWidth
-      //amplitude = 0 --> (this.width / 2 - this.wallWidth - this.middleConnectorWidth) = this.memberWidth
-      //                  this.wallWidth = - this.memberWidth + this.width/2 - this.middleConnectorWidth
-      var maxWallWidth = this.width/2 - this.memberWidth - this.middleConnectorWidth;
-      //amplitude = 1 --> this.wallWidth = 0.01 (minThickness)
-      var minWallWidth = this.minThickness;
-      this.wallWidth = minWallWidth + this.amplitude * (maxWallWidth - minWallWidth);
+      var memberMinWidth = 0.05;
+      var memberMaxWidth = this.width / 2 - this.minThickness - this.hingeWidth * 2 - this.middleConnectorWidth / 2;
+      this.memberWidth = memberMinWidth + this.amplitude * (memberMaxWidth - memberMinWidth);
+      this.wallWidth = this.width/2 - this.hingeWidth - this.memberWidth - this.hingeWidth - this.middleConnectorWidth /2;
     }
+    
     this.amplitudeAbsolut = Math.sqrt((this.width / 2 - this.wallWidth - this.middleConnectorWidth) ** 2 - this.memberWidth ** 2);
 
     //this.cellCount = options.cellCount || this.cells();
@@ -237,7 +236,8 @@ class Texture extends Voxel {
     var lowerMember2 = this.member(-1, false, {
       memberHeight: memberHeight
     });
-    lowerMember2.translate(this.width / 2 + this.middleConnectorWidth / 2 + this.hingeWidth + this.memberWidth, 0, 0);
+    //lowerMember2.translate(this.width / 2 + this.middleConnectorWidth / 2 + this.hingeWidth + this.memberWidth, 0, 0);
+    lowerMember2.translate(this.width - this.hingeWidth - this.wallWidth, 0, 0);
     tempGeo = this.merge(tempGeo, lowerMember2);
     tempGeo.translate(0, -this.height, -this.length / 2);
 

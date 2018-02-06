@@ -317,7 +317,7 @@ body {
   width: auto;
   height: auto;
   padding: 0;
-  background-color: cyan;
+  background-color: white;
   z-index: 1;
   border: solid;
   border-width: thin;
@@ -326,7 +326,7 @@ body {
 }
 
 .labeled-slider-component{
-  width: 50%; 
+  width: 50%;
   padding: 10px;
   float: left;
 }
