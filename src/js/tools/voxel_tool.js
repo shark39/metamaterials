@@ -103,11 +103,8 @@ module.exports = (function() {
     this.extrusionComponent = params.extrusionNormal.largestComponent();
     this.extrusionNormal = params.extrusionNormal;
     this.startPosition = params.startPosition;
-    this.endPosition = params.endPosition || this.startPosition.clone();
-    this.startRect = {
-      start: params.startPosition,
-      end: params.endPosition
-    };
+    let size = new THREE.Vector3(...(this.activeBrush.size(this.extrusionNormal)));
+    this.endPosition = params.startPosition.clone().add(size).subScalar(1);
 
     this.updateSelection();
   }
@@ -122,9 +119,20 @@ module.exports = (function() {
     const intersection = this.raycaster.ray.intersectPlane(plane);
 
     if (intersection) {
-      this.endPosition = intersection.clone().sub(this.startPosition).round().add(this.startPosition);
+      let diff = this.startPosition.clone().sub(intersection.clone());
+      let size = new THREE.Vector3(...(this.activeBrush.size(this.extrusionNormal)));
+      let {sign, vec} = splitSign(diff);
+      diff = vec.divide(size).ceil().multiply(size).max(size).subScalar(1).multiply(sign);
+      diff.setComponent(this.extrusionComponent, 0);
+      this.endPosition = this.startPosition.clone().sub(diff);
       this.updateSelection();
     }
+
+    function sign(x) { return Math.sign(x) == 0 ? 1 : Math.sign(x)}
+    function splitSign(vec) { return {
+      sign: new THREE.Vector3(sign(vec.x), sign(vec.y), sign(vec.z)),
+      vec: new THREE.Vector3(Math.abs(vec.x), Math.abs(vec.y), Math.abs(vec.z)),
+    }}
   }
 
   VoxelTool.prototype.processCube = function() {
@@ -221,9 +229,6 @@ module.exports = (function() {
     return geo.clone();
   }
 
-  VoxelTool.prototype.updateCursor = function() {} //overwritten by inhertated functions
-
-
   VoxelTool.prototype.calculateStiffness = function(value, rangeStart, rangeEnd) {
 
     function normal() {
@@ -295,17 +300,13 @@ module.exports = (function() {
     });
   }
 
-  VoxelTool.prototype.__defineGetter__('activeBrush', function() {
-    return this._activeBrush;
-  });
+  VoxelTool.prototype.updateCursor = function () {
+    if(this.lastActiveBrush === this.activeBrush) return;
 
-  VoxelTool.prototype.__defineSetter__('activeBrush', function(activeBrush) {
-    this._activeBrush = activeBrush;
-
-    if (activeBrush.type === 'mechanicalCell') {
-      this.cursor.mesh.material.uniforms.image.value = new THREE.Texture(activeBrush.textureIcon);
-      this.cursor.mesh.material.uniforms.image.value.needsUpdate = true;
+    if (this.activeBrush.type === 'mechanicalCell') {
       this.cursor.shaderMode();
+      this.cursor.mesh.material.uniforms.image.value = new THREE.Texture(this.activeBrush.textureIcon);
+      this.cursor.mesh.material.uniforms.image.value.needsUpdate = true;
       return;
     }
 
@@ -314,7 +315,8 @@ module.exports = (function() {
       this.cursor.setGeometry(voxel._buildGeometry());
     }
 
-  });
+    this.lastActiveBrush = this.activeBrush;
+  };
 
   VoxelTool.prototype.alterMouseEvents = function() {
     const oldouseMoveDown = this.mouseMoveDown;

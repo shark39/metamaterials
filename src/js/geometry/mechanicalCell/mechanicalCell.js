@@ -6,27 +6,21 @@ const Wall = require('./wall');
 const Voxel = require('../voxel');
 
 class MechanicalCell extends Voxel {
-  constructor(position, {features, direction, stiffness = 0.01, minThickness = 0.01}) {
-    if(features.length == 1 && features[0] == "box") {
-      return new Voxel(position, stiffness, minThickness);
-    }
-    
-    super(position, {stiffness, minThickness});
+  constructor(position, options) {
+    super(position, options);
     this.elements = [];
     this.featuresPerDirection = [
       [],
       [],
       []
     ];
-    this.featuresPerDirection[direction] = features;
+    if(this.features) {
+      this.featuresPerDirection[this.direction] = this.features;
+    }
   }
 
   type() {
     return "mechanical";
-  }
-
-  cacheKey() {
-    return super.cacheKey() + '|' + JSON.stringify(this.featuresPerDirection);
   }
 
   setFeaturesInDirection(features, direction, stiffness) {
@@ -38,23 +32,11 @@ class MechanicalCell extends Voxel {
 
     this.stiffness = stiffness;
     this.featuresPerDirection[direction] = intersect(this.featuresPerDirection[direction], features);
-    this.meshRemoved = false;
-    this.buildGeometry();
-    this.renderMesh();
 
     function intersect(set1, set2) {
       if (set1.length == 0) return set2;
       return set1; //TODO which stratergy?
     }
-  }
-
-  setMinThickness(minThickness) {
-    if (this.minThickness === minThickness) return false;
-    this.minThickness = minThickness;
-    this.meshRemoved = false;
-    this.buildGeometry();
-    this.renderMesh();
-    return true;
   }
 
   _buildGeometry(zFighting = true) {

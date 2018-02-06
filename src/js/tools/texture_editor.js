@@ -13,7 +13,6 @@ const TextureBuilder = require('../geometry/textureCell/textureBuilder');
 const TextureCustom = require('../geometry/textureCell/textureCustom');
 const Texture = require('../geometry/textureCell/texture');
 
-
 const mapping = TextureBuilder.mapping;
 
 module.exports = (function() {
@@ -195,6 +194,15 @@ module.exports = (function() {
     if (texture && this.activeBrush && this.activeBrush.class.isCustom()) {
       this.removeUnusedBrush();
     }
+    var brush = this.brushes[name];
+    brush.name = name;
+    brush.hash = name;
+    brush.rotated = this.rotatation;
+    brush.domElement.addClass('active');
+    brush.texture = texture;
+    brush.class = texture;
+    brush.size = (orientation) => (new texture(undefined, {orientation}).size());
+
     brush.options = {};
     brush.options.rotatation = true;
     brush.options.amplitude = this.getAmplitude();
