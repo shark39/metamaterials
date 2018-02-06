@@ -54,7 +54,8 @@ class TextureCanvasDrawer {
     var wallRelative = 0.2;
     var wall = new createjs.Shape();
     this.background.addChild(wall);
-    wall.graphics.beginFill("#aaaaaa")
+    // wall.graphics.beginFill("#aaaaaa")
+    wall.graphics.beginFill("#E6E7E8")
       .drawRect(0, 0, width * wallRelative, height)
       .drawRect(width - width * wallRelative, 0, width, height);
 
