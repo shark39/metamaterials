@@ -100,7 +100,7 @@ module.exports = (function() {
 
     var self = this;
 
-    let div = $('<div></div>');
+    let div = $('<div id="canvas-div"></div>');
     $('#canvas-container').append(div);
 
     let canvas = $('<canvas height=100 width=200 class="texture-canvas"></canvas>');
