@@ -13,7 +13,7 @@ class CustomTexture extends Texture {
     return true
   }
   static drawing() {
-    return [];
+    return [[0, 0], [1, 1]];
   }
 
   cells() {
