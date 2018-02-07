@@ -122,7 +122,7 @@ module.exports = (function() {
     if (intersection) {
       let diff = this.startPosition.clone().sub(intersection.clone());
       let size = new THREE.Vector3(...(this.activeBrush.size(this.extrusionNormal)));
-      let {sign, vec} = splitSign(diff); 
+      let {sign, vec} = splitSign(diff);
       diff = vec.divide(size).ceil().multiply(size).max(size).subScalar(1).multiply(sign);
       diff.setComponent(this.extrusionComponent, 0);
       this.endPosition = this.startPosition.clone().sub(diff);
@@ -303,7 +303,7 @@ module.exports = (function() {
 
   VoxelTool.prototype.updateCursor = function () {
     if(this.lastActiveBrush === this.activeBrush) return;
-    
+
     if (this.activeBrush.type === 'mechanicalCell') {
       this.cursor.shaderMode();
       this.cursor.mesh.material.uniforms.image.value = new THREE.Texture(this.activeBrush.textureIcon);
@@ -312,7 +312,7 @@ module.exports = (function() {
     }
 
     if (this.cursor.isAddMode) {
-      var voxel = new this.activeBrush.class(new THREE.Vector3(), (this.activeBrush || {}).options);
+      var voxel = new this.activeBrush.class(new THREE.Vector3(), {...(this.activeBrush || {}).options});
       this.cursor.setGeometry(voxel._buildGeometry());
     }
 

@@ -13,7 +13,7 @@ class ZigZagTexture extends CustomTexture {
     return "zigzag"
   }
   static isCustomizable() {
-    return true
+    return false
   }
   static drawing() {
     return [
@@ -35,8 +35,8 @@ class ZigZagTexture extends CustomTexture {
     return false;
   }
 
-  cacheKey() {
-    return 'zigzag' + super.cacheKey();
+  static cacheKey() {
+    return 'zigzag';
   }
 
   customInner() { //workarond

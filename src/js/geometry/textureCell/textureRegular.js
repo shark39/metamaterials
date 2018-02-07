@@ -7,7 +7,7 @@ class RegularTexture extends Texture {
     return "regular"
   }
   static isCustomizable() {
-    return true
+    return false
   }
   static drawing() {
     return [

@@ -8,7 +8,6 @@ const createjs = require('createjs-browserify');
 const bind = require('../misc/bind');
 
 const TextureCanvasDrawer = require('./texture_canvasdrawer_canvasstyle');
-const TexturePreview = require('../geometry/textureCell/texturePreviewImageBuilder');
 const TextureBuilder = require('../geometry/textureCell/textureBuilder');
 const TextureCustom = require('../geometry/textureCell/textureCustom');
 const Texture = require('../geometry/textureCell/texture');
@@ -42,7 +41,10 @@ module.exports = (function() {
 
     Object.keys(mapping).forEach((pattern) => {
 
-      var image = TextureCanvasDrawer.getImageFromCoordsArray(mapping[pattern].drawing());
+      var image = TextureCanvasDrawer.getImage2(mapping[pattern].drawing());
+      if (mapping[pattern].isCustomizable()) {
+        image = TextureCanvasDrawer.getImageFromCoordsArray(mapping[pattern].drawing());
+      }
       var domElement = getButtonDom(image);
 
       domElement.click(() => this.activateBrush(pattern));
@@ -100,7 +102,7 @@ module.exports = (function() {
 
     var self = this;
 
-    let div = $('<div></div>');
+    let div = $('<div id="canvas-div"></div>');
     $('#canvas-container').append(div);
 
     let canvas = $('<canvas height=100 width=200 class="texture-canvas"></canvas>');
@@ -170,17 +172,15 @@ module.exports = (function() {
     var brush = this.brushes[name];
     brush.domElement.addClass('active');
 
-    let texture;
-    if (brush.class.isCustom() && this.activeBrush.name != name) {
+    let texture = mapping[name];
+    if (!texture && brush.class.isCustomizable() && this.activeBrush.name != name) {
       texture = Object.assign(TextureCustom, {
         drawing: () => customPath || this.canvasdrawer.getDrawing(),
         cells: () => cells || this.canvasdrawer.cellCount,
-        cacheKey: () => name
+        cacheKey: () => name,
+        isCustom: () => true
       });
-    } else {
-      texture = mapping[name];
     }
-
     if ((this.activeBrush == undefined || this.activeBrush.name != name) && texture && texture.isCustomizable()) {
       this.canvasdrawer.setCellCount(texture.cells());
       this.canvasdrawer.load(texture.drawing());
@@ -191,16 +191,10 @@ module.exports = (function() {
       //this.canvasdrawer.block();
       $('#canvas-container').hide();
     }
-    if (texture && this.activeBrush && this.activeBrush.class.isCustom()) {
+    if (texture && this.activeBrush && (this.activeBrush.class.isCustom())) {
       this.removeUnusedBrush();
     }
-    var brush = this.brushes[name];
-    brush.name = name;
-    brush.hash = name;
-    brush.rotated = this.rotatation;
-    brush.domElement.addClass('active');
-    brush.texture = texture;
-    brush.class = texture;
+
     brush.size = (orientation) => (new texture(undefined, {orientation}).size());
 
     brush.options = {};

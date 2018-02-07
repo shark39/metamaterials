@@ -291,6 +291,18 @@ class TextureCanvasDrawer {
     return drawer.getImage();
   }
 
+  static getImage2(coordArray, width = 80, height = 60) {
+    var canvas = document.createElement("canvas");
+    canvas.setAttribute('width', width);
+    canvas.setAttribute('height', height);
+    let drawer = new TextureCanvasDrawer($(canvas));
+    drawer.load(coordArray);
+    drawer.stage.removeChild(...drawer.points);
+    //drawer.points.forEach((p) => drawer.stage.removeChild(p));
+    drawer.stage.update();
+    return drawer.getImage();
+  }
+
   getPoint(t) {
     //t is in [0;1]
     //1. calculate length of whole path
