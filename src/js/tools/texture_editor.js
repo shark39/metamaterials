@@ -41,7 +41,10 @@ module.exports = (function() {
 
     Object.keys(mapping).forEach((pattern) => {
 
-      var image = TextureCanvasDrawer.getImageFromCoordsArray(mapping[pattern].drawing());
+      var image = TextureCanvasDrawer.getImage2(mapping[pattern].drawing());
+      if (mapping[pattern].isCustomizable()) {
+        image = TextureCanvasDrawer.getImageFromCoordsArray(mapping[pattern].drawing());
+      }
       var domElement = getButtonDom(image);
 
       domElement.click(() => this.activateBrush(pattern));
