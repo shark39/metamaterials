@@ -38,6 +38,14 @@ module.exports = (function () {
 
   VoxelEditTool.prototype.updateCursor = function () {
 
+    if (this.activeBrush.type === 'mechanicalCell') {
+      this.cursor.shaderMode();
+      this.cursor.mesh.material.uniforms.image.value = new THREE.Texture(this.activeBrush.textureIcon);
+      this.cursor.mesh.material.uniforms.image.value.needsUpdate = true;
+      return;
+    }
+
+
     if (this.cylinderSelection) {
       let diff = this.endPosition.clone().sub(this.startPosition).addScalar(1);
       diff.setComponent((this.extrusionComponent+1) %3, 1);

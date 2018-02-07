@@ -179,8 +179,8 @@ module.exports = (function() {
   VoxelTool.prototype.renderSelectionShader = function(start, end) {
 
     this.cursor.mesh.position.copy(start.clone().add(end).divideScalar(2.0));
-    //let scale = end.clone().sub(start).addScalar(1.0 + this.cursor.cursorBorder);
-    this.cursor.mesh.scale.copy(new THREE.Vector3(1, 1, 1));
+    let scale = end.clone().sub(start).addScalar(1.0 + this.cursor.cursorBorder);
+    this.cursor.mesh.scale.copy(scale);
     this.cursor.mesh.rotation.fromArray([0.0, 0.0, 0.0]);
 
     this.cursor.mesh.material.uniforms.scale.value.copy(this.cursor.mesh.scale);
@@ -271,11 +271,13 @@ module.exports = (function() {
     let ec = this.extrusionComponent;
     let reverseOrder = !start.equals(this.startPosition);
     let diameter = Math.abs(Math.max(diff.getComponent((ec + 1) % 3), diff.getComponent((ec + 2) % 3))) + 1;
-    var voxel, size;
+    var voxel;
+    var size = this.activeBrush.size(new THREE.Vector3(0, 1, 0));
     for (var x = start.x; x <= end.x; x += size[0])
       for (var y = start.y; y <= end.y; y += size[1])
         for (var z = start.z; z <= end.z; z += size[2]) {
-          let stiffness = this.calculateStiffness([x, y, z][lc], start.getComponent(lc), end.getComponent(lc));
+          //activeBrush.size(orientation)
+          let stiffness = this.calculateStiffness([x, y, z][lc]/size[lc], start.getComponent(lc)/size[lc], end.getComponent(lc)/size[lc]);
           let relativeExtrusion = ([x, y, z][ec] - start.getComponent(ec)) / diff.getComponent(ec);
           if (reverseOrder) relativeExtrusion = 1 - relativeExtrusion;
           relativeExtrusion = isNaN(relativeExtrusion) ? undefined : relativeExtrusion;
@@ -304,12 +306,6 @@ module.exports = (function() {
   VoxelTool.prototype.updateCursor = function () {
     if(this.lastActiveBrush === this.activeBrush) return;
 
-    if (this.activeBrush.type === 'mechanicalCell') {
-      this.cursor.shaderMode();
-      this.cursor.mesh.material.uniforms.image.value = new THREE.Texture(this.activeBrush.textureIcon);
-      this.cursor.mesh.material.uniforms.image.value.needsUpdate = true;
-      return;
-    }
 
     if (this.cursor.isAddMode) {
       var voxel = new this.activeBrush.class(new THREE.Vector3(), {...(this.activeBrush || {}).options});

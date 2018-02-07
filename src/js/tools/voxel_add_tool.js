@@ -42,7 +42,6 @@ module.exports = (function () {
     voxel = new this.activeBrush.class(position, options);
     this.voxelGrid.addVoxel(voxel, position);
     this.activeBrush.used = true;
-    // /this.activeBrush.usedWith
     return voxel;
   }
 
