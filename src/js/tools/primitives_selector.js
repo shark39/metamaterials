@@ -40,7 +40,7 @@ module.exports = (function (tools) {
             .append(
                 $('<div></div>')
                     .addClass('voxel-btn-img')
-                    .css({width: 50})
+                    .css({width: 70})
                     .append($('<div></div>')
                         .addClass('voxel-btn-selection')
                     )
