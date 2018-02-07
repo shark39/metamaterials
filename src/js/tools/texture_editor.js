@@ -169,17 +169,15 @@ module.exports = (function() {
     var brush = this.brushes[name];
     brush.domElement.addClass('active');
 
-    let texture;
-    if (brush.class.isCustom() && this.activeBrush.name != name) {
+    let texture = mapping[name];
+    if (!texture && brush.class.isCustomizable() && this.activeBrush.name != name) {
       texture = Object.assign(TextureCustom, {
         drawing: () => customPath || this.canvasdrawer.getDrawing(),
         cells: () => cells || this.canvasdrawer.cellCount,
-        cacheKey: () => name
+        cacheKey: () => name,
+        isCustom: () => true
       });
-    } else {
-      texture = mapping[name];
     }
-
     if ((this.activeBrush == undefined || this.activeBrush.name != name) && texture && texture.isCustomizable()) {
       this.canvasdrawer.setCellCount(texture.cells());
       this.canvasdrawer.load(texture.drawing());
@@ -190,10 +188,10 @@ module.exports = (function() {
       //this.canvasdrawer.block();
       $('#canvas-container').hide();
     }
-    if (texture && this.activeBrush && this.activeBrush.class.isCustom()) {
+    if (texture && this.activeBrush && (this.activeBrush.class.isCustom())) {
       this.removeUnusedBrush();
     }
-    var brush = this.brushes[name];
+
     brush.size = (orientation) => (new texture(undefined, {orientation}).size());
 
     brush.options = {};

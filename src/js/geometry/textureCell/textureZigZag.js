@@ -13,7 +13,7 @@ class ZigZagTexture extends CustomTexture {
     return "zigzag"
   }
   static isCustomizable() {
-    return true
+    return false
   }
   static drawing() {
     return [
