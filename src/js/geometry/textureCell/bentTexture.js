@@ -8,6 +8,7 @@ class BentTexture extends Texture {
         options.diameter = options.diameter || 1;
         let textureOptions = {...options};
         textureOptions.orientation = new THREE.Vector3(0,1,0); //we need the texture always the same way
+        textureOptions.surfaceGaps = true;
         delete textureOptions.texture;
         delete textureOptions.diameter;
         super(position, options);

@@ -103,6 +103,7 @@ module.exports = (function() {
     this.extrusionComponent = params.extrusionNormal.largestComponent();
     this.extrusionNormal = params.extrusionNormal;
     this.startPosition = params.startPosition;
+    this.cylinderSelection = params.cylinder;
     let size = new THREE.Vector3(...(this.activeBrush.size(this.extrusionNormal)));
     this.endPosition = params.startPosition.clone().add(size).subScalar(1);
 

@@ -75,7 +75,8 @@ class ZigZagTexture extends CustomTexture {
 
     pathGeometry.translate(-this.width / 2, this.surfaceHeight / 2, -this.length / 2 * this.cellCount);
 
-    var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length);
+    let length = this.length - this.surfaceGaps * this.minThickness * 2;
+    var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, length);
     var memberPlane = new THREE.BoxGeometry(this.width - 2 * this.wallWidth - 2 * this.hingeWidth, this.memberHeight, 1);
     memberPlane.translate(0, -this.surfaceHeight, 0);
     topPlane = merge(topPlane, memberPlane);

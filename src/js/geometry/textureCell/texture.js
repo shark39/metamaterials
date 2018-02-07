@@ -43,6 +43,7 @@ class Texture extends Voxel {
       memberHeight: 0.3,
       onlySupport: false,
       fullMiddleConnector: false,
+      surfaceGaps: false,
       hingeHeight: 0.1 + this.stiffness / 4 //this is just for visualisation
     };
 
@@ -212,7 +213,8 @@ class Texture extends Voxel {
 
   surface() {
     //TODO two parts, leave out the hinges
-    var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, this.length);
+    let length = this.length - this.surfaceGaps * this.minThickness * 2;
+    var topPlane = new THREE.BoxGeometry(this.width, this.surfaceHeight, length);
     topPlane.translate(this.width / 2, -this.surfaceHeight / 2, 0);
     return topPlane;
   }
