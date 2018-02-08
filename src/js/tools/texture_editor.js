@@ -203,6 +203,7 @@ module.exports = (function() {
     this.activeBrush = brush;
     this.tools.forEach(function(tool) {
       tool.activeBrush = brush;
+      tool.cursor.geometryMode();
     });
   }
 

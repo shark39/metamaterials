@@ -180,6 +180,7 @@ module.exports = (function() {
 
     this.cursor.mesh.position.copy(start.clone().add(end).divideScalar(2.0));
     let scale = end.clone().sub(start).addScalar(1.0 + this.cursor.cursorBorder);
+    //scale = new THREE.Vector3(1, 1, 1);
     this.cursor.mesh.scale.copy(scale);
     this.cursor.mesh.rotation.fromArray([0.0, 0.0, 0.0]);
 
