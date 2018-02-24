@@ -5,7 +5,9 @@
   "homepage": "https://hpi.de/baudisch/projects/metamaterial-mechanisms.html",
   "main": "index.js",
   "scripts": {
-    "start": "gulp"
+    "start": "gulp",
+    "build": "node ./node_modules/gulp/bin/gulp.js build",
+    "publish": "git subtree push --prefix editor github master"
   },
   "repository": {
     "type": "git",
