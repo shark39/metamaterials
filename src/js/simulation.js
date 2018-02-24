@@ -5,17 +5,9 @@ const path            = require('path');
 
 const bind      = require('./misc/bind');
 
-if (!process.env.TRAVIS) {
-  const config    = require('../../../config');
-} else {
-  const config = {
-    "simulation": {
-      "ip": "127.0.0.1",
-      "port": 1234
-    }
-  }
+const config    = require('../../config');
 
-}
+
 
 module.exports = (function() {
 
