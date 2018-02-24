@@ -4,7 +4,18 @@ const fs              = require('fs');
 const path            = require('path');
 
 const bind      = require('./misc/bind');
-const config    = require('../../../config');
+
+if (!process.env.TRAVIS) {
+  const config    = require('../../../config');
+} else {
+  const config = {
+    "simulation": {
+      "ip": "127.0.0.1",
+      "port": 1234
+    }
+  }
+
+}
 
 module.exports = (function() {
 
